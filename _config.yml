@@ -102,5 +102,5 @@ theme: landscape
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: https://github.com/Silen1-king/Silen1-king.github.io.git
+  repo: git@github.com:silen1-king/silen1-king.github.io.git
   branch: main
