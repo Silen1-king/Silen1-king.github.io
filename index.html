@@ -129,7 +129,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -151,6 +151,99 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://silen1-king.github.io/2026/05/13/Linux%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Silen1-king">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silen1Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Silen1Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/05/13/Linux%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" class="post-title-link" itemprop="url">Linux文件路径的基础知识</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2026-05-13 15:38:36" itemprop="dateCreated datePublished" datetime="2026-05-13T15:38:36+08:00">2026-05-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2026-05-18 16:54:31" itemprop="dateModified" datetime="2026-05-18T16:54:31+08:00">2026-05-18</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="EXAMPLES"><a href="#EXAMPLES" class="headerlink" title="EXAMPLES"></a>EXAMPLES</h2><p>&#x2F;	文件系统的“锚点”，读作“root（根）”。	<br>&#x2F;usr	Unix 系统资源目录，包含所有系统文件。	<br>&#x2F;usr&#x2F;bin	计算机上已安装程序的可执行文件目录。	<br>&#x2F;usr&#x2F;lib	供计算机上的程序使用的共享库目录。	<br>&#x2F;usr&#x2F;share	程序资源目录（图标、美术资源等）。	<br>&#x2F;etc	系统配置文件目录。	<br>&#x2F;var	日志、缓存等数据目录。	<br>&#x2F;home	用户所有数据的目录。	<br>&#x2F;home&#x2F;hacker	在 pwn.college 环境中，你个人的数据目录。	<br>&#x2F;proc	运行时进程数据目录。	<br>&#x2F;tmp	临时数据存储目录。	</p>
+<h2 id="三种命令"><a href="#三种命令" class="headerlink" title="三种命令"></a>三种命令</h2><h3 id="pwd：显示当前终端会话所处目录的绝对路径"><a href="#pwd：显示当前终端会话所处目录的绝对路径" class="headerlink" title="pwd：显示当前终端会话所处目录的绝对路径"></a>pwd：显示当前终端会话所处目录的绝对路径</h3><h3 id="cd：改变当前终端的目录，在文件系统中移动"><a href="#cd：改变当前终端的目录，在文件系统中移动" class="headerlink" title="cd：改变当前终端的目录，在文件系统中移动"></a>cd：改变当前终端的目录，在文件系统中移动</h3><ol>
+<li>切换到指定路径（绝对路径）cd &#x2F;home&#x2F;hacker</li>
+<li>切换到相对路径（基于当前目录）cd Documents</li>
+<li>回到上一级目录 cd ..</li>
+<li>直接回到用户主目录（和 cd ~ 效果一样）cd</li>
+<li>回到上一次所在的目录（来回切换超方便）cd -</li>
+</ol>
+<h3 id="ls：列出指定目录下的文件和子目录"><a href="#ls：列出指定目录下的文件和子目录" class="headerlink" title="ls：列出指定目录下的文件和子目录"></a>ls：列出指定目录下的文件和子目录</h3><ol>
+<li>列出当前目录的文件&#x2F;目录（默认模式）ls</li>
+<li>列出指定目录的内容 ls &#x2F;home</li>
+<li>显示详细信息（权限、大小、修改时间等）ls -l</li>
+<li>显示所有文件，包括隐藏文件（以 . 开头的文件 ls -a</li>
+<li>人类可读格式显示文件大小（KB&#x2F;MB&#x2F;GB ls -lh</li>
+</ol>
+<h2 id="路径的核心组成"><a href="#路径的核心组成" class="headerlink" title="路径的核心组成"></a>路径的核心组成</h2><p>符号&#x2F;元素	            含义	                                                       示例	<br>&#x2F;（开头）	表示这是绝对路径，从根目录开始定位	                                    &#x2F;home&#x2F;yans&#x2F;flags	<br>&#x2F;（中间）	路径分隔符，用于分隔目录层级	                                     flags&#x2F;TOPSECRET 中的 &#x2F;	<br>.	       代表当前目录，写不写都可以，比如 .&#x2F;TOPSECRET 和 TOPSECRET 效果相同	          .&#x2F;lib	<br>..	       代表上一级目录，每写一个 .. 就向上退一层	                            ..&#x2F;..&#x2F; 表示向上退两级目录	<br>文件名	    路径的终点，指向具体的文件                                                  TOPSECRET	</p>
+<h2 id="相对路径与绝对路径"><a href="#相对路径与绝对路径" class="headerlink" title="相对路径与绝对路径"></a>相对路径与绝对路径</h2><p>如果你在每个地方都放绝对路径，那么你所在哪个目录其实无关紧要</p>
+<p>相对路径是指任何不从根开始的路径（即不以&#x2F;为起点）。<br>相对路径相对于你的 current working directory （cwd）。<br>pwd提示当前所在的目录。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
