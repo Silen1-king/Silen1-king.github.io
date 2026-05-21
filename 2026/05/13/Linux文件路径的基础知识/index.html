@@ -28,7 +28,7 @@
 <meta property="og:description" content="EXAMPLES&#x2F;	文件系统的“锚点”，读作“root（根）”。	&#x2F;usr	Unix 系统资源目录，包含所有系统文件。	&#x2F;usr&#x2F;bin	计算机上已安装程序的可执行文件目录。	&#x2F;usr&#x2F;lib	供计算机上的程序使用的共享库目录。	&#x2F;usr&#x2F;share	程序资源目录（图标、美术资源等）。	&#x2F;etc	系统配置文件">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-05-13T07:38:36.000Z">
-<meta property="article:modified_time" content="2026-05-18T08:54:31.784Z">
+<meta property="article:modified_time" content="2026-05-21T11:17:16.330Z">
 <meta property="article:author" content="Silen1-king">
 <meta property="article:tag" content="PWN">
 <meta name="twitter:card" content="summary">
@@ -122,7 +122,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#EXAMPLES"><span class="nav-number">1.</span> <span class="nav-text">EXAMPLES</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">三种命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pwd%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%BD%93%E5%89%8D%E7%BB%88%E7%AB%AF%E4%BC%9A%E8%AF%9D%E6%89%80%E5%A4%84%E7%9B%AE%E5%BD%95%E7%9A%84%E7%BB%9D%E5%AF%B9%E8%B7%AF%E5%BE%84"><span class="nav-number">2.1.</span> <span class="nav-text">pwd：显示当前终端会话所处目录的绝对路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cd%EF%BC%9A%E6%94%B9%E5%8F%98%E5%BD%93%E5%89%8D%E7%BB%88%E7%AB%AF%E7%9A%84%E7%9B%AE%E5%BD%95%EF%BC%8C%E5%9C%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%A7%BB%E5%8A%A8"><span class="nav-number">2.2.</span> <span class="nav-text">cd：改变当前终端的目录，在文件系统中移动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ls%EF%BC%9A%E5%88%97%E5%87%BA%E6%8C%87%E5%AE%9A%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E4%BB%B6%E5%92%8C%E5%AD%90%E7%9B%AE%E5%BD%95"><span class="nav-number">2.3.</span> <span class="nav-text">ls：列出指定目录下的文件和子目录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%AF%E5%BE%84%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90"><span class="nav-number">3.</span> <span class="nav-text">路径的核心组成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%AF%B9%E8%B7%AF%E5%BE%84%E4%B8%8E%E7%BB%9D%E5%AF%B9%E8%B7%AF%E5%BE%84"><span class="nav-number">4.</span> <span class="nav-text">相对路径与绝对路径</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#EXAMPLES"><span class="nav-number">1.</span> <span class="nav-text">EXAMPLES</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">三种命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pwd%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%BD%93%E5%89%8D%E7%BB%88%E7%AB%AF%E4%BC%9A%E8%AF%9D%E6%89%80%E5%A4%84%E7%9B%AE%E5%BD%95%E7%9A%84%E7%BB%9D%E5%AF%B9%E8%B7%AF%E5%BE%84"><span class="nav-number">2.1.</span> <span class="nav-text">pwd：显示当前终端会话所处目录的绝对路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cd%EF%BC%9A%E6%94%B9%E5%8F%98%E5%BD%93%E5%89%8D%E7%BB%88%E7%AB%AF%E7%9A%84%E7%9B%AE%E5%BD%95%EF%BC%8C%E5%9C%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%A7%BB%E5%8A%A8"><span class="nav-number">2.2.</span> <span class="nav-text">cd：改变当前终端的目录，在文件系统中移动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ls%EF%BC%9A%E5%88%97%E5%87%BA%E6%8C%87%E5%AE%9A%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E4%BB%B6%E5%92%8C%E5%AD%90%E7%9B%AE%E5%BD%95"><span class="nav-number">2.3.</span> <span class="nav-text">ls：列出指定目录下的文件和子目录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%AF%E5%BE%84%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90"><span class="nav-number">3.</span> <span class="nav-text">路径的核心组成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">~</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -135,7 +135,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -203,7 +203,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2026-05-18 16:54:31" itemprop="dateModified" datetime="2026-05-18T16:54:31+08:00">2026-05-18</time>
+      <time title="Modified: 2026-05-21 19:17:16" itemprop="dateModified" datetime="2026-05-21T19:17:16+08:00">2026-05-21</time>
     </span>
 
   
@@ -231,8 +231,7 @@
 <li>人类可读格式显示文件大小（KB&#x2F;MB&#x2F;GB ls -lh</li>
 </ol>
 <h2 id="路径的核心组成"><a href="#路径的核心组成" class="headerlink" title="路径的核心组成"></a>路径的核心组成</h2><p>符号&#x2F;元素	            含义	                                                       示例	<br>&#x2F;（开头）	表示这是绝对路径，从根目录开始定位	                                    &#x2F;home&#x2F;yans&#x2F;flags	<br>&#x2F;（中间）	路径分隔符，用于分隔目录层级	                                     flags&#x2F;TOPSECRET 中的 &#x2F;	<br>.	       代表当前目录，写不写都可以，比如 .&#x2F;TOPSECRET 和 TOPSECRET 效果相同	          .&#x2F;lib	<br>..	       代表上一级目录，每写一个 .. 就向上退一层	                            ..&#x2F;..&#x2F; 表示向上退两级目录	<br>文件名	    路径的终点，指向具体的文件                                                  TOPSECRET	</p>
-<h2 id="相对路径与绝对路径"><a href="#相对路径与绝对路径" class="headerlink" title="相对路径与绝对路径"></a>相对路径与绝对路径</h2><p>如果你在每个地方都放绝对路径，那么你所在哪个目录其实无关紧要</p>
-<p>相对路径是指任何不从根开始的路径（即不以&#x2F;为起点）。<br>相对路径相对于你的 current working directory （cwd）。<br>pwd提示当前所在的目录。</p>
+<h2 id=""><a href="#" class="headerlink" title="~"></a>~</h2><p>单独的~代表当前用户的家目录<br>~用户名代表指定用户的家目录</p>
 
     </div>
 
@@ -254,6 +253,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2026/05/21/%E2%80%9C%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E7%BA%BF%E4%B8%8B%E5%AD%A6%E4%B9%A0%E2%80%9D/" rel="next" title="“第一次的线下学习”">
+                  “第一次的线下学习” <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
