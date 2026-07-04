@@ -5,6 +5,8 @@ categories: 学习笔记
 tags: PWN
 ---
 ## EXAMPLES
+
+<!-- more -->
 	
 /	文件系统的“锚点”，读作“root（根）”。	
 /usr	Unix 系统资源目录，包含所有系统文件。	

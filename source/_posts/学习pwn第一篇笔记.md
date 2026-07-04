@@ -8,6 +8,8 @@ tags: PWN
 
 首先学习的是Linux命令行，输入一串指令时，第一个词是命令，后面的词是参数
 
+<!-- more -->
+
 ### 比如：
     ```bash
     echo Hello Hackers!
