@@ -1,0 +1,98 @@
+<canvas id="stars-canvas"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('stars-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  let shootingStars = [];
+  let w, h;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    const count = Math.floor((w * h) / 3000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.5 + 0.3,
+        alpha: Math.random(),
+        dAlpha: (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1)
+      });
+    }
+  }
+
+  function spawnShootingStar() {
+    if (shootingStars.length > 2) return;
+    shootingStars.push({
+      x: Math.random() * w * 0.8,
+      y: Math.random() * h * 0.4,
+      len: Math.random() * 60 + 40,
+      speed: Math.random() * 4 + 4,
+      alpha: 1,
+      angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw static stars
+    for (const s of stars) {
+      s.alpha += s.dAlpha;
+      if (s.alpha > 1 || s.alpha < 0.1) s.dAlpha = -s.dAlpha;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200, 210, 255, ${s.alpha})`;
+      ctx.fill();
+    }
+
+    // Draw shooting stars
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const ss = shootingStars[i];
+      const dx = Math.cos(ss.angle) * ss.len;
+      const dy = Math.sin(ss.angle) * ss.len;
+
+      const grad = ctx.createLinearGradient(ss.x, ss.y, ss.x - dx, ss.y - dy);
+      grad.addColorStop(0, `rgba(255, 255, 255, ${ss.alpha})`);
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.beginPath();
+      ctx.moveTo(ss.x, ss.y);
+      ctx.lineTo(ss.x - dx, ss.y - dy);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ss.x += Math.cos(ss.angle) * ss.speed;
+      ss.y += Math.sin(ss.angle) * ss.speed;
+      ss.alpha -= 0.012;
+
+      if (ss.alpha <= 0 || ss.x > w + 100 || ss.y > h + 100) {
+        shootingStars.splice(i, 1);
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  initStars();
+  draw();
+
+  window.addEventListener('resize', () => {
+    resize();
+    initStars();
+  });
+
+  // Spawn a shooting star every 3-8 seconds
+  setInterval(() => {
+    if (Math.random() < 0.7) spawnShootingStar();
+  }, 4000);
+})();
+</script>
