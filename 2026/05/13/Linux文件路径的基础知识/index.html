@@ -20,15 +20,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"silen1-king.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":true}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="EXAMPLES&#x2F;	文件系统的“锚点”，读作“root（根）”。	&#x2F;usr	Unix 系统资源目录，包含所有系统文件。	&#x2F;usr&#x2F;bin	计算机上已安装程序的可执行文件目录。	&#x2F;usr&#x2F;lib	供计算机上的程序使用的共享库目录。	&#x2F;usr&#x2F;share	程序资源目录（图标、美术资源等）。	&#x2F;etc	系统配置文件">
+    <meta name="description" content="EXAMPLES">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux文件路径的基础知识">
 <meta property="og:url" content="http://silen1-king.github.io/2026/05/13/Linux%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/index.html">
 <meta property="og:site_name" content="Silen1Blog">
-<meta property="og:description" content="EXAMPLES&#x2F;	文件系统的“锚点”，读作“root（根）”。	&#x2F;usr	Unix 系统资源目录，包含所有系统文件。	&#x2F;usr&#x2F;bin	计算机上已安装程序的可执行文件目录。	&#x2F;usr&#x2F;lib	供计算机上的程序使用的共享库目录。	&#x2F;usr&#x2F;share	程序资源目录（图标、美术资源等）。	&#x2F;etc	系统配置文件">
+<meta property="og:description" content="EXAMPLES">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-05-13T07:38:36.000Z">
-<meta property="article:modified_time" content="2026-07-04T19:25:25.657Z">
+<meta property="article:modified_time" content="2026-07-04T19:29:21.003Z">
 <meta property="article:author" content="Silen1-king">
 <meta property="article:tag" content="PWN">
 <meta name="twitter:card" content="summary">
@@ -245,7 +245,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2026-07-05 03:25:25" itemprop="dateModified" datetime="2026-07-05T03:25:25+08:00">2026-07-05</time>
+      <time title="Modified: 2026-07-05 03:29:21" itemprop="dateModified" datetime="2026-07-05T03:29:21+08:00">2026-07-05</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -266,7 +266,8 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="EXAMPLES"><a href="#EXAMPLES" class="headerlink" title="EXAMPLES"></a>EXAMPLES</h2><p>&#x2F;	文件系统的“锚点”，读作“root（根）”。	<br>&#x2F;usr	Unix 系统资源目录，包含所有系统文件。	<br>&#x2F;usr&#x2F;bin	计算机上已安装程序的可执行文件目录。	<br>&#x2F;usr&#x2F;lib	供计算机上的程序使用的共享库目录。	<br>&#x2F;usr&#x2F;share	程序资源目录（图标、美术资源等）。	<br>&#x2F;etc	系统配置文件目录。	<br>&#x2F;var	日志、缓存等数据目录。	<br>&#x2F;home	用户所有数据的目录。	<br>&#x2F;home&#x2F;hacker	在 pwn.college 环境中，你个人的数据目录。	<br>&#x2F;proc	运行时进程数据目录。	<br>&#x2F;tmp	临时数据存储目录。	</p>
+    <div class="post-body" itemprop="articleBody"><h2 id="EXAMPLES"><a href="#EXAMPLES" class="headerlink" title="EXAMPLES"></a>EXAMPLES</h2><span id="more"></span>
+<p>&#x2F;	文件系统的“锚点”，读作“root（根）”。	<br>&#x2F;usr	Unix 系统资源目录，包含所有系统文件。	<br>&#x2F;usr&#x2F;bin	计算机上已安装程序的可执行文件目录。	<br>&#x2F;usr&#x2F;lib	供计算机上的程序使用的共享库目录。	<br>&#x2F;usr&#x2F;share	程序资源目录（图标、美术资源等）。	<br>&#x2F;etc	系统配置文件目录。	<br>&#x2F;var	日志、缓存等数据目录。	<br>&#x2F;home	用户所有数据的目录。	<br>&#x2F;home&#x2F;hacker	在 pwn.college 环境中，你个人的数据目录。	<br>&#x2F;proc	运行时进程数据目录。	<br>&#x2F;tmp	临时数据存储目录。	</p>
 <h2 id="三种命令"><a href="#三种命令" class="headerlink" title="三种命令"></a>三种命令</h2><h3 id="pwd：显示当前终端会话所处目录的绝对路径"><a href="#pwd：显示当前终端会话所处目录的绝对路径" class="headerlink" title="pwd：显示当前终端会话所处目录的绝对路径"></a>pwd：显示当前终端会话所处目录的绝对路径</h3><h3 id="cd：改变当前终端的目录，在文件系统中移动"><a href="#cd：改变当前终端的目录，在文件系统中移动" class="headerlink" title="cd：改变当前终端的目录，在文件系统中移动"></a>cd：改变当前终端的目录，在文件系统中移动</h3><ol>
 <li>切换到指定路径（绝对路径）cd &#x2F;home&#x2F;hacker</li>
 <li>切换到相对路径（基于当前目录）cd Documents</li>
