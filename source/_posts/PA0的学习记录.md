@@ -1,6 +1,7 @@
 ---
 title: PA0的学习记录
 date: 2026-05-30 13:51:00
+categories: 学习笔记
 tags: PAs
 ---
 ## 习惯阅读英文材料

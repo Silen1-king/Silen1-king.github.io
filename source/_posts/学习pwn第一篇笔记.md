@@ -1,6 +1,7 @@
 ---
 title: 学习pwn第一篇笔记
 date: 2026-05-10 01:01:58
+categories: 学习笔记
 tags: PWN
 ---
 ## 第一次接触pwn

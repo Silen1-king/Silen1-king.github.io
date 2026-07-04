@@ -1,6 +1,7 @@
 ---
 title: Linux文件路径的基础知识
 date: 2026-05-13 15:38:36
+categories: 学习笔记
 tags: PWN
 ---
 ## EXAMPLES
