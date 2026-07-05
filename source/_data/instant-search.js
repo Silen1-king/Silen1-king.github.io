@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 限制显示结果数量
-    const maxResults = 10;
+    const maxResults = 20;
     const displayResults = resultItems.slice(0, maxResults);
 
     // 生成结果HTML
