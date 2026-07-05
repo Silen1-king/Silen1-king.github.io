@@ -98,9 +98,12 @@
   </div>
 
   <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="Search" role="button">
-        <i class="fa fa-search fa-fw fa-lg"></i>
-    </div>
+      <div class="instant-search-container">
+        <input type="text" class="instant-search-input" placeholder="搜索博客..." autocomplete="off" />
+        <div class="instant-search-results" style="display: none;">
+          <ul class="instant-search-results-list"></ul>
+        </div>
+      </div>
   </div>
 </div>
 
@@ -444,6 +447,8 @@
   }, 4000);
 })();
 </script>
+
+<script src="/js/instant-search.js"></script>
 
 </body>
 </html>
