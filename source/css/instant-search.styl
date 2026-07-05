@@ -29,18 +29,21 @@
 }
 
 .instant-search-results {
-  position: absolute;
+  position: fixed;
   top: 100%;
   right: 0;
   width: 650px;
-  max-height: 700px;
+  max-height: 70vh;
+  min-height: 200px;
   overflow-y: auto;
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  margin-top: 10px;
+  margin-top: 0;
   z-index: 1000;
+  transform: translateY(-10px);
+  transition: transform 0.3s ease;
 }
 
 .instant-search-results-list {
