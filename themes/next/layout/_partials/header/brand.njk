@@ -28,10 +28,19 @@
   </div>
 
   <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="{{ __('menu.search') }}" role="button">
-      {%- if theme.algolia_search.enable or theme.local_search.enable %}
-        <i class="fa fa-search fa-fw fa-lg"></i>
-      {%- endif %}
-    </div>
+    {%- if theme.local_search.enable %}
+      <div class="instant-search-container">
+        <input type="text" class="instant-search-input" placeholder="搜索博客..." autocomplete="off" />
+        <div class="instant-search-results" style="display: none;">
+          <ul class="instant-search-results-list"></ul>
+        </div>
+      </div>
+    {%- else %}
+      <div class="toggle popup-trigger" aria-label="{{ __('menu.search') }}" role="button">
+        {%- if theme.algolia_search.enable or theme.local_search.enable %}
+          <i class="fa fa-search fa-fw fa-lg"></i>
+        {%- endif %}
+      </div>
+    {%- endif %}
   </div>
 </div>

@@ -1,0 +1,40 @@
+<div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+      {%- if theme.menu %}
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+      {%- endif %}
+    </div>
+  </div>
+
+  <div class="site-meta">
+    {%- if theme.custom_logo and theme.scheme === 'Muse' %}
+      <img class="custom-logo-image" src="{{ url_for(theme.custom_logo) }}" alt="{{ title }}">
+    {%- endif %}
+
+    <a href="{{ config.root }}" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <{% if is_home() or is_archive() %}h1{% else %}p{% endif %} class="site-title">{{ title }}</{% if is_home() or is_archive() %}h1{% else %}p{% endif %}>
+      <i class="logo-line"></i>
+    </a>
+    {%- if subtitle %}
+      <p class="site-subtitle" itemprop="description">{{ subtitle }}</p>
+    {%- endif %}
+    {%- if theme.custom_logo and (theme.scheme === 'Gemini' or theme.scheme === 'Pisces') %}
+      <img class="custom-logo-image" src="{{ url_for(theme.custom_logo) }}" alt="{{ title }}">
+    {%- endif %}
+  </div>
+
+  <div class="site-nav-right">
+    {%- if theme.local_search.enable %}
+      <div class="instant-search-container">
+        <input type="text" class="instant-search-input" placeholder="搜索博客..." autocomplete="off" />
+        <div class="instant-search-results" style="display: none;">
+          <ul class="instant-search-results-list"></ul>
+        </div>
+      </div>
+    {%- endif %}
+  </div>
+</div>
