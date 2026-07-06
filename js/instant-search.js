@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let searchTimeout = null;
 
+  // 动态定位搜索结果 - 固定在搜索框下方
+  const positionResults = () => {
+    const inputRect = searchInput.getBoundingClientRect();
+    resultsContainer.style.top = (inputRect.bottom + 8) + 'px';
+    resultsContainer.style.right = (window.innerWidth - inputRect.right) + 'px';
+  };
+
   // 即时搜索函数
   const performSearch = () => {
     const searchText = searchInput.value.trim().toLowerCase();
@@ -31,6 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
       resultsContainer.style.display = 'none';
       return;
     }
+
+    // 先定位再显示
+    positionResults();
 
     if (!localSearch.isfetched) {
       resultsContainer.style.display = 'block';
@@ -111,6 +121,19 @@ document.addEventListener('DOMContentLoaded', () => {
       searchInput.blur();
     }
   });
+
+  // 窗口大小改变和滚动时重新定位
+  window.addEventListener('resize', () => {
+    if (resultsContainer.style.display === 'block') {
+      positionResults();
+    }
+  });
+
+  window.addEventListener('scroll', () => {
+    if (resultsContainer.style.display === 'block') {
+      positionResults();
+    }
+  }, { passive: true });
 
   // 搜索数据加载完成后重新搜索
   window.addEventListener('search:loaded', performSearch);
