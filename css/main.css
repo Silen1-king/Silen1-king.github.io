@@ -1384,7 +1384,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #53ffff;
+  background: #2f7cf6;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -3083,99 +3083,120 @@ blockquote {
   margin-right: 20px;
 }
 .instant-search-input {
-  padding: 12px 20px;
-  border: 1px solid var(--content-bg-color);
-  border-radius: 20px;
-  background: var(--content-bg-color);
-  color: var(--text-color);
-  font-size: 14px;
-  width: 300px;
+  padding: 14px 24px;
+  border: 2px solid rgba(124,138,255,0.3);
+  border-radius: 25px;
+  background: rgba(20,24,50,0.8);
+  color: #e0e4f0;
+  font-size: 16px;
+  width: 320px;
   transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
 }
 .instant-search-input:focus {
   outline: none;
-  border-color: var(--theme-color);
-  width: 380px;
-  box-shadow: 0 0 18px rgba(0,0,0,0.2);
+  border-color: #7c8aff;
+  width: 420px;
+  box-shadow: 0 0 24px rgba(124,138,255,0.3);
 }
 .instant-search-input::placeholder {
-  color: var(--text-color);
-  opacity: 0.5;
+  color: #8084a0;
+  opacity: 0.7;
 }
+/* 搜索背景遮罩 */
+.instant-search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  z-index: 99998;
+  display: none;
+}
+/* 搜索结果面板 */
 .instant-search-results {
   position: fixed;
-  width: 650px;
-  max-height: 70vh;
-  min-height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75vw;
+  max-width: 960px;
+  max-height: 65vh;
+  min-height: 35vh;
   overflow-y: auto;
-  background: #fff;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  background: rgba(15,18,45,0.97);
+  border: 1px solid rgba(124,138,255,0.3);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,138,255,0.15);
   z-index: 99999;
 }
 .instant-search-results-list {
   list-style: none;
   margin: 0;
-  padding: 10px 0;
+  padding: 16px 0;
 }
 .instant-search-results-list li {
-  padding: 16px 18px;
+  padding: 20px 28px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(124,138,255,0.12);
 }
 .instant-search-results-list li:last-child {
   border-bottom: none;
 }
 .instant-search-results-list li:hover {
-  background-color: var(--content-bg-color-dark);
+  background-color: rgba(124,138,255,0.1);
 }
 .search-result-title {
   display: block;
-  color: var(--text-color);
+  color: #e0e4f0;
   font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 17px;
+  margin-bottom: 8px;
   text-decoration: none;
+  line-height: 1.4;
 }
 .search-result-title:hover {
-  color: var(--theme-color);
+  color: #7c8aff;
 }
 .search-result {
   display: block;
-  color: var(--text-color-secondary);
+  color: #a0a4c0;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   margin-top: 6px;
 }
 .search-keyword {
-  background-color: var(--highlight-background);
-  color: var(--highlight-foreground);
-  padding: 0 2px;
-  border-radius: 2px;
+  background-color: rgba(124,138,255,0.3);
+  color: #c8ccff;
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 .instant-search-no-results {
-  padding: 20px;
+  padding: 40px 20px;
   text-align: center;
-  color: var(--text-color-secondary);
+  color: #8084a0;
+  font-size: 15px;
 }
 /* 滚动条样式 */
 .instant-search-results::-webkit-scrollbar {
   width: 8px;
 }
 .instant-search-results::-webkit-scrollbar-track {
-  background: var(--content-bg-color);
+  background: rgba(20,24,50,0.5);
   border-radius: 4px;
 }
 .instant-search-results::-webkit-scrollbar-thumb {
-  background: var(--text-color-secondary);
+  background: rgba(124,138,255,0.3);
   border-radius: 4px;
 }
 .instant-search-results::-webkit-scrollbar-thumb:hover {
-  background: var(--theme-color);
+  background: rgba(124,138,255,0.5);
 }
