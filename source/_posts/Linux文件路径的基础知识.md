@@ -4,10 +4,12 @@ date: 2026-05-13 15:38:36
 categories: 学习笔记
 tags: PWN
 ---
-## EXAMPLES
+
+学习一下Linux的小知识
 
 <!-- more -->
-	
+
+## EXAMPLES
 /	文件系统的“锚点”，读作“root（根）”。	
 /usr	Unix 系统资源目录，包含所有系统文件。	
 /usr/bin	计算机上已安装程序的可执行文件目录。	
