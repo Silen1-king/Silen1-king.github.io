@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  // 将结果容器移到 body 下，脱离 header 的层叠上下文
+  document.body.appendChild(resultsContainer);
+
   // 创建背景遮罩
   const overlay = document.createElement('div');
   overlay.className = 'instant-search-overlay';
