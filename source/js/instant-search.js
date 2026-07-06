@@ -21,6 +21,28 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  // 将结果容器移到 body 下，脱离 header 的层叠上下文
+  document.body.appendChild(resultsContainer);
+
+  // 创建背景遮罩
+  const overlay = document.createElement('div');
+  overlay.className = 'instant-search-overlay';
+  document.body.appendChild(overlay);
+
+  // 显示搜索结果
+  const showResults = () => {
+    resultsContainer.style.display = 'block';
+    overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  };
+
+  // 隐藏搜索结果
+  const hideResults = () => {
+    resultsContainer.style.display = 'none';
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
   let searchTimeout = null;
 
   // 即时搜索函数
@@ -28,12 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchText = searchInput.value.trim().toLowerCase();
 
     if (!searchText || searchText.length < 1) {
-      resultsContainer.style.display = 'none';
+      hideResults();
       return;
     }
 
     if (!localSearch.isfetched) {
-      resultsContainer.style.display = 'block';
+      showResults();
       resultsList.innerHTML = '<li class="instant-search-no-results"><i class="fa fa-spinner fa-pulse"></i> 加载中...</li>';
       localSearch.fetchData();
       return;
@@ -43,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultItems = localSearch.getResultItems(keywords);
 
     if (resultItems.length === 0) {
-      resultsContainer.style.display = 'block';
+      showResults();
       resultsList.innerHTML = '<li class="instant-search-no-results"><i class="far fa-frown"></i> 没有找到相关文章</li>';
       return;
     }
@@ -59,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 限制显示结果数量
-    const maxResults = 5;
+    const maxResults = 10;
     const displayResults = resultItems.slice(0, maxResults);
 
     // 生成结果HTML
@@ -81,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </li>`;
     }).join('');
 
-    resultsContainer.style.display = 'block';
+    showResults();
   };
 
   // 输入事件监听（带防抖）
@@ -97,17 +119,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 点击外部关闭结果列表
-  document.addEventListener('click', (event) => {
-    if (!event.target.closest('.instant-search-container')) {
-      resultsContainer.style.display = 'none';
-    }
-  });
+  // 点击遮罩关闭
+  overlay.addEventListener('click', hideResults);
 
-  // ESC键关闭结果列表
+  // ESC键关闭
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      resultsContainer.style.display = 'none';
+      hideResults();
       searchInput.blur();
     }
   });
