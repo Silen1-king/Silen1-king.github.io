@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.header');
     if (!header) return;
     const headerBottom = header.getBoundingClientRect().bottom;
-    // 最小 top 值 60px，确保页面滚动后面板仍可见
-    resultsContainer.style.top = Math.max(headerBottom + 8, 60) + 'px';
+    // 16px 间距确保面板与 header 视觉分离；最小 top 60px 防止滚动后贴顶
+    resultsContainer.style.top = Math.max(headerBottom + 16, 60) + 'px';
   };
 
   // 显示搜索结果
@@ -53,6 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.showPopover();
       }
     } else {
+      // 降级方案：确保定位和层级通过内联样式强制生效
+      resultsContainer.style.position = 'fixed';
+      resultsContainer.style.zIndex = '2147483647';
       resultsContainer.style.display = 'block';
       if (overlay) overlay.style.display = 'block';
     }
