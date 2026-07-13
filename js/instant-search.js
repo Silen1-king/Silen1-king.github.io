@@ -36,8 +36,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(overlay);
   }
 
+  // 动态计算下拉面板位置：紧贴 header 底部，居中展示
+  const updateResultsPosition = () => {
+    const header = document.querySelector('.header');
+    if (!header) return;
+    const headerBottom = header.getBoundingClientRect().bottom;
+    // 最小 top 值 60px，确保页面滚动后面板仍可见
+    resultsContainer.style.top = Math.max(headerBottom + 8, 60) + 'px';
+  };
+
   // 显示搜索结果
   const showResults = () => {
+    updateResultsPosition(); // 每次打开前更新位置
     if (supportsPopover) {
       if (!resultsContainer.matches(':popover-open')) {
         resultsContainer.showPopover();
@@ -70,6 +80,38 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // 窗口大小变化时重新计算位置
+  let resizeTimeout = null;
+  window.addEventListener('resize', () => {
+    const isVisible = supportsPopover
+      ? resultsContainer.matches(':popover-open')
+      : resultsContainer.style.display === 'block';
+    if (!isVisible) return;
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(updateResultsPosition, 100);
+  });
+
+  // 页面滚动时：header 滚出视口则自动关闭面板
+  let scrollTimeout = null;
+  window.addEventListener('scroll', () => {
+    const isVisible = supportsPopover
+      ? resultsContainer.matches(':popover-open')
+      : resultsContainer.style.display === 'block';
+    if (!isVisible) return;
+
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const header = document.querySelector('.header');
+      if (!header) return;
+      // header 完全滚出屏幕 → 关闭搜索结果（用户在看内容，不需要搜索了）
+      if (header.getBoundingClientRect().bottom <= 0) {
+        hideResults();
+        return;
+      }
+      updateResultsPosition();
+    }, 50);
+  }, { passive: true });
 
   let searchTimeout = null;
 
@@ -109,11 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 限制显示结果数量
-    const maxResults = 10;
+    const maxResults = 20;
     const displayResults = resultItems.slice(0, maxResults);
 
     // 生成结果HTML
-    resultsList.innerHTML = displayResults.map(result => {
+    const resultHeader = '<li class="instant-search-results-header">找到 ' + displayResults.length + ' 篇相关文章</li>';
+
+    resultsList.innerHTML = resultHeader + displayResults.map(result => {
       // 从原始结果项中提取标题和URL
       const linkMatch = result.item.match(/<a href="([^"]+)" class="search-result-title">([^<]+)<\/a>/);
       if (!linkMatch) return '';
@@ -125,10 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const contentMatch = result.item.match(/<p class="search-result">([^<]+)<\/p>/);
       const content = contentMatch ? contentMatch[1] : '';
 
-      return `<li>
-        <a href="${url}" class="search-result-title">${title}</a>
-        <a href="${url}"><p class="search-result">${content}</p></a>
-      </li>`;
+      return '<li>' +
+        '<a href="' + url + '" class="search-result-title">' + title + '</a>' +
+        '<a href="' + url + '"><p class="search-result">' + content + '</p></a>' +
+        '</li>';
     }).join('');
 
     showResults();

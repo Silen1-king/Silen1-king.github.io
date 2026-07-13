@@ -1384,7 +1384,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #742eff;
+  background: #c80fff;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -3110,50 +3110,74 @@ blockquote {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 2147483646 !important;
   display: none;
 }
-/* 搜索结果面板 - 使用 popover API 渲染在浏览器顶层，始终位于所有图层之上 */
+/* 搜索结果下拉面板 - 毛玻璃效果，从导航栏向下延伸覆盖内容区 */
 .instant-search-results {
   position: fixed;
   inset: auto;
-  top: 50%;
+  top: 100px; /* JS 动态更新为 header 底部位置 */
   left: 50%;
-  transform: translate(-50%, -50%);
-  width: 75vw;
+  transform: translateX(-50%);
+  width: 85vw;
   max-width: 960px;
-  max-height: 65vh;
-  min-height: 35vh;
+  max-height: 72vh;
+  min-height: 120px;
   overflow-y: auto;
-  background: rgba(15,18,45,0.98);
-  border: 1px solid rgba(124,138,255,0.3);
+  background: rgba(6,10,28,0.85);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid rgba(124,138,255,0.15);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,138,255,0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,138,255,0.06) inset, 0 0 60px rgba(124,138,255,0.08);
   z-index: 2147483647 !important;
   padding: 0;
   margin: 0;
+  will-change: transform, opacity;
 }
-/* popover 背景遮罩 - 同样渲染在浏览器顶层 */
+/* 结果计数标题 */
+.instant-search-results-header {
+  padding: 16px 32px 10px 32px;
+  color: #7c8aff;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(124,138,255,0.15);
+}
+/* popover 背景遮罩 - 轻度暗化，保持星空背景隐约可见 */
 .instant-search-results::backdrop {
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(2px);
+}
+/* 面板打开动画 - 从上方滑入 */
+.instant-search-results:popover-open {
+  animation: searchSlideIn 0.25s ease-out;
 }
 .instant-search-results-list {
   list-style: none;
   margin: 0;
-  padding: 16px 0;
+  padding: 8px 0 16px 0;
 }
 .instant-search-results-list li {
-  padding: 20px 28px;
+  padding: 18px 32px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid rgba(124,138,255,0.12);
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid rgba(124,138,255,0.1);
 }
 .instant-search-results-list li:last-child {
   border-bottom: none;
 }
 .instant-search-results-list li:hover {
-  background-color: rgba(124,138,255,0.1);
+  background: rgba(124,138,255,0.08);
+}
+/* 结果计数标题不被 hover 高亮 */
+.instant-search-results-header {
+  cursor: default;
 }
 .search-result-title {
   display: block;
@@ -3205,4 +3229,22 @@ blockquote {
 }
 .instant-search-results::-webkit-scrollbar-thumb:hover {
   background: rgba(124,138,255,0.5);
+}
+/* 移动端适配 */
+@media (max-width: 767px) {
+  .instant-search-results {
+    width: 96vw;
+    max-height: 80vh;
+    border-radius: 12px;
+  }
+}
+@keyframes searchSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
