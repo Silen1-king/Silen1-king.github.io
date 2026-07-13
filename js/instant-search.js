@@ -24,24 +24,52 @@ document.addEventListener('DOMContentLoaded', () => {
   // 将结果容器移到 body 下，脱离 header 的层叠上下文
   document.body.appendChild(resultsContainer);
 
-  // 创建背景遮罩
-  const overlay = document.createElement('div');
-  overlay.className = 'instant-search-overlay';
-  document.body.appendChild(overlay);
+  // 检测 popover API 支持（顶层渲染，始终在所有图层之上）
+  const supportsPopover = typeof HTMLElement.prototype.showPopover === 'function';
+
+  let overlay = null;
+
+  // 不支持 popover 时创建背景遮罩作为降级方案
+  if (!supportsPopover) {
+    overlay = document.createElement('div');
+    overlay.className = 'instant-search-overlay';
+    document.body.appendChild(overlay);
+  }
 
   // 显示搜索结果
   const showResults = () => {
-    resultsContainer.style.display = 'block';
-    overlay.style.display = 'block';
+    if (supportsPopover) {
+      if (!resultsContainer.matches(':popover-open')) {
+        resultsContainer.showPopover();
+      }
+    } else {
+      resultsContainer.style.display = 'block';
+      if (overlay) overlay.style.display = 'block';
+    }
     document.body.style.overflow = 'hidden';
   };
 
   // 隐藏搜索结果
   const hideResults = () => {
-    resultsContainer.style.display = 'none';
-    overlay.style.display = 'none';
+    if (supportsPopover) {
+      if (resultsContainer.matches(':popover-open')) {
+        resultsContainer.hidePopover();
+      }
+    } else {
+      resultsContainer.style.display = 'none';
+      if (overlay) overlay.style.display = 'none';
+    }
     document.body.style.overflow = '';
   };
+
+  // popover 通过 light-dismiss（点击外部/ESC）关闭时，同步清理 body overflow
+  if (supportsPopover) {
+    resultsContainer.addEventListener('toggle', (event) => {
+      if (event.newState === 'closed') {
+        document.body.style.overflow = '';
+      }
+    });
+  }
 
   let searchTimeout = null;
 
@@ -119,10 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 点击遮罩关闭
-  overlay.addEventListener('click', hideResults);
+  // 点击遮罩关闭（仅降级方案需要，popover 自带 light-dismiss）
+  if (!supportsPopover && overlay) {
+    overlay.addEventListener('click', hideResults);
+  }
 
-  // ESC键关闭
+  // ESC键关闭（popover 自带 light-dismiss 处理 ESC，此处为降级 + blur 补充）
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       hideResults();
