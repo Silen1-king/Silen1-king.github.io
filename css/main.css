@@ -1384,7 +1384,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #2eff22;
+  background: #ffff3e;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -3256,8 +3256,6 @@ blockquote {
 .search-popup,
 .local-search-popup,
 .search-result-container {
-  position: absolute !important;
-  top: 100% !important;
   z-index: 9999 !important;
   background: rgba(40,40,45,0.95) !important;
   backdrop-filter: blur(10px);
