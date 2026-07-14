@@ -1384,7 +1384,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #e0db6f;
+  background: #f4ffff;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -3246,4 +3246,31 @@ blockquote {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+}
+.header,
+.header-inner,
+.site-brand-container,
+.site-nav {
+  overflow: visible !important;
+}
+.search-popup,
+.local-search-popup,
+.search-result-container {
+  position: absolute !important;
+  top: 100% !important;
+  z-index: 9999 !important;
+  background: rgba(40,40,45,0.95) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6) !important;
+  border-radius: 0 0 8px 8px;
+}
+.instant-search-input {
+  background: rgba(25,30,60,0.95) !important;
+  border: 2px solid rgba(124,138,255,0.55) !important;
+  box-shadow: 0 0 12px rgba(124,138,255,0.15) !important;
+}
+.instant-search-input:focus {
+  border-color: #7c8aff !important;
+  box-shadow: 0 0 24px rgba(124,138,255,0.35) !important;
+  background: rgba(20,24,55,0.98) !important;
 }
