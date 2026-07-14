@@ -1384,7 +1384,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #f4ffff;
+  background: #2eff22;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -3273,4 +3273,14 @@ blockquote {
   border-color: #7c8aff !important;
   box-shadow: 0 0 24px rgba(124,138,255,0.35) !important;
   background: rgba(20,24,55,0.98) !important;
+}
+.instant-search-results {
+  background: #0a0e23 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.instant-search-overlay {
+  background: rgba(0,0,0,0.5) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
