@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"silen1-king.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":true}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="2025 年，一篇名为 VMSCAPE 的论文登上了安全领域的顶会。它证明了一件事：在云平台上，一个租客只需要租一台最普通的虚拟机，就能隔空偷走宿主机上其他用户的磁盘加密密钥。本文沿着「Spectre 原理 → vBTI 漏洞 → 缓存逆向 → 攻击构建 → 防御反思」的路径，逐层拆解这场数字劫案的全部细节。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VMSCAPE 深度解析：从推测执行到云端隔离的侧信道攻击全貌">
+<meta property="og:url" content="http://silen1-king.github.io/2026/07/16/2026-7-16-VMSCAPE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Silen1Blog">
+<meta property="og:description" content="2025 年，一篇名为 VMSCAPE 的论文登上了安全领域的顶会。它证明了一件事：在云平台上，一个租客只需要租一台最普通的虚拟机，就能隔空偷走宿主机上其他用户的磁盘加密密钥。本文沿着「Spectre 原理 → vBTI 漏洞 → 缓存逆向 → 攻击构建 → 防御反思」的路径，逐层拆解这场数字劫案的全部细节。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-07-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-07-15T17:16:33.292Z">
+<meta property="article:author" content="Silen1-king">
+<meta property="article:tag" content="CPU微架构">
+<meta property="article:tag" content="Side-Channel">
+<meta property="article:tag" content="Spectre">
+<meta property="article:tag" content="VMSCAPE">
+<meta property="article:tag" content="漏洞分析">
+<meta property="article:tag" content="虚拟化安全">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://silen1-king.github.io/2026/07/16/2026-7-16-VMSCAPE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://silen1-king.github.io/2026/07/16/2026-7-16-VMSCAPE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/","path":"2026/07/16/2026-7-16-VMSCAPE深度解析/","title":"VMSCAPE 深度解析：从推测执行到云端隔离的侧信道攻击全貌"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>VMSCAPE 深度解析：从推测执行到云端隔离的侧信道攻击全貌 | Silen1Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Silen1Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+      <div class="instant-search-container">
+        <input type="text" class="instant-search-input" placeholder="搜索博客..." autocomplete="off" />
+        <div class="instant-search-results" style="display: none;" popover="auto">
+          <ul class="instant-search-results-list"></ul>
+        </div>
+      </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags<span class="badge">14</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories<span class="badge">2</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives<span class="badge">10</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%EF%BC%9A%E4%B8%80%E5%88%87%E6%94%BB%E5%87%BB%E7%9A%84%E8%B5%B7%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">第一阶段：一切攻击的起点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E6%B0%B4%E7%BA%BF%EF%BC%9ACPU-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%81%9C%E4%B8%8B%E6%9D%A5%E7%AD%89%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">流水线：CPU 为什么不能停下来等？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spectre%EF%BC%9A%E5%BD%93%E2%80%9D%E7%8C%9C%E9%94%99%E2%80%9D%E5%8F%98%E6%88%90%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E"><span class="nav-number">1.2.</span> <span class="nav-text">Spectre：当”猜错”变成安全漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E9%97%B4%E8%B0%8D%E4%B8%8E%E5%9B%BE%E4%B9%A6%E9%A6%86%E7%9A%84%E6%95%85%E4%BA%8B"><span class="nav-number">1.3.</span> <span class="nav-text">一个间谍与图书馆的故事</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%9C%BA%E6%80%9D%E8%80%83%EF%BC%9A%E6%97%A2%E7%84%B6%E8%BF%99%E4%B9%88%E5%8D%B1%E9%99%A9%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%B9%B2%E8%84%86%E7%A6%81%E7%94%A8%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B%EF%BC%9F"><span class="nav-number">1.4.</span> <span class="nav-text">中场思考：既然这么危险，为什么不干脆禁用分支预测？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VMSCAPE-%E7%9A%84%E6%88%98%E5%9C%BA%EF%BC%9A%E4%BA%91%E7%AB%AF%E7%9A%84%E8%B6%8A%E7%95%8C%E6%94%BB%E5%87%BB"><span class="nav-number">1.5.</span> <span class="nav-text">VMSCAPE 的战场：云端的越界攻击</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%EF%BC%9A%E6%BC%8F%E6%B4%9E%E7%9A%84%E6%A0%B9%E6%BA%90-%E2%80%94%E2%80%94-vBTI"><span class="nav-number">2.</span> <span class="nav-text">第二阶段：漏洞的根源 —— vBTI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%82%A3%E6%9C%AC%E5%85%B1%E4%BA%AB%E7%9A%84%E2%80%9D%E5%AF%BC%E8%88%AA%E7%AC%94%E8%AE%B0%E6%9C%AC%E2%80%9D"><span class="nav-number">2.1.</span> <span class="nav-text">那本共享的”导航笔记本”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#vBTI%EF%BC%9A%E4%B8%89%E6%AD%A5%E5%AE%8C%E6%88%90%E8%B7%A8%E7%95%8C%E4%B8%8B%E6%AF%92"><span class="nav-number">2.2.</span> <span class="nav-text">vBTI：三步完成跨界下毒</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5%EF%BC%9A%E4%BA%89%E5%8F%96%E6%97%B6%E9%97%B4-%E2%80%94%E2%80%94-%E7%BC%93%E5%AD%98%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">第三阶段：争取时间 —— 缓存逆向工程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E7%95%8C%E6%B8%85%E7%BC%93%E5%AD%98%EF%BC%9A%E4%B8%8D%E8%83%BD%E8%B8%A2%E5%87%BA%E5%8E%BB%EF%BC%8C%E9%82%A3%E5%B0%B1%E6%8C%A4%E5%87%BA%E5%8E%BB"><span class="nav-number">3.1.</span> <span class="nav-text">跨界清缓存：不能踢出去，那就挤出去</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%86%E5%90%91-AMD-Zen%EF%BC%9A%E7%A0%B4%E8%A7%A3%E5%8E%82%E5%95%86%E7%9A%84%E6%9C%80%E9%AB%98%E6%9C%BA%E5%AF%86"><span class="nav-number">3.2.</span> <span class="nav-text">逆向 AMD Zen：破解厂商的最高机密</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5%EF%BC%9A%E8%87%B4%E5%91%BD%E4%B8%80%E5%87%BB-%E2%80%94%E2%80%94-%E7%AB%AF%E5%88%B0%E7%AB%AF%E6%94%BB%E5%87%BB"><span class="nav-number">4.</span> <span class="nav-text">第四阶段：致命一击 —— 端到端攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%85%B3%EF%BC%9A%E6%89%93%E7%A0%B4-ASLR"><span class="nav-number">4.1.</span> <span class="nav-text">第一关：打破 ASLR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%85%B3%EF%BC%9A%E5%9C%A8%E6%95%B0%E6%8D%AE%E8%BF%B7%E5%AE%AB%E4%B8%AD%E9%A1%BA%E8%97%A4%E6%91%B8%E7%93%9C"><span class="nav-number">4.2.</span> <span class="nav-text">第二关：在数据迷宫中顺藤摸瓜</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%85%B3%EF%BC%9A%E7%BB%88%E6%9E%81%E6%8F%90%E5%8F%96"><span class="nav-number">4.3.</span> <span class="nav-text">第三关：终极提取</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%A6%82%E4%BD%95%E5%A0%B5%E4%BD%8F%E8%BF%99%E4%B8%AA%E6%BC%8F%E6%B4%9E"><span class="nav-number">5.</span> <span class="nav-text">第五阶段：如何堵住这个漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%8E%B0%E6%9C%89%E7%9A%84%E9%98%B2%E5%BE%A1%E5%A4%B1%E6%95%88%E4%BA%86%EF%BC%9F"><span class="nav-number">5.1.</span> <span class="nav-text">为什么现有的防御失效了？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%B1%82%E7%9A%84%E6%AD%A2%E8%A1%80%E6%96%B9%E6%A1%88"><span class="nav-number">5.2.</span> <span class="nav-text">软件层的止血方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E5%B1%82%E7%9A%84%E6%A0%B9%E6%B2%BB%E6%96%B9%E6%A1%88"><span class="nav-number">5.3.</span> <span class="nav-text">硬件层的根治方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-number">6.</span> <span class="nav-text">写在最后</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Silen1-king</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://silen1-king.github.io/2026/07/16/2026-7-16-VMSCAPE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Silen1-king">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silen1Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="VMSCAPE 深度解析：从推测执行到云端隔离的侧信道攻击全貌 | Silen1Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VMSCAPE 深度解析：从推测执行到云端隔离的侧信道攻击全貌
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2026-07-16 00:00:00 / Modified: 01:16:33" itemprop="dateCreated datePublished" datetime="2026-07-16T00:00:00+08:00">2026-07-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">学习笔记</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>2025 年，一篇名为 VMSCAPE 的论文登上了安全领域的顶会。它证明了一件事：在云平台上，一个租客只需要租一台最普通的虚拟机，就能隔空偷走宿主机上其他用户的磁盘加密密钥。本文沿着「Spectre 原理 → vBTI 漏洞 → 缓存逆向 → 攻击构建 → 防御反思」的路径，逐层拆解这场数字劫案的全部细节。</p>
+</blockquote>
+<span id="more"></span>
+
+<hr>
+<h2 id="第一阶段：一切攻击的起点"><a href="#第一阶段：一切攻击的起点" class="headerlink" title="第一阶段：一切攻击的起点"></a>第一阶段：一切攻击的起点</h2><p>在深入 VMSCAPE 之前，我们得先回答一个更根本的问题：<strong>现代 CPU 为什么会给攻击者可乘之机？</strong> 答案并不在于某个具体的代码 Bug，而在于一个为了极致性能而做出的设计取舍——分支预测与推测执行。</p>
+<h3 id="流水线：CPU-为什么不能停下来等？"><a href="#流水线：CPU-为什么不能停下来等？" class="headerlink" title="流水线：CPU 为什么不能停下来等？"></a>流水线：CPU 为什么不能停下来等？</h3><p>现代 CPU 的工作方式很像工厂的流水线。一条指令从进入 CPU 到执行完毕，通常要经过取指、译码、执行、访存、写回等多个阶段，流水线可能长达 15 到 20 级。</p>
+<p>想象 CPU 遇到了一条 <code>if (A &gt; B)</code> 分支指令。取指阶段发生在流水线的第 1 级，此时 CPU 需要知道下一条指令该从哪里取——是走 <code>if</code> 分支还是 <code>else</code> 分支。但真正的 <code>A &gt; B</code> 比较运算，要等到第 10 级才能在 ALU（算术逻辑单元）中完成。</p>
+<p>如果 CPU 选择等待，整个流水线就必须在第 1 级停下来，后面所有阶段全部干等，直到这条指令慢慢走到第 10 级、算出结果。这意味着流水线中会出现大量的”气泡”——空闲时间。考虑到程序中分支指令（<code>if</code>、<code>for</code>、<code>while</code> 等）占总指令的 15% 到 25%，这种等待会让 CPU 的性能暴跌数倍。</p>
+<p>所以，CPU 不是算不出正确走向，而是<strong>在流水线的起点时，根本拿不到流水线中后段的计算结果</strong>。为了不让流水线停摆，它唯一的办法就是先猜一个方向，继续往前跑。</p>
+<p>这就是**分支预测器（Branch Predictor）**存在的理由。它像一个老练的导航员，根据历史经验在路口提前判断方向，让 CPU 的流水线始终保持满载运转。</p>
+<h3 id="Spectre：当”猜错”变成安全漏洞"><a href="#Spectre：当”猜错”变成安全漏洞" class="headerlink" title="Spectre：当”猜错”变成安全漏洞"></a>Spectre：当”猜错”变成安全漏洞</h3><p>2018 年公开的 Spectre 攻击，是硬件安全领域的一次认知地震。它揭示了一个残酷的事实：<strong>CPU 猜错之后虽然会撤销一切，但撤销得不够干净。</strong></p>
+<p>Spectre 的发作分为三步。每一步单独看都是合理的硬件设计，但组合在一起就变成了致命的漏洞。</p>
+<p><strong>第一步：先猜后算。</strong> 当 CPU 遇到一条 <code>if (x &lt; array_size)</code> 的边界检查时，分支预测器会根据历史规律猜一个方向——通常它会猜”x 没有越界”，因为正常程序几乎不会越界访问。CPU 随即沿着这个猜测的方向，提前执行后面的代码。这一步在正常情况下毫无问题：95% 以上的猜测都是对的，省下了海量的等待时间。</p>
+<p><strong>第二步：发现错误，全速回滚。</strong> 当那条 <code>if</code> 指令终于走完流水线、得出真实结果时，CPU 会做一个比对。如果猜对了，万事大吉——之前提前算好的结果直接生效。如果猜错了，CPU 会触发一个称为”流水线冲刷（Pipeline Flush）”的操作：立刻丢弃所有沿错误路径执行到一半的指令结果，把寄存器恢复到分支前的状态，然后从正确的路径重新开始。从程序逻辑上看，就好像什么都没发生过。</p>
+<p><strong>第三步——也是致命的一步：缓存痕迹残留。</strong> CPU 回滚了寄存器，却没有回滚<strong>高速缓存（Cache）</strong>。刚才”猜错”时短暂执行的那些指令，虽然在逻辑上被作废了，但它们访问过的数据已经被 CPU 硬件自动从慢速主存搬运到了快速缓存中。而缓存的物理状态——哪块数据”热”、哪块数据”冷”——并不会随着流水线冲刷而重置。</p>
+<p>攻击者只需要测量自己读取不同内存地址的时间差（缓存命中约 40 个时钟周期，主存访问约 250 个时钟周期），就能像法医一样还原出刚才那段”错误执行”到底触碰了什么数据。</p>
+<p>这就是 Spectre 的核心公式：<strong>误导分支预测器 → 触发错误的推测执行 → 用缓存侧信道读取痕迹。</strong></p>
+<h3 id="一个间谍与图书馆的故事"><a href="#一个间谍与图书馆的故事" class="headerlink" title="一个间谍与图书馆的故事"></a>一个间谍与图书馆的故事</h3><p>在继续深入之前，我想用一个比喻把缓存侧信道的机制彻底讲透——因为它将是贯穿全文的核心技术。</p>
+<p>想象你是一个间谍，想知道一个保险箱的密码（0 到 9 中的一个数字）。你没办法直接打开保险箱，但你发现了一个神奇的攻击路径：</p>
+<ol>
+<li><strong>催眠</strong>：你把图书馆管理员催眠了，告诉他：”去偷看保险箱密码，密码是几，你就去书架上把第几个编号的书拿出来放在桌上。”</li>
+<li><strong>执行</strong>：管理员看了密码是 <code>8</code>，于是把第 8 本书拿了出来，放在桌上。</li>
+<li><strong>苏醒</strong>：管理员突然惊醒，完全忘了刚才发生的一切，也忘了密码是什么。一切看起来都恢复了原状。</li>
+<li><strong>读心</strong>：你大摇大摆走进图书馆，摸了摸桌上的每一本书。你发现第 8 本书摸起来是温的（说明刚刚被人动过），其他书都落了灰、摸起来冰凉。</li>
+</ol>
+<p>你从来没有打开过保险箱，但你确切地知道密码是 <code>8</code>。</p>
+<p>把这个比喻翻译成计算机术语：管理员就是 <strong>QEMU 进程</strong>，催眠就是<strong>推测执行</strong>，保险箱密码就是<strong>机密数据</strong>，桌上的书就是<strong>共享数组</strong>，书的温度就是<strong>缓存状态</strong>，而你摸书的时间差就是<strong>侧信道测量</strong>。</p>
+<h3 id="中场思考：既然这么危险，为什么不干脆禁用分支预测？"><a href="#中场思考：既然这么危险，为什么不干脆禁用分支预测？" class="headerlink" title="中场思考：既然这么危险，为什么不干脆禁用分支预测？"></a>中场思考：既然这么危险，为什么不干脆禁用分支预测？</h3><p>你可能会问这个很自然的问题。答案简单而残酷：<strong>性能代价大到人类无法接受。</strong></p>
+<p>如果彻底关闭分支预测和推测执行，现代 CPU 的性能会倒退 10 到 20 年。服务器处理能力暴跌，对全球 IT 基础设施是毁灭性的。正因为分支预测器 95% 以上的准确率，我们的手机和电脑才能如此流畅。</p>
+<p>所以业界的选择是”给漏洞打补丁”，而不是”废掉产生漏洞的机制”。在软件层面，操作系统和编译器引入了 Retpoline 等技术，在敏感代码处放置屏障指令阻止推测执行。在硬件层面，新一代 CPU 开始做物理隔离，严格限制推测执行期间对缓存和内存权限的访问。这些我们会在最后的防御阶段详细展开。</p>
+<h3 id="VMSCAPE-的战场：云端的越界攻击"><a href="#VMSCAPE-的战场：云端的越界攻击" class="headerlink" title="VMSCAPE 的战场：云端的越界攻击"></a>VMSCAPE 的战场：云端的越界攻击</h3><p>有了 Spectre 的底子，我们就可以具体看看 VMSCAPE 这篇论文设定的战场了。</p>
+<p>云安全的传统思路是做好<strong>隔离</strong>。防御者认为，只要把虚拟机内部（Guest）和宿主机的核心大脑（Host Kernel &#x2F; Hypervisor）彻底隔开——比如在它们切换时清空分支预测器的历史记录——攻击者就无法跨界作恶。</p>
+<p>但 VMSCAPE 发现了一个巨大的盲区。它的威胁模型是这样的：</p>
+<ul>
+<li><strong>攻击者</strong>：云平台上的一台普通虚拟机，可以运行任意用户态程序。你不需要任何特权，只需要租一台 VM。</li>
+<li><strong>受害者</strong>：宿主机上负责管理虚拟机的用户态进程——也就是 <strong>QEMU</strong>。QEMU 负责模拟虚拟机的硬件设备，手里掌握着大量机密，包括虚拟机磁盘的加密密钥。</li>
+<li><strong>致命路径（Guest User → Host User）</strong>：CPU 厂商只防住了”虚拟机 → 宿主机内核”这条线，却漏掉了”虚拟机用户态 → 宿主机用户态”这条线。恶意虚拟机在自己的领地里疯狂训练分支预测器，当 CPU 切换回宿主机的 QEMU 进程时，QEMU 会在不经意间被”催眠”，按照攻击者的意图去执行错误的推测。</li>
+</ul>
+<p>那么问题来了：攻击者呆在自己的虚拟机里，受害者是宿主机上一个完全独立的进程——攻击者到底怎么把”错误路线”塞进宿主机 CPU 的大脑里？答案藏在下一阶段。</p>
+<hr>
+<h2 id="第二阶段：漏洞的根源-——-vBTI"><a href="#第二阶段：漏洞的根源-——-vBTI" class="headerlink" title="第二阶段：漏洞的根源 —— vBTI"></a>第二阶段：漏洞的根源 —— vBTI</h2><p>恶意虚拟机隔空污染宿主机 CPU 的谜底，藏在一个叫**分支目标缓冲区（Branch Target Buffer，简称 BTB）**的硬件结构里。</p>
+<h3 id="那本共享的”导航笔记本”"><a href="#那本共享的”导航笔记本”" class="headerlink" title="那本共享的”导航笔记本”"></a>那本共享的”导航笔记本”</h3><p>每当 CPU 执行到一条分支指令（比如在内存地址 <code>0x1000</code> 处要发生跳转），它就会在 BTB 这本硬件”笔记本”上记一笔：”下次再走到 <code>0x1000</code> 这个路口，直接往 <code>0x5000</code> 方向走。”下次再遇到同一条指令，CPU 连算都不用算，直接从 BTB 查答案并立刻推测执行。</p>
+<p><strong>漏洞的根源就在这里：这本笔记本是多租户共享的。</strong> 虚拟机（Guest）和宿主机进程（QEMU）如果在同一个物理 CPU 核心上运行，它们使用的是同一块物理 BTB 硬件。这本笔记不会因为”换了一个程序在跑”就自动清空。</p>
+<p>你可能会问：云厂商在切换虚拟机时把笔记本”撕掉”不就行了？事实上，AMD 和 Intel 确实提供了一个叫 **IBPB（间接分支预测屏障）**的清空指令，KVM 在虚拟机退出（VMExit）进入宿主机内核时也的确执行了清空。</p>
+<p><strong>但问题出在清得不够彻底。</strong> 现有的防御逻辑只切断了一条线：「虚拟机 → 宿主机内核」。当系统从宿主机内核再切回**宿主机用户态进程（QEMU）**时，或者在某些特定的上下文切换路径中，虚拟机用户态之前对 BTB 的污染并没有被完全清除。防御的边界上，出现了一个一毫米的缝隙。</p>
+<h3 id="vBTI：三步完成跨界下毒"><a href="#vBTI：三步完成跨界下毒" class="headerlink" title="vBTI：三步完成跨界下毒"></a>vBTI：三步完成跨界下毒</h3><p>既然笔记本没被撕干净，攻击者就可以动手了。VMSCAPE 把这个攻击原语称为 <strong>vBTI（Virtual Branch Target Injection，虚拟分支目标注入）</strong>：</p>
+<p><strong>第一步：地址碰撞。</strong> BTB 容量有限，通常只取内存地址的低位比特作为索引。攻击者在自己的虚拟机里，刻意挑选一个虚拟地址，让它的低位比特与目标 QEMU 进程中某个分支指令的地址<strong>完全一样</strong>——它们在 BTB 里共享同一个”条目”。</p>
+<p><strong>第二步：疯狂训练。</strong> 攻击者在自己的虚拟机里反复执行跳转指令，把”错误的目的地”（也就是 Gadget 的地址）重复写入 BTB 的这个条目，直到它在硬件层面成为这个条目的”默认答案”。</p>
+<p><strong>第三步：跨界发作。</strong> 虚拟机让出 CPU，系统切回宿主机的 QEMU 进程。QEMU 刚好执行到了那个发生地址碰撞的分支指令。CPU 去查 BTB，看到了攻击者留下的导航记录。CPU 硬件无法分辨这条记录是 Guest 写的还是 Host 写的——它只是忠实地按照 BTB 的记录，推测执行跳向了攻击者指定的恶意 Gadget。</p>
+<p>为了方便理解，我们可以延续酒店的比喻：虚拟机租户退房前，在前台的”导航便签条”上偷偷写下”如果你是 QEMU 经理，请去 404 房间（Gadget 地址）把万能钥匙（机密数据）拿出来放在桌上（缓存）”。酒店的安全系统在租户和保安队长（宿主机内核）之间建了隔离墙，但忘了在租户和 QEMU 经理之间清理这张便签。结果 QEMU 经理一上班，看到便签，下意识就照做了——他的理性思维（正常执行）还没启动，潜意识（推测执行）已经被操控了。</p>
+<hr>
+<h2 id="第三阶段：争取时间-——-缓存逆向工程"><a href="#第三阶段：争取时间-——-缓存逆向工程" class="headerlink" title="第三阶段：争取时间 —— 缓存逆向工程"></a>第三阶段：争取时间 —— 缓存逆向工程</h2><p>通过 vBTI，攻击者成功让 QEMU 朝错误的方向狂奔。但紧跟着一个巨大的物理难题：<strong>时间不够。</strong></p>
+<p>CPU 的纠错机制极其敏锐。QEMU 在被污染的分支上一边推测执行着恶意 Gadget，另一边也在真实地计算分支条件。如果分支条件所需的变量恰好躺在 L1 缓存里（命中通常只需要几个时钟周期），CPU 几乎瞬间就能发现”走错了”，然后立刻冲刷流水线。这么短的时间，Gadget 连一条访存指令都来不及完成，机密数据根本偷不出来。</p>
+<p><strong>破局思路：拖延时间。</strong> 如果能把这个关键变量从缓存里赶出去，逼着 CPU 去几百个时钟周期之外的主存里找，CPU 就会长时间卡在推测执行状态。在这段漫长的等待窗口里，Gadget 可以从容地完成窃密操作。</p>
+<h3 id="跨界清缓存：不能踢出去，那就挤出去"><a href="#跨界清缓存：不能踢出去，那就挤出去" class="headerlink" title="跨界清缓存：不能踢出去，那就挤出去"></a>跨界清缓存：不能踢出去，那就挤出去</h3><p>如果攻击者和受害者在同一个进程里，直接调用 <code>clflush</code> 等指令把数据踢出缓存就完了。但在 VMSCAPE 的场景下，恶意虚拟机<strong>没有权限</strong>直接操作宿主机 QEMU 的缓存。</p>
+<p>唯一的办法是”占坑法”——构建<strong>缓存驱逐集（Eviction Sets）</strong>。CPU 的末级缓存（LLC，通常是 L3 Cache）被划分为很多”组（Sets）”，物理地址通过哈希函数映射到具体的组和切片。攻击者只要在自己的虚拟机内存里精挑细选出一批特定的地址，然后疯狂访问它们，就能把目标组塞满，从而把 QEMU 留在该组里的数据物理性地”挤”出去。</p>
+<h3 id="逆向-AMD-Zen：破解厂商的最高机密"><a href="#逆向-AMD-Zen：破解厂商的最高机密" class="headerlink" title="逆向 AMD Zen：破解厂商的最高机密"></a>逆向 AMD Zen：破解厂商的最高机密</h3><p>说起来简单，做起来极其困难。现代 CPU（尤其是 AMD Zen 架构）的 LLC 寻址哈希函数是<strong>厂商的顶级商业机密，没有任何公开文档</strong>。而且 AMD Zen 采用的是非包含式（Non-inclusive）缓存架构——L3 不自动包含 L1&#x2F;L2 的内容，这让驱逐的复杂度又上了一个台阶。</p>
+<p>VMSCAPE 论文最令人惊叹的技术贡献就在这里：</p>
+<ul>
+<li>研究人员利用性能计数器和系统性的逆向工程，<strong>破解了 AMD Zen 4 和 Zen 5 处理器的 LLC 寻址哈希函数</strong>，找出了物理地址到缓存组和切片的完整映射规律。</li>
+<li>基于逆向出的哈希函数，他们开发了一套自动化算法，让恶意虚拟机能够在这个极其复杂的缓存迷宫中，<strong>稳定、精准地找到并驱逐</strong>QEMU 分支变量所在的缓存位置。</li>
+</ul>
+<p>用酒店比喻来理解这一步：QEMU 经理只要瞥一眼手边的”员工手册”（L1 缓存）就能识破你的骗局。为了拖住他，你雇了一大群群演（缓存驱逐集）冲到前台，用各种问题把前台空间彻底占满，把那本员工手册挤进了地下室（主存）。经理派人去地下室取手册的这几百个时钟周期里，他的潜意识（推测执行）已经在不受控制地按便签上的指示行动了。</p>
+<p>至此，攻击者同时拥有了两件武器：让 QEMU 跑错路的”方向盘”（vBTI），和延迟纠错的”刹车”（LLC 缓存驱逐）。接下来，就是把它们拼装成一把真正能开锁的钥匙。</p>
+<hr>
+<h2 id="第四阶段：致命一击-——-端到端攻击"><a href="#第四阶段：致命一击-——-端到端攻击" class="headerlink" title="第四阶段：致命一击 —— 端到端攻击"></a>第四阶段：致命一击 —— 端到端攻击</h2><p>理论有了，武器齐了。但要在一台真实服务器上偷到磁盘加密密钥，攻击者还得翻过三座大山。</p>
+<h3 id="第一关：打破-ASLR"><a href="#第一关：打破-ASLR" class="headerlink" title="第一关：打破 ASLR"></a>第一关：打破 ASLR</h3><p>现代操作系统会把程序每次运行的内存位置随机打乱——这就是 ASLR（地址空间布局随机化）。攻击者连 QEMU 进程和 Gadget 到底在内存的哪个位置都不知道，攻击就无从谈起。</p>
+<p>破解方法本身也是 vBTI 的一次精妙应用：攻击者首先发动一次”轻量级”的 vBTI 攻击，在不引起系统崩溃的前提下，诱导 QEMU 在推测执行中泄露一些包含地址信息的指针。拿到一个已知函数的真实地址后，就能顺藤摸瓜计算出整个 QEMU 进程的基址——ASLR 的随机化就像多米诺骨牌一样瞬间崩塌。</p>
+<h3 id="第二关：在数据迷宫中顺藤摸瓜"><a href="#第二关：在数据迷宫中顺藤摸瓜" class="headerlink" title="第二关：在数据迷宫中顺藤摸瓜"></a>第二关：在数据迷宫中顺藤摸瓜</h3><p>磁盘加密密钥（比如 LUKS 密钥）不是随意躺在内存里的。它被深埋在 QEMU 复杂的内部数据结构中——虚拟队列 <code>VirtQueue</code>、加密上下文、层层嵌套的指针链。</p>
+<p>攻击者不能指望一次推测执行就直达目标。他们必须精心设计一条<strong>推测执行链（Speculative Pointer Dereferencing）</strong>：第一次推测执行读取结构体 A 里的指针，第二次沿着指针读取结构体 B 里的下一级指针，第三次、第四次……像按图索骥一样，一步步穿越 QEMU 的内存迷宫，直到最终定位到保存密钥的那个地址。</p>
+<h3 id="第三关：终极提取"><a href="#第三关：终极提取" class="headerlink" title="第三关：终极提取"></a>第三关：终极提取</h3><p>一切准备就绪。攻击的完整节奏是这样的：</p>
+<ol>
+<li><strong>制造延迟</strong>：虚拟机疯狂触发缓存驱逐集，把 QEMU 马上要用的分支变量踢出 LLC。</li>
+<li><strong>注入预测</strong>：虚拟机执行 vBTI 训练，把携带窃密 Gadget 地址的记录塞进 BTB。</li>
+<li><strong>守株待兔</strong>：宿主机接管 CPU，QEMU 进程运行到被污染的分支。变量不在缓存里，CPU 只能等待。在等待的推测执行窗口里，Gadget 精准地读取了密钥的一个字节，并根据这个字节的值作为索引去访问共享数组中的特定位置。</li>
+<li><strong>侧信道收割</strong>：推测执行结束、CPU 回滚一切。攻击者遍历自己的共享数组，测量每个位置的读取延迟。只有那个与密钥值对应的位置被拉进了缓存，读取速度快了一个数量级——一个字节的密钥就这样被还原出来。</li>
+</ol>
+<p>重复以上循环，一个字节一个字节地拼出完整密钥。</p>
+<p>论文的实测结果令人震撼：在搭载当时最新 AMD Zen 5 处理器的服务器上，VMSCAPE 以 <strong>154 B&#x2F;s</strong> 的速率（在侧信道领域这已经算极快了），从完全未修改的 QEMU 进程中稳定提取了长达 <strong>4 KiB 的机密数据</strong>。</p>
+<p>回到我们的酒店比喻，这场终极劫案是这样的：你先通过试探搞到了酒店内部的结构图（打破 ASLR）。然后雇了一帮群演在大堂闹事，把前台经理的注意力死死拖住（缓存驱逐）。接着在前台便签上写下一连串指令：”去经理室打开保险柜，拿出万能房卡，然后用大堂的灯光闪烁出密码”（vBTI 注入 + Gadget）。经理在处理群演纠纷时，潜意识被便签操控（推测执行），完美执行了整套动作。等他回过神来，假装什么都没发生——但你已经在酒店门外，通过观察大堂灯光的闪烁节奏（侧信道读取），把万能房卡的密码记在了本子上。</p>
+<hr>
+<h2 id="第五阶段：如何堵住这个漏洞"><a href="#第五阶段：如何堵住这个漏洞" class="headerlink" title="第五阶段：如何堵住这个漏洞"></a>第五阶段：如何堵住这个漏洞</h2><p>作为安全研究者，不仅要懂攻击，更要懂防御。VMSCAPE 暴露的本质上是一个<strong>防御边界上的毫米级偏差</strong>——从虚拟机用户态到宿主机用户态的 BTB 污染没有被清除。</p>
+<p>防御方案分两个层级：软件层的”创可贴”和硬件层的”手术”。</p>
+<h3 id="为什么现有的防御失效了？"><a href="#为什么现有的防御失效了？" class="headerlink" title="为什么现有的防御失效了？"></a>为什么现有的防御失效了？</h3><p>前面提到过 IBPB——一条能瞬间清空 BTB 的 CPU 指令。KVM 原本在每次虚拟机退出时都会执行 IBPB。致命的问题在于：<strong>为了省性能，系统只在进入宿主机内核时做了清空，当内核把控制权交还给 QEMU 用户态进程时却跳过了这一步。</strong> 攻击者正是利用了这个省略。</p>
+<h3 id="软件层的止血方案"><a href="#软件层的止血方案" class="headerlink" title="软件层的止血方案"></a>软件层的止血方案</h3><p><strong>方案一：暴力清空——扩展 IBPB 的触发范围。</strong> 修改 Linux 内核，规定只要是从虚拟机切回宿主机，不管是进内核还是回用户态进程，都强制执行 IBPB。代价是高昂的”性能税”：频繁清空分支预测器会让 CPU 变成”瞎子”，后续执行会遭遇大量预测失败，服务器整体吞吐量明显下降。</p>
+<p><strong>方案二：给 QEMU 穿防弹衣——Retpoline 编译。</strong> 不指望清空攻击者的”假便签”，而是让 QEMU 从根本上<strong>不依赖便签做决策</strong>。Retpoline 是一种特殊的编译器技术，它会把代码中容易被污染的间接分支指令全部替换成安全的跳转模式，阻止推测执行的发生。代价是需要云厂商重新编译部署庞大的基础设施，且 Retpoline 本身也会带来一定的运行时开销。</p>
+<h3 id="硬件层的根治方案"><a href="#硬件层的根治方案" class="headerlink" title="硬件层的根治方案"></a>硬件层的根治方案</h3><p>软件补丁永远伴随性能损耗。真正的解药在芯片厂商手中：<strong>硬件级 VMID 标签。</strong></p>
+<p>在下一代 CPU 的设计中，给 BTB 的每一条记录打上”虚拟机 ID（VMID）”和”特权级别”的标签。当 QEMU（Host 标签）准备查 BTB 时，CPU 硬件会自动过滤掉所有带 Guest 标签的预测记录。恶意虚拟机再怎么疯狂训练预测器，QEMU 都根本看不见它的”假便签”——在不牺牲性能的前提下实现物理级隔离。</p>
+<hr>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>VMSCAPE 这篇论文的价值超越了任何一个具体漏洞的修补。它给我们上了一堂深刻的课：<strong>在极其复杂的现代云计算和 CPU 微架构中，防御边界上哪怕一毫米的偏差——漏掉了对用户态进程的 BTB 隔离——在侧信道这面放大镜下，都会变成足以撼动千亿美元云产业的致命裂缝。</strong></p>
+<p>回顾这条学习路径：我们从 CPU 为什么必须”蒙眼狂奔”开始，理解了分支预测和推测执行的设计逻辑；看到了 Spectre 如何利用缓存残留将错误执行转化为信息泄露；掌握了 vBTI 如何利用 BTB 的共享特性实现跨界污染；惊叹于 AMD Zen LLC 哈希函数的逆向破解和缓存驱逐集的精妙构建；最后见证了从打破 ASLR 到 154 B&#x2F;s 提取密钥的完整攻击链，以及从软件补丁到硬件标签的分层防御体系。</p>
+<p>希望这篇笔记能为你推开侧信道攻击研究的大门——这扇门背后，是计算机体系结构中一个充满智力挑战的迷人世界。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Side-Channel/" rel="tag"># Side-Channel</a>
+              <a href="/tags/Spectre/" rel="tag"># Spectre</a>
+              <a href="/tags/VMSCAPE/" rel="tag"># VMSCAPE</a>
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%AE%89%E5%85%A8/" rel="tag"># 虚拟化安全</a>
+              <a href="/tags/CPU%E5%BE%AE%E6%9E%B6%E6%9E%84/" rel="tag"># CPU微架构</a>
+              <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" rel="tag"># 漏洞分析</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/07/13/%E8%BD%AF%E4%BB%B6%E9%80%86%E5%90%91%E4%B8%8E%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%9F%BA%E7%A1%80/" rel="prev" title="软件逆向与漏洞挖掘基础">
+                  <i class="fa fa-angle-left"></i> 软件逆向与漏洞挖掘基础
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Silen1-king</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<canvas id="stars-canvas"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('stars-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  let shootingStars = [];
+  let w, h;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    const count = Math.floor((w * h) / 3000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.5 + 0.3,
+        alpha: Math.random(),
+        dAlpha: (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1)
+      });
+    }
+  }
+
+  function spawnShootingStar() {
+    if (shootingStars.length > 2) return;
+    shootingStars.push({
+      x: Math.random() * w * 0.8,
+      y: Math.random() * h * 0.4,
+      len: Math.random() * 60 + 40,
+      speed: Math.random() * 4 + 4,
+      alpha: 1,
+      angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw static stars
+    for (const s of stars) {
+      s.alpha += s.dAlpha;
+      if (s.alpha > 1 || s.alpha < 0.1) s.dAlpha = -s.dAlpha;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200, 210, 255, ${s.alpha})`;
+      ctx.fill();
+    }
+
+    // Draw shooting stars
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const ss = shootingStars[i];
+      const dx = Math.cos(ss.angle) * ss.len;
+      const dy = Math.sin(ss.angle) * ss.len;
+
+      const grad = ctx.createLinearGradient(ss.x, ss.y, ss.x - dx, ss.y - dy);
+      grad.addColorStop(0, `rgba(255, 255, 255, ${ss.alpha})`);
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.beginPath();
+      ctx.moveTo(ss.x, ss.y);
+      ctx.lineTo(ss.x - dx, ss.y - dy);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ss.x += Math.cos(ss.angle) * ss.speed;
+      ss.y += Math.sin(ss.angle) * ss.speed;
+      ss.alpha -= 0.012;
+
+      if (ss.alpha <= 0 || ss.x > w + 100 || ss.y > h + 100) {
+        shootingStars.splice(i, 1);
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  initStars();
+  draw();
+
+  window.addEventListener('resize', () => {
+    resize();
+    initStars();
+  });
+
+  // Spawn a shooting star every 3-8 seconds
+  setInterval(() => {
+    if (Math.random() < 0.7) spawnShootingStar();
+  }, 4000);
+})();
+</script>
+
+<script src="/js/instant-search.js"></script>
+
+</body>
+</html>
