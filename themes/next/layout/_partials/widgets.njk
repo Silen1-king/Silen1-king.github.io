@@ -1,11 +1,16 @@
 {# Widgets with fixed position #}
 
 {%- if theme.sidebar.display !== 'remove' %}
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
+  <button class="toggle sidebar-toggle" type="button"
+          aria-label="打开文章目录或侧栏导航"
+          aria-controls="sidebar" aria-expanded="false"
+          data-label="导航">
+    <span class="sidebar-toggle-icon" aria-hidden="true">
+      <span class="toggle-line"></span>
+      <span class="toggle-line"></span>
+      <span class="toggle-line"></span>
+    </span>
+  </button>
   <div class="sidebar-dimmer"></div>
 {%- endif %}
 

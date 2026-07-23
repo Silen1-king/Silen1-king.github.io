@@ -31,6 +31,16 @@ function transformAlerts(html) {
   });
 }
 
+function addImageLoadingHints(html) {
+  return String(html || '').replace(/<img\b([^>]*)>/gi, (tag, attributes) => {
+    const additions = [];
+    if (!/\bloading\s*=/i.test(attributes)) additions.push('loading="lazy"');
+    if (!/\bdecoding\s*=/i.test(attributes)) additions.push('decoding="async"');
+    if (!additions.length) return tag;
+    return `<img${attributes} ${additions.join(' ')}>`;
+  });
+}
+
 function asDate(value) {
   if (!value) return null;
   const date = value && typeof value.toDate === 'function' ? value.toDate() : new Date(value);
@@ -143,7 +153,7 @@ hexo.extend.filter.register('after_post_render', function enhancePost(post) {
   if (post.layout !== 'post') return post;
 
   const staleNotice = staleNoticeFor(post);
-  post.content = staleNotice + transformAlerts(post.content);
+  post.content = staleNotice + addImageLoadingHints(transformAlerts(post.content));
   return post;
 });
 
@@ -158,6 +168,7 @@ hexo.extend.filter.register('template_locals', function prepareRelatedPosts(loca
 });
 
 module.exports = {
+  addImageLoadingHints,
   relatedPostsFor,
   staleNoticeFor,
   transformAlerts

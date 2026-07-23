@@ -124,10 +124,88 @@
   }
 
   function enhanceCodeBlocks(root = document) {
-    root.querySelectorAll('.post-body figure.highlight').forEach(enhanceFigure);
+    // NexT owns its generated figure.highlight blocks. Handling only plain
+    // pre/Prism structures here prevents duplicate toolbars after DOMContentLoaded.
     root.querySelectorAll('.post-body pre').forEach(enhancePre);
   }
 
-  document.addEventListener('DOMContentLoaded', () => enhanceCodeBlocks());
-  document.addEventListener('pjax:success', () => enhanceCodeBlocks());
+  let zoomOverlay = null;
+  let zoomImage = null;
+  let zoomCaption = null;
+  let previousZoomFocus = null;
+
+  function closeImageZoom() {
+    if (!zoomOverlay || zoomOverlay.hidden) return;
+    zoomOverlay.classList.remove('is-open');
+    zoomOverlay.hidden = true;
+    document.body.classList.remove('image-zoom-open');
+    if (previousZoomFocus && typeof previousZoomFocus.focus === 'function') previousZoomFocus.focus();
+  }
+
+  function ensureZoomOverlay() {
+    if (zoomOverlay) return;
+    zoomOverlay = document.createElement('div');
+    zoomOverlay.className = 'image-zoom-overlay';
+    zoomOverlay.hidden = true;
+    zoomOverlay.setAttribute('role', 'dialog');
+    zoomOverlay.setAttribute('aria-modal', 'true');
+    zoomOverlay.setAttribute('aria-label', '图片预览');
+    zoomOverlay.innerHTML = `<button class="image-zoom-close" type="button" aria-label="关闭图片预览">×</button>
+      <figure class="image-zoom-figure">
+        <img alt="">
+        <figcaption></figcaption>
+      </figure>`;
+    document.body.appendChild(zoomOverlay);
+    zoomImage = zoomOverlay.querySelector('img');
+    zoomCaption = zoomOverlay.querySelector('figcaption');
+    zoomOverlay.querySelector('.image-zoom-close').addEventListener('click', closeImageZoom);
+    zoomOverlay.addEventListener('click', event => {
+      if (event.target === zoomOverlay) closeImageZoom();
+    });
+  }
+
+  function openImageZoom(sourceImage) {
+    ensureZoomOverlay();
+    previousZoomFocus = document.activeElement;
+    zoomImage.src = sourceImage.currentSrc || sourceImage.src;
+    zoomImage.alt = sourceImage.alt || '';
+    zoomCaption.textContent = sourceImage.alt || '';
+    zoomCaption.hidden = !sourceImage.alt;
+    zoomOverlay.hidden = false;
+    document.body.classList.add('image-zoom-open');
+    requestAnimationFrame(() => zoomOverlay.classList.add('is-open'));
+    zoomOverlay.querySelector('.image-zoom-close').focus();
+  }
+
+  function enhanceImages(root = document) {
+    root.querySelectorAll('.post-body img').forEach(img => {
+      if (!img.hasAttribute('loading')) img.loading = 'lazy';
+      if (!img.hasAttribute('decoding')) img.decoding = 'async';
+      if (img.closest('a') || img.dataset.postImageEnhanced === 'true') return;
+
+      img.classList.add('post-image-zoomable');
+      img.tabIndex = 0;
+      img.setAttribute('role', 'button');
+      img.setAttribute('aria-label', img.alt ? `放大图片：${img.alt}` : '放大图片');
+      img.addEventListener('click', () => openImageZoom(img));
+      img.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openImageZoom(img);
+        }
+      });
+      img.dataset.postImageEnhanced = 'true';
+    });
+  }
+
+  function enhancePost(root = document) {
+    enhanceCodeBlocks(root);
+    enhanceImages(root);
+  }
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && zoomOverlay && !zoomOverlay.hidden) closeImageZoom();
+  });
+  document.addEventListener('DOMContentLoaded', () => enhancePost());
+  document.addEventListener('pjax:success', () => enhancePost());
 })();

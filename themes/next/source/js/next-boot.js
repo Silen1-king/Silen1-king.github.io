@@ -9,12 +9,22 @@ NexT.boot.registerEvents = function() {
   NexT.utils.updateFooterPosition();
 
   // Mobile top menu bar.
-  document.querySelector('.site-nav-toggle .toggle').addEventListener('click', event => {
-    event.currentTarget.classList.toggle('toggle-close');
+  const siteNavToggle = document.querySelector('.site-nav-toggle .toggle');
+  siteNavToggle.addEventListener('click', event => {
+    const isOpen = event.currentTarget.classList.toggle('toggle-close');
+    event.currentTarget.setAttribute('aria-expanded', String(isOpen));
     const siteNav = document.querySelector('.site-nav');
     if (!siteNav) return;
     siteNav.style.setProperty('--scroll-height', siteNav.scrollHeight + 'px');
-    document.body.classList.toggle('site-nav-on');
+    document.body.classList.toggle('site-nav-on', isOpen);
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    if (document.body.classList.contains('site-nav-on')) siteNavToggle.click();
+    if (document.body.classList.contains('sidebar-active')) {
+      window.dispatchEvent(new Event('sidebar:hide'));
+    }
   });
 
   document.querySelectorAll('.sidebar-nav li').forEach((element, index) => {

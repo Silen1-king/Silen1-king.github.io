@@ -3,17 +3,24 @@
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
-  const trigger = document.querySelector('.global-search-trigger');
+  const triggers = [...document.querySelectorAll('[data-open-search]')];
+  const trigger = triggers[0];
   const modal = document.querySelector('.global-search-modal');
   const input = modal && modal.querySelector('.global-search-input');
   const status = modal && modal.querySelector('.global-search-status');
   const results = modal && modal.querySelector('.global-search-results');
   if (!trigger || !modal || !input || !status || !results) return;
 
+  const searchPath = modal.dataset.searchPath || CONFIG.path;
+
   document.body.appendChild(modal);
 
-  const shortcut = trigger.querySelector('kbd');
-  if (shortcut && /Mac|iPhone|iPad/i.test(navigator.platform)) shortcut.textContent = '⌘ K';
+  if (/Mac|iPhone|iPad/i.test(navigator.platform)) {
+    triggers.forEach(element => {
+      const shortcut = element.querySelector('kbd');
+      if (shortcut) shortcut.textContent = '⌘ K';
+    });
+  }
 
   let searchIndex = [];
   let indexPromise = null;
@@ -63,12 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function loadIndex() {
     if (indexPromise) return indexPromise;
-    if (!CONFIG.path) {
+    if (!searchPath) {
       indexPromise = Promise.reject(new Error('未配置本地搜索索引'));
       return indexPromise;
     }
 
-    indexPromise = fetch(CONFIG.path)
+    indexPromise = fetch(searchPath)
       .then(response => {
         if (!response.ok) throw new Error(`搜索索引加载失败（${response.status}）`);
         return response.json();
@@ -231,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
   }
 
-  trigger.addEventListener('click', openSearch);
+  triggers.forEach(element => element.addEventListener('click', openSearch));
   modal.querySelectorAll('[data-search-close]').forEach(element => element.addEventListener('click', closeSearch));
   input.addEventListener('input', () => {
     window.clearTimeout(debounceTimer);
@@ -251,6 +258,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.key === 'Escape') {
       event.preventDefault();
       closeSearch();
+    } else if (event.key === 'Tab') {
+      const focusable = [...modal.querySelectorAll('input, button, a[href]')]
+        .filter(element => !element.hidden && element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       setActiveResult(activeIndex + 1);

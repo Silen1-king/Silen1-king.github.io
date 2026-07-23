@@ -4,11 +4,11 @@
 
 # Site
 title: Silen1Blog
-subtitle: ''
-description: ''
-keywords:
+subtitle: '逆向安全 · AI · 开发实践'
+description: '记录软件逆向、安全研究、人工智能与开发实践的技术学习博客。'
+keywords: 软件逆向, 安全研究, AI, 前端开发, 算法, 技术学习
 author: Silen1-king
-language: en
+language: zh-CN
 timezone: ''
 
 # URL
