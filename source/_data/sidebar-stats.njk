@@ -1,0 +1,24 @@
+{% if blog_stats %}
+{% set stats = blog_stats(site.posts) %}
+<section class="sidebar-tech-stats animated" aria-labelledby="sidebar-tech-stats-title">
+  <h2 id="sidebar-tech-stats-title"><i class="fa fa-chart-bar fa-fw"></i> 知识库概览</h2>
+  <p class="sidebar-stats-summary">
+    已积累 <strong>{{ stats.postCount }}</strong> 篇文章，共计
+    <strong>{{ stats.wordWan }}</strong> 万字，涵盖 {{ stats.domainSummary }} 等领域。
+  </p>
+  {% if stats.topTags.length %}
+    <div class="sidebar-tag-bars">
+      {% for tag in stats.topTags %}
+        <div class="sidebar-tag-row" title="{{ tag.name }}：{{ tag.count }} 篇文章">
+          <div class="sidebar-tag-meta">
+            <span>{{ tag.name }}</span><span>{{ tag.count }}</span>
+          </div>
+          <div class="sidebar-tag-track" aria-hidden="true">
+            <span style="width: {{ tag.percent }}%"></span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endif %}

@@ -1,0 +1,18 @@
+{% if page.related_posts_by_metadata and page.related_posts_by_metadata.length %}
+  <section class="related-posts-section" aria-labelledby="related-posts-title">
+    <div class="related-posts-heading">
+      <span class="related-posts-kicker">RELATED POSTS</span>
+      <h2 id="related-posts-title">继续阅读</h2>
+    </div>
+    <div class="related-posts-grid">
+      {% for related in page.related_posts_by_metadata %}
+        <a class="related-post-card" href="{{ url_for(related.path) }}" rel="bookmark">
+          <span class="related-post-reason">{{ related.reason }}</span>
+          <h3>{{ related.title }}</h3>
+          {% if related.dateLabel %}<time>{{ related.dateLabel }}</time>{% endif %}
+          <span class="related-post-arrow" aria-hidden="true">→</span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}

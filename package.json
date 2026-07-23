@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "build": "hexo generate",
+    "check:posts": "node scripts/check-posts.js",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
+    "new:post": "hexo new post",
     "server": "hexo server"
   },
   "hexo": {
@@ -13,6 +15,7 @@
   },
   "dependencies": {
     "hexo": "^8.0.0",
+    "hexo-front-matter": "^4.2.1",
     "hexo-deployer-git": "^4.0.0",
     "hexo-generator-archive": "^2.0.0",
     "hexo-generator-category": "^2.0.0",
