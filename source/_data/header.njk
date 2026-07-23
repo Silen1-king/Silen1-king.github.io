@@ -29,11 +29,24 @@
 
   <div class="site-nav-right">
     {%- if theme.local_search.enable %}
-      <div class="instant-search-container">
-        <input type="text" class="instant-search-input" placeholder="搜索博客..." autocomplete="off" />
-        <div class="instant-search-results" style="display: none;">
-          <ul class="instant-search-results-list"></ul>
-        </div>
+      <button class="global-search-trigger" type="button" aria-haspopup="dialog" aria-controls="global-search-modal">
+        <i class="fa fa-search" aria-hidden="true"></i><span>搜索</span><kbd>Ctrl K</kbd>
+      </button>
+      <div id="global-search-modal" class="global-search-modal" role="dialog" aria-modal="true" aria-labelledby="global-search-title" aria-hidden="true" hidden>
+        <div class="global-search-backdrop" data-search-close></div>
+        <section class="global-search-panel">
+          <header class="global-search-header">
+            <i class="fa fa-search" aria-hidden="true"></i>
+            <label id="global-search-title" class="global-search-label" for="global-search-input">全站搜索</label>
+            <input id="global-search-input" class="global-search-input" type="search" placeholder="搜索标题、标签、分类和正文…" autocomplete="off" spellcheck="false">
+            <button class="global-search-close" type="button" data-search-close aria-label="关闭搜索">×</button>
+          </header>
+          <div class="global-search-status" role="status" aria-live="polite">输入关键词开始检索</div>
+          <ul class="global-search-results" role="listbox"></ul>
+          <footer class="global-search-footer">
+            <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span><span><kbd>Enter</kbd> 打开</span><span><kbd>Esc</kbd> 关闭</span>
+          </footer>
+        </section>
       </div>
     {%- endif %}
   </div>

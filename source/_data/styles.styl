@@ -165,3 +165,548 @@ blockquote
 
 // --- Instant Search ---
 @import 'instant-search.styl'
+
+// ========== Search Popup Occlusion Fix ==========
+
+// 1. Force parent containers to allow overflow for dropdown visibility
+.header,
+.header-inner,
+.site-brand-container,
+.site-nav {
+    overflow: visible !important;
+}
+
+// 2. Fix search popup z-index and add floating visual enhancement
+.search-popup,
+.local-search-popup,
+.search-result-container {
+    z-index: 9999 !important;
+}
+
+// 3. Fix search input box visibility — increase contrast against header
+.instant-search-input {
+    background: rgba(25, 30, 60, 0.95) !important;
+    border: 2px solid rgba(124, 138, 255, 0.55) !important;
+    box-shadow: 0 0 12px rgba(124, 138, 255, 0.15) !important;
+}
+
+.instant-search-input:focus {
+    border-color: #7c8aff !important;
+    box-shadow: 0 0 24px rgba(124, 138, 255, 0.35) !important;
+    background: rgba(20, 24, 55, 0.98) !important;
+}
+
+// 4. Make search results panel fully opaque (no transparency)
+.instant-search-results {
+    background: rgb(10, 14, 35) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.instant-search-overlay {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+// ========== Learning Paths / Series ==========
+
+.learning-paths-intro
+  margin: 0 0 28px
+  padding: 22px 24px
+  border: 1px solid rgba(124, 138, 255, .22)
+  border-radius: 12px
+  background: rgba(20, 24, 50, .58)
+
+  p
+    margin: 0 0 14px
+    color: #c9cee7
+
+.learning-paths-stats
+  display: flex
+  flex-wrap: wrap
+  gap: 12px
+
+  span
+    padding: 6px 12px
+    border-radius: 999px
+    background: rgba(124, 138, 255, .14)
+    color: #bfc5ee
+    font-size: .9em
+
+  strong
+    color: #a9b2ff
+
+.learning-path-grid
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 22px
+
+.learning-path-card
+  padding: 0 22px 20px
+  overflow: hidden
+  border: 1px solid rgba(124, 138, 255, .2)
+  border-radius: 14px
+  background: linear-gradient(145deg, rgba(24, 29, 61, .9), rgba(13, 17, 40, .82))
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .2)
+  transition: transform .25s ease, border-color .25s ease
+
+  &:hover
+    transform: translateY(-3px)
+    border-color: rgba(124, 138, 255, .5)
+
+.learning-path-card-header
+  display: flex
+  align-items: center
+  gap: 14px
+  margin: 0 -22px 18px
+  padding: 20px 22px
+  border-bottom: 1px solid rgba(124, 138, 255, .16)
+  background: rgba(124, 138, 255, .07)
+
+  h2
+    margin: 0 0 3px
+    color: #e0e4f6
+    font-size: 1.22em
+    line-height: 1.35
+
+.learning-path-card-index
+  flex: 0 0 auto
+  color: #7c8aff
+  font-size: 1.55em
+  font-weight: 700
+  letter-spacing: .04em
+
+.learning-path-card-count
+  color: #8f96b8
+  font-size: .82em
+
+.learning-path-steps
+  margin: 0 !important
+  padding: 0 !important
+  list-style: none !important
+
+.learning-path-step
+  position: relative
+  display: flex
+  gap: 14px
+  padding: 0 0 20px
+
+  &:not(:last-child)::before
+    content: ''
+    position: absolute
+    top: 27px
+    bottom: 1px
+    left: 13px
+    width: 1px
+    background: linear-gradient(rgba(124, 138, 255, .55), rgba(124, 138, 255, .12))
+
+  &:last-child
+    padding-bottom: 0
+
+.learning-path-step-number
+  position: relative
+  z-index: 1
+  display: flex
+  flex: 0 0 28px
+  align-items: center
+  justify-content: center
+  width: 28px
+  height: 28px
+  border: 1px solid rgba(124, 138, 255, .55)
+  border-radius: 50%
+  background: #171c3d
+  color: #aab3ff
+  font-size: .76em
+  font-weight: 700
+
+.learning-path-step-content
+  min-width: 0
+  padding-top: 2px
+
+.learning-path-step-title
+  display: block
+  border: 0 !important
+  color: #cbd0f2 !important
+  font-weight: 600
+  line-height: 1.5
+
+  &:hover
+    color: #a78bfa !important
+
+.learning-path-step-date
+  display: block
+  margin-top: 3px
+  color: #747c9d
+  font-size: .75em
+
+.learning-path-step-description
+  margin: 7px 0 0 !important
+  color: #969dbc
+  font-size: .86em
+  line-height: 1.65
+
+.learning-paths-empty
+  grid-column: 1 / -1
+  padding: 28px
+  text-align: center
+
+@media (max-width: 767px)
+  .learning-path-grid
+    grid-template-columns: 1fr
+
+  .learning-paths-intro
+    padding: 18px
+
+  .learning-path-card
+    padding-right: 18px
+    padding-left: 18px
+
+  .learning-path-card-header
+    margin-right: -18px
+    margin-left: -18px
+    padding-right: 18px
+    padding-left: 18px
+
+// ========== Article Rendering Enhancements ==========
+
+// GitHub / Obsidian-style Markdown alerts.
+.markdown-alert
+  --alert-color: #7c8aff
+  margin: 24px 0
+  padding: 16px 18px
+  border: 1px solid rgba(124, 138, 255, .28)
+  border-left: 4px solid var(--alert-color)
+  border-radius: 10px
+  background: rgba(20, 24, 50, .7)
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .14)
+
+  p
+    margin: 8px 0
+
+  .markdown-alert-title
+    display: flex
+    align-items: center
+    gap: 8px
+    margin: 0 0 8px
+    color: var(--alert-color)
+    font-weight: 700
+
+  .markdown-alert-body > :first-child
+    margin-top: 0
+
+  .markdown-alert-body > :last-child
+    margin-bottom: 0
+
+.markdown-alert-note
+  --alert-color: #74a7ff
+
+.markdown-alert-tip
+  --alert-color: #58d6a7
+
+.markdown-alert-important
+  --alert-color: #a78bfa
+
+.markdown-alert-warning
+  --alert-color: #f6bd60
+
+.markdown-alert-caution
+  --alert-color: #ff758f
+
+// Old-article freshness notice.
+.post-stale-notice
+  display: flex
+  align-items: flex-start
+  gap: 12px
+  margin: 0 0 26px
+  padding: 15px 18px
+  border: 1px solid rgba(246, 189, 96, .42)
+  border-radius: 10px
+  background: linear-gradient(135deg, rgba(246, 189, 96, .14), rgba(255, 117, 143, .07))
+  color: #e7d6ad
+
+  p
+    margin: 0
+    line-height: 1.7
+
+.post-stale-notice-icon
+  flex: 0 0 auto
+  font-size: 1.18em
+
+// Fallback toolbar for plain pre/code and Prism output.
+.post-code-container
+  position: relative
+  margin: 20px 0
+  overflow: hidden
+  border-radius: 6px
+
+  > pre
+    margin: 0 !important
+    padding-top: 38px !important
+
+.post-copy-btn
+  border: 0
+  font: inherit
+  cursor: pointer
+
+.post-body .code-lang
+  max-width: calc(100% - 54px)
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+// Metadata-based related posts at the end of each article.
+.related-posts-section
+  margin-top: 52px
+  padding-top: 30px
+  border-top: 1px solid rgba(124, 138, 255, .2)
+
+.related-posts-heading
+  margin-bottom: 18px
+
+  h2
+    margin: 3px 0 0
+    color: #e1e5f5
+    font-size: 1.35em
+
+.related-posts-kicker
+  color: #7c8aff
+  font-size: .72em
+  font-weight: 700
+  letter-spacing: .14em
+
+.related-posts-grid
+  display: grid
+  grid-template-columns: repeat(3, minmax(0, 1fr))
+  gap: 14px
+
+.related-post-card
+  position: relative
+  display: flex
+  min-width: 0
+  min-height: 145px
+  flex-direction: column
+  padding: 17px
+  border: 1px solid rgba(124, 138, 255, .2) !important
+  border-radius: 11px
+  background: linear-gradient(145deg, rgba(25, 30, 62, .82), rgba(14, 18, 42, .78))
+  color: #cdd2ed !important
+  text-decoration: none
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease
+
+  &:hover
+    transform: translateY(-3px)
+    border-color: rgba(124, 138, 255, .52) !important
+    box-shadow: 0 12px 26px rgba(0, 0, 0, .2)
+
+  h3
+    margin: 9px 0 12px
+    color: #dce0f4
+    font-size: .98em
+    line-height: 1.55
+
+  time
+    margin-top: auto
+    color: #757d9e
+    font-size: .74em
+
+.related-post-reason
+  overflow: hidden
+  color: #929af0
+  font-size: .72em
+  line-height: 1.45
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.related-post-arrow
+  position: absolute
+  right: 15px
+  bottom: 13px
+  color: #7c8aff
+
+@media (max-width: 900px)
+  .related-posts-grid
+    grid-template-columns: 1fr
+
+  .related-post-card
+    min-height: 120px
+
+@media (max-width: 767px)
+  .markdown-alert, .post-stale-notice
+    padding: 14px
+
+  .related-posts-section
+    margin-top: 40px
+
+// ========== Archive Accordion & Blog Stats ==========
+
+.archive-accordion .archive-block
+  padding: 30px
+
+.archive-page-header
+  margin-bottom: 28px
+  text-align: center
+
+  h1
+    margin: 4px 0 8px
+    color: #e2e6f5
+
+  p
+    margin: 0
+    color: #858dab
+
+.archive-page-kicker
+  color: #7c8aff
+  font-size: .74em
+  font-weight: 700
+  letter-spacing: .16em
+
+.archive-tree
+  display: grid
+  gap: 16px
+
+.archive-year,
+.archive-month
+  overflow: hidden
+  border: 1px solid rgba(124, 138, 255, .2)
+  border-radius: 12px
+  background: rgba(17, 21, 46, .68)
+
+  > summary
+    display: flex
+    align-items: center
+    justify-content: space-between
+    cursor: pointer
+    list-style: none
+
+    &::-webkit-details-marker
+      display: none
+
+    &::after
+      content: '+'
+      width: 25px
+      margin-left: 12px
+      color: #7c8aff
+      font-size: 1.2em
+      text-align: center
+      transition: transform .2s ease
+
+  &[open] > summary::after
+    transform: rotate(45deg)
+
+.archive-year > summary
+  padding: 18px 20px
+  background: linear-gradient(90deg, rgba(124, 138, 255, .14), rgba(124, 138, 255, .03))
+
+.archive-year-name
+  margin-right: auto
+  color: #dfe3f5
+  font-size: 1.35em
+  font-weight: 700
+
+.archive-panel-count
+  color: #8189aa
+  font-size: .8em
+
+.archive-months
+  display: grid
+  gap: 10px
+  padding: 14px
+
+.archive-month
+  border-radius: 9px
+  background: rgba(10, 14, 34, .56)
+
+  > summary
+    padding: 12px 15px
+
+.archive-month-name
+  margin-right: auto
+  color: #bfc5e3
+  font-weight: 600
+
+.archive-post-list
+  margin: 0 !important
+  padding: 0 16px 12px !important
+  list-style: none !important
+
+  li
+    display: grid
+    grid-template-columns: 58px minmax(0, 1fr)
+    gap: 12px
+    align-items: baseline
+    padding: 10px 4px
+    border-top: 1px solid rgba(124, 138, 255, .1)
+
+  time
+    color: #747c9e
+    font-size: .78em
+    font-variant-numeric: tabular-nums
+
+  a
+    overflow: hidden
+    color: #c6cbe7 !important
+    text-overflow: ellipsis
+    white-space: nowrap
+
+    &:hover
+      color: #a78bfa !important
+
+.sidebar-tech-stats
+  margin: 22px 12px 0
+  padding: 16px
+  border: 1px solid rgba(124, 138, 255, .2)
+  border-radius: 11px
+  background: rgba(20, 24, 50, .5)
+  text-align: left
+
+  h2
+    margin: 0 0 10px
+    color: #cfd4eb
+    font-size: .94em
+
+.sidebar-stats-summary
+  margin: 0 0 15px
+  color: #9299b9
+  font-size: .78em
+  line-height: 1.65
+
+  strong
+    color: #aeb6ff
+
+.sidebar-tag-bars
+  display: grid
+  gap: 9px
+
+.sidebar-tag-meta
+  display: flex
+  justify-content: space-between
+  margin-bottom: 4px
+  color: #9da4c4
+  font-size: .7em
+
+.sidebar-tag-track
+  height: 5px
+  overflow: hidden
+  border-radius: 999px
+  background: rgba(124, 138, 255, .11)
+
+  span
+    display: block
+    height: 100%
+    border-radius: inherit
+    background: linear-gradient(90deg, #6e7df0, #a78bfa)
+
+@media (max-width: 767px)
+  .archive-accordion .archive-block
+    padding: 20px 14px
+
+  .archive-year > summary
+    padding: 15px
+
+  .archive-months
+    padding: 10px
+
+  .archive-post-list li
+    grid-template-columns: 48px minmax(0, 1fr)
+    gap: 8px
