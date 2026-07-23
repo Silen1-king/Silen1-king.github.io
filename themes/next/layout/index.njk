@@ -7,6 +7,39 @@
 
 {% block content %}
 
+  <section class="home-hero" aria-labelledby="home-hero-title">
+    <div class="home-hero-copy">
+      <span class="home-hero-kicker">可检索的技术学习知识库</span>
+      <h1 id="home-hero-title">把逆向、安全与 AI 的学习过程，整理成可复用的路线</h1>
+      <p>这里记录软件逆向、安全研究、人工智能与开发实践。你可以从专题路线开始，也可以直接检索 {{ site.posts.length }} 篇学习笔记。</p>
+      <div class="home-hero-actions">
+        <button class="home-hero-search" type="button" data-open-search>
+          <i class="fa fa-search" aria-hidden="true"></i>
+          搜索全部文章
+          <kbd>Ctrl K</kbd>
+        </button>
+        <a class="home-hero-primary" href="{{ url_for('/learning-paths/') }}">
+          浏览学习路线 <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+    <nav class="home-hero-map" aria-label="快速开始">
+      <a href="{{ url_for('/learning-paths/') }}">
+        <span>01</span><strong>学习路线</strong><small>按系列循序阅读</small>
+      </a>
+      <a href="{{ url_for('/tags/') }}">
+        <span>02</span><strong>主题标签</strong><small>按技术方向筛选</small>
+      </a>
+      <a href="{{ url_for('/archives/') }}">
+        <span>03</span><strong>时间归档</strong><small>查看全部积累</small>
+      </a>
+    </nav>
+  </section>
+
+  <div class="home-latest-heading" aria-hidden="true">
+    <span>LATEST NOTES</span><strong>最近更新</strong>
+  </div>
+
   {%- for post in page.posts.toArray() %}
     {{ partial('_macro/post.njk', {post: post, is_index: true}) }}
   {%- endfor %}

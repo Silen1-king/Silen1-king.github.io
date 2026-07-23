@@ -194,11 +194,11 @@ toc:
   # Automatically add list number to toc.
   number: true
   # If true, all words will placed on next lines if header width longer then sidebar width.
-  wrap: false
+  wrap: true
   # If true, all level of TOC in a post will be displayed, rather than the activated part of it.
   expand_all: false
   # Maximum heading depth of generated toc.
-  max_depth: 6
+  max_depth: 4
 
 
 # ---------------------------------------------------------------
@@ -354,7 +354,7 @@ text_align:
   mobile: justify
 
 # Reduce padding / margin indents on devices with narrow width.
-mobile_layout_economy: false
+mobile_layout_economy: true
 
 # Browser header panel color.
 theme_color:
@@ -372,10 +372,12 @@ codeblock:
   # Code Highlight theme
   # All available themes: https://theme-next.js.org/highlight/
   theme:
-    light: default
+    # The site uses a permanently dark starry surface, so both OS modes need
+    # a syntax palette designed for a dark code background.
+    light: stackoverflow-dark
     dark: stackoverflow-dark
   prism:
-    light: prism
+    light: prism-dark
     dark: prism-dark
   # Add copy button on codeblock
   copy_button:
@@ -398,7 +400,7 @@ back2top:
 
 # Reading progress bar
 reading_progress:
-  enable: false
+  enable: true
   # Available values: left | right
   start_at: left
   # Available values: top | bottom
@@ -635,7 +637,8 @@ quicklink:
 # Use Animate.css to animate everything.
 # For more information: https://animate.style
 motion:
-  enable: true
+  # Avoid hiding the whole page while the external animation runtime loads.
+  enable: false
   async: false
   duration: 200
   transition:
@@ -850,13 +853,14 @@ algolia_search:
 # Local Search
 # Dependencies: https://github.com/next-theme/hexo-generator-searchdb
 local_search:
-  enable: true
+  # Search is provided by the local, dependency-free modal in source/js.
+  enable: false
   # Show top n results per article, show all results by setting to -1
   top_n_per_article: 1
   # Unescape html strings to the readable one.
   unescape: false
   # Preload the search data when the page loads.
-  preload: true
+  preload: false
 
 
 # ---------------------------------------------------------------

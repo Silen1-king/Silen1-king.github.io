@@ -117,8 +117,8 @@
 }
 
 .global-search-close {
-  width: 31px;
-  height: 31px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 1px solid rgba(124, 138, 255, .2);
   border-radius: 8px;
@@ -299,13 +299,26 @@ body.global-search-open {
   }
 
   .global-search-modal {
-    padding: 10px;
+    padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));
   }
 
   .global-search-panel {
     width: 100%;
-    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
     border-radius: 13px;
+  }
+
+  .global-search-header {
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .global-search-input {
+    font-size: 16px;
+  }
+
+  .global-search-result-link {
+    padding: 13px 38px 13px 12px;
   }
 
   .global-search-footer {

@@ -4,18 +4,31 @@
   const canvas = document.getElementById('stars-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   let stars = [];
   let shootingStars = [];
-  let w, h;
+  let w = 0;
+  let h = 0;
+  let frameId = 0;
+  let spawnTimer = 0;
+  let lastFrame = 0;
 
   function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
+    w = window.innerWidth;
+    h = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    initStars();
+    drawScene();
   }
 
   function initStars() {
     stars = [];
-    const count = Math.floor((w * h) / 3000);
+    const count = Math.min(160, Math.max(36, Math.floor((w * h) / 9000)));
     for (let i = 0; i < count; i++) {
       stars.push({
         x: Math.random() * w,
@@ -39,20 +52,20 @@
     });
   }
 
-  function draw() {
+  function drawScene() {
     ctx.clearRect(0, 0, w, h);
 
-    // Draw static stars
     for (const s of stars) {
-      s.alpha += s.dAlpha;
-      if (s.alpha > 1 || s.alpha < 0.1) s.dAlpha = -s.dAlpha;
+      if (!motionQuery.matches) {
+        s.alpha += s.dAlpha;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dAlpha = -s.dAlpha;
+      }
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(200, 210, 255, ${s.alpha})`;
       ctx.fill();
     }
 
-    // Draw shooting stars
     for (let i = shootingStars.length - 1; i >= 0; i--) {
       const ss = shootingStars[i];
       const dx = Math.cos(ss.angle) * ss.len;
@@ -78,22 +91,41 @@
       }
     }
 
-    requestAnimationFrame(draw);
+  }
+
+  function animate(now) {
+    frameId = requestAnimationFrame(animate);
+    if (document.hidden || now - lastFrame < 33) return;
+    lastFrame = now;
+    drawScene();
+  }
+
+  function stopAnimation() {
+    if (frameId) cancelAnimationFrame(frameId);
+    frameId = 0;
+    if (spawnTimer) window.clearInterval(spawnTimer);
+    spawnTimer = 0;
+  }
+
+  function startAnimation() {
+    stopAnimation();
+    if (motionQuery.matches || document.hidden) {
+      drawScene();
+      return;
+    }
+    frameId = requestAnimationFrame(animate);
+    spawnTimer = window.setInterval(() => {
+      if (!document.hidden && Math.random() < 0.7) spawnShootingStar();
+    }, 5000);
   }
 
   resize();
-  initStars();
-  draw();
-
+  startAnimation();
   window.addEventListener('resize', () => {
-    resize();
-    initStars();
+    window.requestAnimationFrame(resize);
   });
-
-  // Spawn a shooting star every 3-8 seconds
-  setInterval(() => {
-    if (Math.random() < 0.7) spawnShootingStar();
-  }, 4000);
+  document.addEventListener('visibilitychange', startAnimation);
+  motionQuery.addEventListener?.('change', startAnimation);
 })();
 </script>
 

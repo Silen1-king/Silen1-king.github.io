@@ -1,12 +1,12 @@
 <div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="{{ __('accessibility.nav_toggle') }}" role="button">
+    <button class="toggle" type="button" aria-label="{{ __('accessibility.nav_toggle') }}" aria-controls="site-nav" aria-expanded="false">
       {%- if theme.menu %}
         <span class="toggle-line"></span>
         <span class="toggle-line"></span>
         <span class="toggle-line"></span>
       {%- endif %}
-    </div>
+    </button>
   </div>
 
   <div class="site-meta">
@@ -16,7 +16,7 @@
 
     <a href="{{ config.root }}" class="brand" rel="start">
       <i class="logo-line"></i>
-      <{% if is_home() or is_archive() %}h1{% else %}p{% endif %} class="site-title">{{ title }}</{% if is_home() or is_archive() %}h1{% else %}p{% endif %}>
+      <p class="site-title">{{ title }}</p>
       <i class="logo-line"></i>
     </a>
     {%- if subtitle %}
@@ -28,11 +28,11 @@
   </div>
 
   <div class="site-nav-right">
-    {%- if theme.local_search.enable %}
-      <button class="global-search-trigger" type="button" aria-haspopup="dialog" aria-controls="global-search-modal">
+    {%- if config.search and config.search.path %}
+      <button class="global-search-trigger" type="button" data-open-search aria-haspopup="dialog" aria-controls="global-search-modal">
         <i class="fa fa-search" aria-hidden="true"></i><span>搜索</span><kbd>Ctrl K</kbd>
       </button>
-      <div id="global-search-modal" class="global-search-modal" role="dialog" aria-modal="true" aria-labelledby="global-search-title" aria-hidden="true" hidden>
+      <div id="global-search-modal" class="global-search-modal" data-search-path="{{ url_for(config.search.path) }}" role="dialog" aria-modal="true" aria-labelledby="global-search-title" aria-hidden="true" hidden>
         <div class="global-search-backdrop" data-search-close></div>
         <section class="global-search-panel">
           <header class="global-search-header">
@@ -47,12 +47,6 @@
             <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span><span><kbd>Enter</kbd> 打开</span><span><kbd>Esc</kbd> 关闭</span>
           </footer>
         </section>
-      </div>
-    {%- else %}
-      <div class="toggle popup-trigger" aria-label="{{ __('menu.search') }}" role="button">
-        {%- if theme.algolia_search.enable or theme.local_search.enable %}
-          <i class="fa fa-search fa-fw fa-lg"></i>
-        {%- endif %}
       </div>
     {%- endif %}
   </div>

@@ -3,6 +3,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   const isRight = CONFIG.sidebar.position === 'right';
+  const sidebarToggle = document.querySelector('.sidebar-toggle');
+  const sidebarLabel = CONFIG.isPost ? '目录' : '导航';
+  sidebarToggle.dataset.label = sidebarLabel;
+  sidebarToggle.setAttribute('aria-label', `打开${sidebarLabel}`);
 
   const sidebarToggleMotion = {
     mouse: {},
@@ -10,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.addEventListener('mousedown', this.mousedownHandler.bind(this));
       window.addEventListener('mouseup', this.mouseupHandler.bind(this));
       document.querySelector('.sidebar-dimmer').addEventListener('click', this.clickHandler.bind(this));
-      document.querySelector('.sidebar-toggle').addEventListener('click', this.clickHandler.bind(this));
+      sidebarToggle.addEventListener('click', this.clickHandler.bind(this));
       window.addEventListener('sidebar:show', this.showSidebar);
       window.addEventListener('sidebar:hide', this.hideSidebar);
     },
@@ -32,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     showSidebar() {
       document.body.classList.add('sidebar-active');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+      sidebarToggle.setAttribute('aria-label', `关闭${sidebarToggle.dataset.label || '侧栏'}`);
       const animateAction = isRight ? 'fadeInRight' : 'fadeInLeft';
       document.querySelectorAll('.sidebar .animated').forEach((element, index) => {
         element.style.animationDelay = (100 * index) + 'ms';
@@ -44,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     hideSidebar() {
       document.body.classList.remove('sidebar-active');
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute('aria-label', `打开${sidebarToggle.dataset.label || '侧栏'}`);
     }
   };
   sidebarToggleMotion.init();
