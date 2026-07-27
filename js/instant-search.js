@@ -1,217 +1,287 @@
-/* global CONFIG, LocalSearch */
+/* global CONFIG */
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!CONFIG.path) {
-    console.warn('`hexo-generator-searchdb` plugin is not installed!');
-    return;
-  }
+  'use strict';
 
-  const localSearch = new LocalSearch({
-    path             : CONFIG.path,
-    top_n_per_article: 1,
-    unescape         : false
-  });
+  const triggers = [...document.querySelectorAll('[data-open-search]')];
+  const trigger = triggers[0];
+  const modal = document.querySelector('.global-search-modal');
+  const input = modal && modal.querySelector('.global-search-input');
+  const status = modal && modal.querySelector('.global-search-status');
+  const results = modal && modal.querySelector('.global-search-results');
+  if (!trigger || !modal || !input || !status || !results) return;
 
-  const searchInput = document.querySelector('.instant-search-input');
-  const resultsContainer = document.querySelector('.instant-search-results');
-  const resultsList = document.querySelector('.instant-search-results-list');
+  const searchPath = modal.dataset.searchPath || CONFIG.path;
 
-  if (!searchInput || !resultsContainer || !resultsList) {
-    console.warn('Instant search elements not found!');
-    return;
-  }
+  document.body.appendChild(modal);
 
-  // 将结果容器移到 body 下，脱离 header 的层叠上下文
-  document.body.appendChild(resultsContainer);
-
-  // 检测 popover API 支持（顶层渲染，始终在所有图层之上）
-  const supportsPopover = typeof HTMLElement.prototype.showPopover === 'function';
-
-  let overlay = null;
-
-  // 不支持 popover 时创建背景遮罩作为降级方案
-  if (!supportsPopover) {
-    overlay = document.createElement('div');
-    overlay.className = 'instant-search-overlay';
-    document.body.appendChild(overlay);
-  }
-
-  // 动态计算下拉面板位置：紧贴 header 底部，居中展示
-  const updateResultsPosition = () => {
-    const header = document.querySelector('.header');
-    if (!header) return;
-    const headerBottom = header.getBoundingClientRect().bottom;
-    // 16px 间距确保面板与 header 视觉分离；最小 top 60px 防止滚动后贴顶
-    resultsContainer.style.top = Math.max(headerBottom + 16, 60) + 'px';
-  };
-
-  // 显示搜索结果
-  const showResults = () => {
-    updateResultsPosition(); // 每次打开前更新位置
-    if (supportsPopover) {
-      if (!resultsContainer.matches(':popover-open')) {
-        resultsContainer.showPopover();
-      }
-    } else {
-      // 降级方案：确保定位和层级通过内联样式强制生效
-      resultsContainer.style.position = 'fixed';
-      resultsContainer.style.zIndex = '2147483647';
-      resultsContainer.style.display = 'block';
-      if (overlay) overlay.style.display = 'block';
-    }
-    document.body.style.overflow = 'hidden';
-  };
-
-  // 隐藏搜索结果
-  const hideResults = () => {
-    if (supportsPopover) {
-      if (resultsContainer.matches(':popover-open')) {
-        resultsContainer.hidePopover();
-      }
-    } else {
-      resultsContainer.style.display = 'none';
-      if (overlay) overlay.style.display = 'none';
-    }
-    document.body.style.overflow = '';
-  };
-
-  // popover 通过 light-dismiss（点击外部/ESC）关闭时，同步清理 body overflow
-  if (supportsPopover) {
-    resultsContainer.addEventListener('toggle', (event) => {
-      if (event.newState === 'closed') {
-        document.body.style.overflow = '';
-      }
+  if (/Mac|iPhone|iPad/i.test(navigator.platform)) {
+    triggers.forEach(element => {
+      const shortcut = element.querySelector('kbd');
+      if (shortcut) shortcut.textContent = '⌘ K';
     });
   }
 
-  // 窗口大小变化时重新计算位置
-  let resizeTimeout = null;
-  window.addEventListener('resize', () => {
-    const isVisible = supportsPopover
-      ? resultsContainer.matches(':popover-open')
-      : resultsContainer.style.display === 'block';
-    if (!isVisible) return;
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(updateResultsPosition, 100);
-  });
+  let searchIndex = [];
+  let indexPromise = null;
+  let activeIndex = -1;
+  let previousFocus = null;
+  let debounceTimer = null;
 
-  // 页面滚动时：header 滚出视口则自动关闭面板
-  let scrollTimeout = null;
-  window.addEventListener('scroll', () => {
-    const isVisible = supportsPopover
-      ? resultsContainer.matches(':popover-open')
-      : resultsContainer.style.display === 'block';
-    if (!isVisible) return;
-
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      const header = document.querySelector('.header');
-      if (!header) return;
-      // header 完全滚出屏幕 → 关闭搜索结果（用户在看内容，不需要搜索了）
-      if (header.getBoundingClientRect().bottom <= 0) {
-        hideResults();
-        return;
-      }
-      updateResultsPosition();
-    }, 50);
-  }, { passive: true });
-
-  let searchTimeout = null;
-
-  // 即时搜索函数
-  const performSearch = () => {
-    const searchText = searchInput.value.trim().toLowerCase();
-
-    if (!searchText || searchText.length < 1) {
-      hideResults();
-      return;
-    }
-
-    if (!localSearch.isfetched) {
-      showResults();
-      resultsList.innerHTML = '<li class="instant-search-no-results"><i class="fa fa-spinner fa-pulse"></i> 加载中...</li>';
-      localSearch.fetchData();
-      return;
-    }
-
-    const keywords = searchText.split(/[-\s]+/);
-    const resultItems = localSearch.getResultItems(keywords);
-
-    if (resultItems.length === 0) {
-      showResults();
-      resultsList.innerHTML = '<li class="instant-search-no-results"><i class="far fa-frown"></i> 没有找到相关文章</li>';
-      return;
-    }
-
-    // 按匹配度排序
-    resultItems.sort((left, right) => {
-      if (left.includedCount !== right.includedCount) {
-        return right.includedCount - left.includedCount;
-      } else if (left.hitCount !== right.hitCount) {
-        return right.hitCount - left.hitCount;
-      }
-      return right.id - left.id;
-    });
-
-    // 限制显示结果数量
-    const maxResults = 20;
-    const displayResults = resultItems.slice(0, maxResults);
-
-    // 生成结果HTML
-    const resultHeader = '<li class="instant-search-results-header">找到 ' + displayResults.length + ' 篇相关文章</li>';
-
-    resultsList.innerHTML = resultHeader + displayResults.map(result => {
-      // 从原始结果项中提取标题和URL
-      const linkMatch = result.item.match(/<a href="([^"]+)" class="search-result-title">([^<]+)<\/a>/);
-      if (!linkMatch) return '';
-
-      const url = linkMatch[1];
-      const title = linkMatch[2];
-
-      // 提取内容摘要
-      const contentMatch = result.item.match(/<p class="search-result">([^<]+)<\/p>/);
-      const content = contentMatch ? contentMatch[1] : '';
-
-      return '<li>' +
-        '<a href="' + url + '" class="search-result-title">' + title + '</a>' +
-        '<a href="' + url + '"><p class="search-result">' + content + '</p></a>' +
-        '</li>';
-    }).join('');
-
-    showResults();
-  };
-
-  // 输入事件监听（带防抖）
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(performSearch, 300);
-  });
-
-  // 获得焦点时如果有内容则显示结果
-  searchInput.addEventListener('focus', () => {
-    if (searchInput.value.trim()) {
-      performSearch();
-    }
-  });
-
-  // 点击遮罩关闭（仅降级方案需要，popover 自带 light-dismiss）
-  if (!supportsPopover && overlay) {
-    overlay.addEventListener('click', hideResults);
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
-  // ESC键关闭（popover 自带 light-dismiss 处理 ESC，此处为降级 + blur 补充）
-  document.addEventListener('keydown', (event) => {
+  function decodeHtml(value) {
+    const element = document.createElement('div');
+    element.innerHTML = String(value ?? '');
+    return (element.textContent || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function normalizeList(value) {
+    const list = Array.isArray(value) ? value : (value ? [value] : []);
+    return list.map(item => decodeHtml(item)).filter(Boolean);
+  }
+
+  function normalizeRecord(record) {
+    const title = decodeHtml(record.title || '未命名文章');
+    const tags = normalizeList(record.tags);
+    const categories = normalizeList(record.categories);
+    const content = decodeHtml(record.content);
+    return {
+      title,
+      tags,
+      categories,
+      content,
+      url: record.url || '#',
+      normalized: {
+        title: title.toLocaleLowerCase('zh-CN'),
+        tags: tags.join(' ').toLocaleLowerCase('zh-CN'),
+        categories: categories.join(' ').toLocaleLowerCase('zh-CN'),
+        content: content.toLocaleLowerCase('zh-CN')
+      }
+    };
+  }
+
+  function loadIndex() {
+    if (indexPromise) return indexPromise;
+    if (!searchPath) {
+      indexPromise = Promise.reject(new Error('未配置本地搜索索引'));
+      return indexPromise;
+    }
+
+    indexPromise = fetch(searchPath)
+      .then(response => {
+        if (!response.ok) throw new Error(`搜索索引加载失败（${response.status}）`);
+        return response.json();
+      })
+      .then(data => {
+        searchIndex = (Array.isArray(data) ? data : []).map(normalizeRecord);
+        return searchIndex;
+      });
+    return indexPromise;
+  }
+
+  function tokenized(query) {
+    return [...new Set(query
+      .trim()
+      .toLocaleLowerCase('zh-CN')
+      .split(/[\s\-_/]+/)
+      .filter(Boolean))];
+  }
+
+  function occurrenceCount(text, keyword) {
+    let count = 0;
+    let position = 0;
+    while ((position = text.indexOf(keyword, position)) !== -1) {
+      count += 1;
+      position += Math.max(keyword.length, 1);
+    }
+    return count;
+  }
+
+  function scoreRecord(record, keywords) {
+    let score = 0;
+    for (const keyword of keywords) {
+      const titleHits = occurrenceCount(record.normalized.title, keyword);
+      const tagHits = occurrenceCount(record.normalized.tags, keyword);
+      const categoryHits = occurrenceCount(record.normalized.categories, keyword);
+      const contentHits = occurrenceCount(record.normalized.content, keyword);
+      if (titleHits + tagHits + categoryHits + contentHits === 0) return 0;
+      score += titleHits * 12 + tagHits * 8 + categoryHits * 6 + Math.min(contentHits, 8);
+    }
+    return score;
+  }
+
+  function regexEscape(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function highlight(text, keywords) {
+    if (!text || keywords.length === 0) return escapeHtml(text);
+    const pattern = new RegExp(`(${keywords.map(regexEscape).sort((a, b) => b.length - a.length).join('|')})`, 'gi');
+    return String(text).split(pattern).map((part, index) =>
+      index % 2 ? `<mark>${escapeHtml(part)}</mark>` : escapeHtml(part)
+    ).join('');
+  }
+
+  function snippetFor(record, keywords) {
+    const lowerContent = record.normalized.content;
+    const positions = keywords.map(keyword => lowerContent.indexOf(keyword)).filter(index => index >= 0);
+    if (positions.length === 0) return record.content.slice(0, 210);
+    const matchAt = Math.min(...positions);
+    const start = Math.max(0, matchAt - 70);
+    const end = Math.min(record.content.length, start + 230);
+    return `${start > 0 ? '…' : ''}${record.content.slice(start, end)}${end < record.content.length ? '…' : ''}`;
+  }
+
+  function resultMarkup(record, keywords) {
+    const metadata = [
+      ...record.tags.slice(0, 3).map(tag => ({ type: '标签', value: tag })),
+      ...record.categories.slice(0, 2).map(category => ({ type: '分类', value: category }))
+    ];
+    return `<li class="global-search-result" role="option">
+      <a class="global-search-result-link" href="${escapeHtml(record.url)}">
+        <h3>${highlight(record.title, keywords)}</h3>
+        ${metadata.length ? `<div class="global-search-result-meta">${metadata.map(item =>
+          `<span><small>${item.type}</small>${highlight(item.value, keywords)}</span>`
+        ).join('')}</div>` : ''}
+        <p>${highlight(snippetFor(record, keywords), keywords)}</p>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+      </a>
+    </li>`;
+  }
+
+  function setActiveResult(index) {
+    const links = [...results.querySelectorAll('.global-search-result-link')];
+    if (links.length === 0) {
+      activeIndex = -1;
+      return;
+    }
+    activeIndex = (index + links.length) % links.length;
+    links.forEach((link, linkIndex) => {
+      const active = linkIndex === activeIndex;
+      link.parentElement.classList.toggle('is-active', active);
+      link.parentElement.setAttribute('aria-selected', String(active));
+      if (active) link.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function renderSearch() {
+    const keywords = tokenized(input.value);
+    activeIndex = -1;
+    if (keywords.length === 0) {
+      status.textContent = `已索引 ${searchIndex.length} 篇文章，请输入关键词`;
+      results.innerHTML = '<li class="global-search-empty"><i class="fa fa-keyboard" aria-hidden="true"></i><p>可搜索文章标题、标签、分类和全部正文</p></li>';
+      return;
+    }
+
+    const matched = searchIndex
+      .map(record => ({ record, score: scoreRecord(record, keywords) }))
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score || a.record.title.localeCompare(b.record.title, 'zh-CN'))
+      .slice(0, 20);
+
+    status.textContent = `找到 ${matched.length} 篇匹配文章`;
+    if (matched.length === 0) {
+      results.innerHTML = `<li class="global-search-empty"><i class="far fa-frown" aria-hidden="true"></i><p>没有找到“${escapeHtml(input.value.trim())}”</p></li>`;
+      return;
+    }
+    results.innerHTML = matched.map(item => resultMarkup(item.record, keywords)).join('');
+    setActiveResult(0);
+  }
+
+  async function ensureIndexAndRender() {
+    if (searchIndex.length > 0) {
+      renderSearch();
+      return;
+    }
+    status.textContent = '正在加载本地搜索索引…';
+    results.innerHTML = '<li class="global-search-empty"><i class="fa fa-spinner fa-pulse" aria-hidden="true"></i></li>';
+    try {
+      await loadIndex();
+      renderSearch();
+    } catch (error) {
+      status.textContent = '搜索暂不可用';
+      results.innerHTML = `<li class="global-search-empty"><p>${escapeHtml(error.message)}</p></li>`;
+    }
+  }
+
+  function isOpen() {
+    return !modal.hidden;
+  }
+
+  function openSearch() {
+    if (!isOpen()) {
+      previousFocus = document.activeElement;
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('global-search-open');
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+    }
+    input.focus();
+    input.select();
+    ensureIndexAndRender();
+  }
+
+  function closeSearch() {
+    if (!isOpen()) return;
+    modal.classList.remove('is-open');
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('global-search-open');
+    if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+  }
+
+  triggers.forEach(element => element.addEventListener('click', openSearch));
+  modal.querySelectorAll('[data-search-close]').forEach(element => element.addEventListener('click', closeSearch));
+  input.addEventListener('input', () => {
+    window.clearTimeout(debounceTimer);
+    debounceTimer = window.setTimeout(ensureIndexAndRender, 100);
+  });
+  results.addEventListener('click', event => {
+    if (event.target.closest('.global-search-result-link')) closeSearch();
+  });
+
+  document.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase() === 'k') {
+      event.preventDefault();
+      openSearch();
+      return;
+    }
+    if (!isOpen()) return;
     if (event.key === 'Escape') {
-      hideResults();
-      searchInput.blur();
+      event.preventDefault();
+      closeSearch();
+    } else if (event.key === 'Tab') {
+      const focusable = [...modal.querySelectorAll('input, button, a[href]')]
+        .filter(element => !element.hidden && element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setActiveResult(activeIndex + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setActiveResult(activeIndex - 1);
+    } else if (event.key === 'Enter' && activeIndex >= 0) {
+      const activeLink = results.querySelectorAll('.global-search-result-link')[activeIndex];
+      if (activeLink) activeLink.click();
     }
   });
 
-  // 搜索数据加载完成后重新搜索
-  window.addEventListener('search:loaded', performSearch);
-
-  // 预加载搜索数据
-  if (CONFIG.localsearch.preload) {
-    localSearch.fetchData();
-  }
+  if (CONFIG.localsearch && CONFIG.localsearch.preload) loadIndex().catch(() => {});
 });
