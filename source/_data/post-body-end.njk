@@ -16,3 +16,34 @@
     </div>
   </section>
 {% endif %}
+
+{% if page.comments %}
+  <section class="post-community" aria-labelledby="post-community-title">
+    <div class="post-community-heading">
+      <div>
+        <span class="post-community-kicker">DISCUSSION</span>
+        <h2 id="post-community-title">评论与勘误</h2>
+      </div>
+      <a class="post-error-report" href="https://github.com/Silen1-king/Silen1-king.github.io/issues/new?title={{ ('文章勘误：' + page.title) | urlencode }}&body={{ ('文章地址：' + page.permalink + '\n\n问题描述：\n') | urlencode }}" target="_blank" rel="noopener">
+        <i class="fa fa-bug" aria-hidden="true"></i> 报告错误
+      </a>
+    </div>
+    <p class="post-community-intro">欢迎补充资料、提出问题或指出文章中的错误。评论由 GitHub Discussions 提供。</p>
+    <script src="https://giscus.app/client.js"
+            data-repo="Silen1-king/Silen1-king.github.io"
+            data-repo-id="R_kgDOSXxVIg"
+            data-category="General"
+            data-category-id="DIC_kwDOSXxVIs4DCILS"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark_dimmed"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </section>
+{% endif %}

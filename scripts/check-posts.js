@@ -4,7 +4,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const frontMatter = require('hexo-front-matter');
 
-const REQUIRED_FIELDS = ['description', 'tags', 'date'];
+const REQUIRED_FIELDS = ['title', 'description', 'tags', 'date'];
+const MARKDOWN_IMAGE_PATTERN = /!\[[^\]]*\]\(([^)]+)\)/g;
+const MARKDOWN_LINK_PATTERN = /(?<!!)\[[^\]]+\]\(([^)]+)\)/g;
+const HTML_IMAGE_PATTERN = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+const ASSET_PATTERN = /\{%\s*asset_(?:img|link)\s+([^\s%]+)[^%]*%\}/g;
 
 function findMarkdownFiles(directory) {
   const files = [];
@@ -38,6 +42,51 @@ function postsDirectoryFromArgs() {
 
 function relativeName(postsDirectory, filePath) {
   return path.relative(postsDirectory, filePath).split(path.sep).join('/');
+}
+
+function cleanTarget(rawTarget) {
+  let target = String(rawTarget || '').trim();
+  if (target.startsWith('<') && target.includes('>')) target = target.slice(1, target.indexOf('>'));
+  else target = target.split(/\s+["']/)[0];
+  target = target.replace(/^['"]|['"]$/g, '').split(/[?#]/)[0];
+  try {
+    return decodeURIComponent(target);
+  } catch {
+    return target;
+  }
+}
+
+function isExternalTarget(target) {
+  return /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(target);
+}
+
+function referencedTargets(content, pattern) {
+  return [...content.matchAll(pattern)].map(match => cleanTarget(match[1])).filter(Boolean);
+}
+
+function resolveLocalTarget(postsDirectory, filePath, target) {
+  const sourceDirectory = path.dirname(postsDirectory);
+  if (target.startsWith('/')) return path.join(sourceDirectory, target.replace(/^\/+/, ''));
+  return path.resolve(path.dirname(filePath), target);
+}
+
+function missingLocalReferences(postsDirectory, filePath, content) {
+  const imageTargets = [
+    ...referencedTargets(content, MARKDOWN_IMAGE_PATTERN),
+    ...referencedTargets(content, HTML_IMAGE_PATTERN),
+    ...referencedTargets(content, ASSET_PATTERN)
+  ];
+  const linkTargets = referencedTargets(content, MARKDOWN_LINK_PATTERN)
+    // Extensionless links are usually generated Hexo routes and are validated after build.
+    .filter(target => /\.[a-z\d]{1,8}$/i.test(target));
+
+  const missing = [];
+  for (const target of [...new Set([...imageTargets, ...linkTargets])]) {
+    if (isExternalTarget(target)) continue;
+    const resolved = resolveLocalTarget(postsDirectory, filePath, target);
+    if (!fs.existsSync(resolved)) missing.push(target);
+  }
+  return missing;
 }
 
 function main() {
@@ -82,22 +131,24 @@ function main() {
       continue;
     }
 
-    const missing = REQUIRED_FIELDS.filter(field => isMissing(attributes[field]));
-    if (missing.length === 0) continue;
+    const missingFields = REQUIRED_FIELDS.filter(field => isMissing(attributes[field]));
+    const missingReferences = missingLocalReferences(postsDirectory, filePath, attributes._content || '');
+    if (missingFields.length === 0 && missingReferences.length === 0) continue;
 
-    console.warn(`[WARN] ${fileName}: 缺少 ${missing.join(', ')}`);
-    issueCount += missing.length;
+    if (missingFields.length) console.warn(`[WARN] ${fileName}: 缺少 ${missingFields.join(', ')}`);
+    if (missingReferences.length) console.warn(`[WARN] ${fileName}: 本地资源不存在 ${missingReferences.join(', ')}`);
+    issueCount += missingFields.length + missingReferences.length;
     affectedFiles += 1;
   }
 
   console.log('');
   if (issueCount === 0) {
-    console.log(`[OK] 已检查 ${files.length} 篇文章，description、tags、date 均完整。`);
+    console.log(`[OK] 已检查 ${files.length} 篇文章，元数据与本地资源引用均有效。`);
     return;
   }
 
   console.warn(`[SUMMARY] 已检查 ${files.length} 篇文章；${affectedFiles} 篇存在问题，共缺少或损坏 ${issueCount} 项元数据。`);
-  console.warn('请补全后重新运行 npm run check:posts。');
+  console.warn('请修复文章元数据或本地资源引用后重新运行 npm run check:posts。');
   process.exitCode = 1;
 }
 
