@@ -1,6 +1,7 @@
 ---
 title: 学习pwn第一篇笔记
 date: 2026-05-10 01:01:58
+description: 记录初次学习 PWN 时对 Linux 命令、参数、题目提示和获取 flag 基本流程的理解。
 categories: 学习笔记
 tags: PWN
 ---

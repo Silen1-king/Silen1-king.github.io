@@ -1,6 +1,7 @@
 ---
 title: PA0的学习记录
 date: 2026-05-30 13:51:00
+description: 记录 PA0 学习中使用 Ubuntu、WSL、apt、Vim 和网络诊断命令时遇到的问题与解决方法。
 categories: 学习笔记
 tags: PAs
 ---

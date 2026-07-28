@@ -1,6 +1,7 @@
 ---
 title: 下载安装并使用obsidian
 date: 2026-07-11 00:13:37
+description: 从零介绍 Obsidian 的特点、下载安装方法，以及 Markdown、双向链接和本地知识库的基本使用。
 categories: 学习笔记
 tags:
   - Obsidian

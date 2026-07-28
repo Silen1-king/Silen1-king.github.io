@@ -1139,3 +1139,123 @@ body.image-zoom-open
   .image-zoom-overlay
     scroll-behavior: auto !important
     transition: none !important
+
+// ========== Comments, Corrections & 404 ==========
+
+.post-community
+  margin-top: 52px
+  padding-top: 30px
+  border-top: 1px solid rgba(124, 138, 255, .2)
+
+.post-community-heading
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 18px
+  margin-bottom: 8px
+
+  h2
+    margin: 3px 0 0
+    color: #e1e5f5
+    font-size: 1.35em
+
+.post-community-kicker
+  color: #7c8aff
+  font-size: .72em
+  font-weight: 700
+  letter-spacing: .14em
+
+.post-community-intro
+  margin: 0 0 22px
+  color: #9299b9
+  font-size: .9em
+
+.post-error-report
+  display: inline-flex
+  min-height: 40px
+  box-sizing: border-box
+  align-items: center
+  gap: 8px
+  padding: 8px 13px
+  border: 1px solid rgba(124, 138, 255, .3) !important
+  border-radius: 9px
+  background: rgba(124, 138, 255, .09)
+  color: #cbd1f5 !important
+  font-size: .84em
+  text-decoration: none
+
+  &:hover
+    border-color: rgba(124, 138, 255, .62) !important
+    background: rgba(124, 138, 255, .17)
+
+.giscus,
+.giscus-frame
+  width: 100%
+
+.not-found-page
+  max-width: 620px
+  margin: 48px auto
+  padding: 38px
+  border: 1px solid rgba(124, 138, 255, .28)
+  border-radius: 18px
+  background: radial-gradient(circle at 80% 5%, rgba(124, 138, 255, .2), transparent 38%), rgba(15, 19, 43, .82)
+  text-align: center
+
+  h1
+    margin: 8px 0 15px
+    color: #eef0ff
+
+  p
+    color: #aeb5d2
+    line-height: 1.8
+
+.not-found-code
+  color: #8792ff
+  font-size: clamp(3.8em, 14vw, 7em)
+  font-weight: 800
+  line-height: 1
+  letter-spacing: -.05em
+
+.not-found-actions
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+  gap: 12px
+  margin-top: 25px
+
+  button,
+  a
+    display: inline-flex
+    min-height: 44px
+    box-sizing: border-box
+    align-items: center
+    justify-content: center
+    gap: 8px
+    padding: 10px 16px
+    border: 1px solid rgba(124, 138, 255, .45)
+    border-radius: 9px
+    background: rgba(124, 138, 255, .12)
+    color: #e2e5ff !important
+    font: inherit
+    text-decoration: none
+    cursor: pointer
+
+  button
+    background: #727ff0
+    color: #fff !important
+
+@media (max-width: 767px)
+  .post-community-heading
+    align-items: flex-start
+    flex-direction: column
+
+  .not-found-page
+    margin: 20px auto
+    padding: 26px 18px
+
+  .not-found-actions
+    display: grid
+
+    button,
+    a
+      width: 100%

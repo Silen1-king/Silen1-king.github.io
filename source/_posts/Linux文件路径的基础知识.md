@@ -1,6 +1,7 @@
 ---
 title: Linux文件路径的基础知识
 date: 2026-05-13 15:38:36
+description: 介绍 Linux 常见目录、绝对路径与相对路径，并整理 pwd、cd、ls 等基础命令的常见用法。
 categories: 学习笔记
 tags: PWN
 ---
