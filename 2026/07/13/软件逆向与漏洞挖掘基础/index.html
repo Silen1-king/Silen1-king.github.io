@@ -66,6 +66,25 @@
 
 
 
+<link rel="alternate" type="application/atom+xml" title="Silen1Blog" href="/atom.xml">
+<script>
+(function() {
+  var isHome = /^(?:\/?|\/index\.html)$/.test(window.location.pathname);
+  var shouldPlay = true;
+  try {
+    shouldPlay = window.sessionStorage.getItem('silen1:intro-seen') !== '1';
+  } catch (error) {
+    // The intro can still run when storage is unavailable.
+  }
+
+  if (isHome && shouldPlay) {
+    document.documentElement.classList.add('blog-intro-pending');
+    window.setTimeout(function() {
+      document.documentElement.classList.remove('blog-intro-pending');
+    }, 7000);
+  }
+})();
+</script>
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -588,6 +607,37 @@
   </section>
 
 
+
+  <section class="post-community" aria-labelledby="post-community-title">
+    <div class="post-community-heading">
+      <div>
+        <span class="post-community-kicker">DISCUSSION</span>
+        <h2 id="post-community-title">评论与勘误</h2>
+      </div>
+      <a class="post-error-report" href="https://github.com/Silen1-king/Silen1-king.github.io/issues/new?title=%E6%96%87%E7%AB%A0%E5%8B%98%E8%AF%AF%EF%BC%9A%E8%BD%AF%E4%BB%B6%E9%80%86%E5%90%91%E4%B8%8E%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%9F%BA%E7%A1%80&body=%E6%96%87%E7%AB%A0%E5%9C%B0%E5%9D%80%EF%BC%9Ahttps%3A%2F%2Fsilen1-king.github.io%2F2026%2F07%2F13%2F%25E8%25BD%25AF%25E4%25BB%25B6%25E9%2580%2586%25E5%2590%2591%25E4%25B8%258E%25E6%25BC%258F%25E6%25B4%259E%25E6%258C%2596%25E6%258E%2598%25E5%259F%25BA%25E7%25A1%2580%2F%0A%0A%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0%EF%BC%9A%0A" target="_blank" rel="noopener">
+        <i class="fa fa-bug" aria-hidden="true"></i> 报告错误
+      </a>
+    </div>
+    <p class="post-community-intro">欢迎补充资料、提出问题或指出文章中的错误。评论由 GitHub Discussions 提供。</p>
+    <script src="https://giscus.app/client.js"
+            data-repo="Silen1-king/Silen1-king.github.io"
+            data-repo-id="R_kgDOSXxVIg"
+            data-category="General"
+            data-category-id="DIC_kwDOSXxVIs4DCILS"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark_dimmed"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </section>
+
+
           <div class="post-tags">
               <a href="/tags/%E9%80%86%E5%90%91/" rel="tag"># 逆向</a>
               <a href="/tags/%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/" rel="tag"># 漏洞挖掘</a>
@@ -808,6 +858,45 @@
 
 <script src="/js/instant-search.js"></script>
 <script src="/js/post-enhancements.js"></script>
+
+<div class="blog-intro" data-blog-intro aria-label="Silen1 begins exploring the world" hidden>
+  <canvas class="blog-intro-stars" data-intro-stars aria-hidden="true"></canvas>
+  <div class="blog-intro-nebula" aria-hidden="true"></div>
+
+  <div class="blog-intro-content">
+    <div class="blog-intro-orbit" aria-hidden="true">
+      <span class="blog-intro-planet"></span>
+      <span class="blog-intro-satellite"></span>
+    </div>
+
+    <p class="blog-intro-kicker">
+      <span>MISSION LOG</span>
+      <span class="blog-intro-kicker-line"></span>
+      <span>01</span>
+    </p>
+
+    <h1 class="blog-intro-title">
+      <span style="--word-index: 0">Silen1</span>
+      <span style="--word-index: 1">Begins</span>
+      <span style="--word-index: 2">Exploring</span>
+      <span style="--word-index: 3">the</span>
+      <span style="--word-index: 4">World</span><b>.</b>
+    </h1>
+
+    <p class="blog-intro-subtitle">Observe &middot; Question &middot; Discover</p>
+    <div class="blog-intro-progress" aria-hidden="true"><span></span></div>
+  </div>
+
+  <div class="blog-intro-coordinates" aria-hidden="true">
+    <span>31.2304&deg; N</span>
+    <span>121.4737&deg; E</span>
+  </div>
+
+  <button class="blog-intro-skip" type="button" data-intro-skip>
+    Skip intro <span aria-hidden="true">&#8599;</span>
+  </button>
+</div>
+<script src="/js/blog-intro.js"></script>
 
 </body>
 </html>

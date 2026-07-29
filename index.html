@@ -63,6 +63,25 @@
 
 
 
+<link rel="alternate" type="application/atom+xml" title="Silen1Blog" href="/atom.xml">
+<script>
+(function() {
+  var isHome = /^(?:\/?|\/index\.html)$/.test(window.location.pathname);
+  var shouldPlay = true;
+  try {
+    shouldPlay = window.sessionStorage.getItem('silen1:intro-seen') !== '1';
+  } catch (error) {
+    // The intro can still run when storage is unavailable.
+  }
+
+  if (isHome && shouldPlay) {
+    document.documentElement.classList.add('blog-intro-pending');
+    window.setTimeout(function() {
+      document.documentElement.classList.remove('blog-intro-pending');
+    }, 7000);
+  }
+})();
+</script>
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -338,9 +357,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2026-07-16 00:00:00 / 修改时间：01:16:33" itemprop="dateCreated datePublished" datetime="2026-07-16T00:00:00+08:00">2026-07-16</time>
+      <time title="创建时间：2026-07-16 00:00:00" itemprop="dateCreated datePublished" datetime="2026-07-16T00:00:00+08:00">2026-07-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -362,12 +387,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>2025 年，一篇名为 VMSCAPE 的论文登上了安全领域的顶会。它证明了一件事：在云平台上，一个租客只需要租一台最普通的虚拟机，就能隔空偷走宿主机上其他用户的磁盘加密密钥。本文沿着「Spectre 原理 → vBTI 漏洞 → 缓存逆向 → 攻击构建 → 防御反思」的路径，逐层拆解这场数字劫案的全部细节。</p>
-</blockquote>
+          <p>从 Spectre、分支预测与推测执行出发，解析 VMSCAPE 跨虚拟机侧信道攻击的原理、构建过程与防御思路。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/07/16/2026-7-16-VMSCAPE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/#more" rel="contents">
+              <a class="btn" href="/2026/07/16/2026-7-16-VMSCAPE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -526,7 +549,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-13 23:58:11" itemprop="dateModified" datetime="2026-07-13T23:58:11+08:00">2026-07-13</time>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -548,10 +571,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>obsidian是一款无比前卫的电子笔记软件，从零开始完成下载安装与基本使用。</p>
+          <p>从零介绍 Obsidian 的特点、下载安装方法，以及 Markdown、双向链接和本地知识库的基本使用。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/07/11/%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8obsidian/#more" rel="contents">
+              <a class="btn" href="/2026/07/11/%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8obsidian/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -618,7 +641,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-07 00:11:46" itemprop="dateModified" datetime="2026-07-07T00:11:46+08:00">2026-07-07</time>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -640,10 +663,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>一个学习网站</p>
+          <p>记录 PA0 学习中使用 Ubuntu、WSL、apt、Vim 和网络诊断命令时遇到的问题与解决方法。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/05/30/PA0%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/#more" rel="contents">
+              <a class="btn" href="/2026/05/30/PA0%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -710,7 +733,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-07 00:09:33" itemprop="dateModified" datetime="2026-07-07T00:09:33+08:00">2026-07-07</time>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
 
   
@@ -723,10 +746,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>收到学长的邀请，参加线下学习交流</p>
+          <p>记录第一次参加 PWN 线下学习交流后的反思，包括前置知识、资料筛选、提问方式与实践节奏。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/05/21/%E2%80%9C%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E7%BA%BF%E4%B8%8B%E5%AD%A6%E4%B9%A0%E2%80%9D/#more" rel="contents">
+              <a class="btn" href="/2026/05/21/%E2%80%9C%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9A%84%E7%BA%BF%E4%B8%8B%E5%AD%A6%E4%B9%A0%E2%80%9D/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -793,7 +816,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-07 00:10:47" itemprop="dateModified" datetime="2026-07-07T00:10:47+08:00">2026-07-07</time>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -815,10 +838,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>学习一下Linux的小知识</p>
+          <p>介绍 Linux 常见目录、绝对路径与相对路径，并整理 pwd、cd、ls 等基础命令的常见用法。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/05/13/Linux%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/#more" rel="contents">
+              <a class="btn" href="/2026/05/13/Linux%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -885,7 +908,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-08 12:14:20" itemprop="dateModified" datetime="2026-07-08T12:14:20+08:00">2026-07-08</time>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -907,10 +930,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>学习PWN初体验</p>
+          <p>记录初次学习 PWN 时对 Linux 命令、参数、题目提示和获取 flag 基本流程的理解。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/05/10/%E5%AD%A6%E4%B9%A0pwn%E7%AC%AC%E4%B8%80%E7%AF%87%E7%AC%94%E8%AE%B0/#more" rel="contents">
+              <a class="btn" href="/2026/05/10/%E5%AD%A6%E4%B9%A0pwn%E7%AC%AC%E4%B8%80%E7%AF%87%E7%AC%94%E8%AE%B0/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -977,7 +1000,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-07 00:13:13" itemprop="dateModified" datetime="2026-07-07T00:13:13+08:00">2026-07-07</time>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -999,10 +1022,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>测试一下我的blog，并简单使用</p>
+          <p>测试 Hexo 博客中的 C 代码高亮、行号显示、图片引用和文件上传等文章渲染能力。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/05/09/%E6%B5%8B%E8%AF%95%E5%B9%B6%E5%AD%A6%E4%B9%A0%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AE%EF%BC%8C%E5%9B%BE%E7%89%87%E5%92%8C%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/#more" rel="contents">
+              <a class="btn" href="/2026/05/09/%E6%B5%8B%E8%AF%95%E5%B9%B6%E5%AD%A6%E4%B9%A0%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AE%EF%BC%8C%E5%9B%BE%E7%89%87%E5%92%8C%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1069,7 +1092,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-05 03:29:27" itemprop="dateModified" datetime="2026-07-05T03:29:27+08:00">2026-07-05</time>
+      <time title="修改时间：2026-07-28 11:23:52" itemprop="dateModified" datetime="2026-07-28T11:23:52+08:00">2026-07-28</time>
     </span>
 
   
@@ -1082,10 +1105,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>哈哈哈哈哈哈，我回来了</p>
+          <p>一篇记录博客重新开始更新的简短日常文章。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/05/08/%E6%88%91%E7%9A%84%E6%96%B0%E6%96%87%E7%AB%A0/#more" rel="contents">
+              <a class="btn" href="/2026/05/08/%E6%88%91%E7%9A%84%E6%96%B0%E6%96%87%E7%AB%A0/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1152,7 +1175,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-07 00:08:12" itemprop="dateModified" datetime="2026-07-07T00:08:12+08:00">2026-07-07</time>
+      <time title="修改时间：2026-07-28 11:23:24" itemprop="dateModified" datetime="2026-07-28T11:23:24+08:00">2026-07-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1174,10 +1197,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>搭建一个blog</p>
+          <p>记录 Hexo 博客首次搭建完成的过程，以及学习 PWN、筛选教程和结合 AI 排查问题的心得。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2026/05/08/2026-4-8%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/#more" rel="contents">
+              <a class="btn" href="/2026/05/08/2026-4-8%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1393,6 +1416,45 @@
 
 <script src="/js/instant-search.js"></script>
 <script src="/js/post-enhancements.js"></script>
+
+<div class="blog-intro" data-blog-intro aria-label="Silen1 begins exploring the world" hidden>
+  <canvas class="blog-intro-stars" data-intro-stars aria-hidden="true"></canvas>
+  <div class="blog-intro-nebula" aria-hidden="true"></div>
+
+  <div class="blog-intro-content">
+    <div class="blog-intro-orbit" aria-hidden="true">
+      <span class="blog-intro-planet"></span>
+      <span class="blog-intro-satellite"></span>
+    </div>
+
+    <p class="blog-intro-kicker">
+      <span>MISSION LOG</span>
+      <span class="blog-intro-kicker-line"></span>
+      <span>01</span>
+    </p>
+
+    <h1 class="blog-intro-title">
+      <span style="--word-index: 0">Silen1</span>
+      <span style="--word-index: 1">Begins</span>
+      <span style="--word-index: 2">Exploring</span>
+      <span style="--word-index: 3">the</span>
+      <span style="--word-index: 4">World</span><b>.</b>
+    </h1>
+
+    <p class="blog-intro-subtitle">Observe &middot; Question &middot; Discover</p>
+    <div class="blog-intro-progress" aria-hidden="true"><span></span></div>
+  </div>
+
+  <div class="blog-intro-coordinates" aria-hidden="true">
+    <span>31.2304&deg; N</span>
+    <span>121.4737&deg; E</span>
+  </div>
+
+  <button class="blog-intro-skip" type="button" data-intro-skip>
+    Skip intro <span aria-hidden="true">&#8599;</span>
+  </button>
+</div>
+<script src="/js/blog-intro.js"></script>
 
 </body>
 </html>
