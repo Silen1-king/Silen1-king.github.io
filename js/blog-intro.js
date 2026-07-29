@@ -30,7 +30,7 @@
   requestAnimationFrame(() => intro.classList.add('is-ready'));
 
   function createStars(width, height) {
-    const density = Math.min(150, Math.max(70, Math.floor((width * height) / 11500)));
+    const density = Math.min(170, Math.max(80, Math.floor((width * height) / 9500)));
     return Array.from({ length: density }, () => ({
       x: (Math.random() - 0.5) * width,
       y: (Math.random() - 0.5) * height,
@@ -65,7 +65,7 @@
     context.clearRect(0, 0, width, height);
     for (const star of stars) {
       const previousZ = star.z;
-      star.z -= delta * 0.018;
+      star.z -= delta * 0.029;
       if (star.z < 1) {
         star.x = (Math.random() - 0.5) * width;
         star.y = (Math.random() - 0.5) * height;
@@ -89,7 +89,7 @@
       context.moveTo(previousX, previousY);
       context.lineTo(x, y);
       context.strokeStyle = `rgba(181, 193, 255, ${alpha})`;
-      context.lineWidth = Math.max(0.45, star.size * (1 - star.z / width));
+      context.lineWidth = Math.max(0.5, star.size * (1 - star.z / width));
       context.stroke();
     }
 
