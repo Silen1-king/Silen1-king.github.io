@@ -1294,7 +1294,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #3cffe9;
+  background: #5569b3;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2953,7 +2953,7 @@ html.blog-intro-pending .headband {
   gap: 0.08em 0.28em;
   margin: 0;
   color: #f5f6ff;
-  font-size: clamp(2rem, 6.4vw, 5.7rem);
+  font-size: clamp(1.75rem, 5.2vw, 4.6rem);
   font-weight: 300;
   letter-spacing: -0.045em;
   line-height: 1.08;
@@ -3073,7 +3073,7 @@ html.blog-intro-pending .headband {
   }
   .blog-intro-title {
     gap: 0.14em 0.24em;
-    font-size: clamp(2rem, 11vw, 3.5rem);
+    font-size: clamp(1.65rem, 9vw, 2.9rem);
   }
   .blog-intro-subtitle {
     font-size: 9px;
