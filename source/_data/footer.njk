@@ -1,0 +1,51 @@
+{%- if config.blog_runtime and config.blog_runtime.enable %}
+<div class="blog-runtime" data-blog-runtime data-since="{{ config.blog_runtime.since }}">
+  <i class="fa fa-clock" aria-hidden="true"></i>
+  <span>本站已运行</span>
+  <time data-blog-runtime-value datetime="PT0S">
+    <span class="blog-runtime-value" data-runtime-days>0</span><span class="blog-runtime-unit"> 天</span>
+    <span class="blog-runtime-value" data-runtime-hours>00</span><span class="blog-runtime-unit"> 时</span>
+    <span class="blog-runtime-value" data-runtime-minutes>00</span><span class="blog-runtime-unit"> 分</span>
+    <span class="blog-runtime-value" data-runtime-seconds>00</span><span class="blog-runtime-unit"> 秒</span>
+  </time>
+</div>
+<script>
+(function() {
+  const runtime = document.querySelector('[data-blog-runtime]');
+  if (!runtime) return;
+
+  const startedAt = Date.parse(runtime.dataset.since);
+  if (!Number.isFinite(startedAt)) {
+    runtime.hidden = true;
+    return;
+  }
+
+  const output = runtime.querySelector('[data-blog-runtime-value]');
+  const fields = {
+    days: runtime.querySelector('[data-runtime-days]'),
+    hours: runtime.querySelector('[data-runtime-hours]'),
+    minutes: runtime.querySelector('[data-runtime-minutes]'),
+    seconds: runtime.querySelector('[data-runtime-seconds]')
+  };
+
+  function updateRuntime() {
+    let totalSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+    const days = Math.floor(totalSeconds / 86400);
+    totalSeconds %= 86400;
+    const hours = Math.floor(totalSeconds / 3600);
+    totalSeconds %= 3600;
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    fields.days.textContent = String(days);
+    fields.hours.textContent = String(hours).padStart(2, '0');
+    fields.minutes.textContent = String(minutes).padStart(2, '0');
+    fields.seconds.textContent = String(seconds).padStart(2, '0');
+    output.dateTime = `P${days}DT${hours}H${minutes}M${seconds}S`;
+  }
+
+  updateRuntime();
+  window.setInterval(updateRuntime, 1000);
+})();
+</script>
+{%- endif %}
