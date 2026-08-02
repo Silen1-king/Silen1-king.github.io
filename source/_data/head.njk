@@ -1,1 +1,19 @@
 <link rel="alternate" type="application/atom+xml" title="{{ config.title }}" href="/atom.xml">
+<script>
+(function() {
+  var isHome = /^(?:\/?|\/index\.html)$/.test(window.location.pathname);
+  var shouldPlay = true;
+  try {
+    shouldPlay = window.sessionStorage.getItem('silen1:intro-seen') !== '1';
+  } catch (error) {
+    // The intro can still run when storage is unavailable.
+  }
+
+  if (isHome && shouldPlay) {
+    document.documentElement.classList.add('blog-intro-pending');
+    window.setTimeout(function() {
+      document.documentElement.classList.remove('blog-intro-pending');
+    }, 7000);
+  }
+})();
+</script>

@@ -41,7 +41,7 @@ external_link:
 filename_case: 0
 render_drafts: true
 post_asset_folder: true
-relative_link: true
+relative_link: false
 future: true
 syntax_highlighter: highlight.js
 highlight:
@@ -125,6 +125,11 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: next
+
+# Live site runtime shown in the footer.
+blog_runtime:
+  enable: true
+  since: '2026-05-08T20:20:31+08:00'
 
 # Learning paths / series page
 # Posts use `series: Name` first, then fall back to `categories`.
