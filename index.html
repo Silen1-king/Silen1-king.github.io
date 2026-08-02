@@ -64,7 +64,24 @@
 
 
 <link rel="alternate" type="application/atom+xml" title="Silen1Blog" href="/atom.xml">
+<script>
+(function() {
+  var isHome = /^(?:\/?|\/index\.html)$/.test(window.location.pathname);
+  var shouldPlay = true;
+  try {
+    shouldPlay = window.sessionStorage.getItem('silen1:intro-seen') !== '1';
+  } catch (error) {
+    // The intro can still run when storage is unavailable.
+  }
 
+  if (isHome && shouldPlay) {
+    document.documentElement.classList.add('blog-intro-pending');
+    window.setTimeout(function() {
+      document.documentElement.classList.remove('blog-intro-pending');
+    }, 7000);
+  }
+})();
+</script>
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
@@ -271,34 +288,6 @@
     <div class="main-inner index posts-expand">
 
 
-  <section class="home-hero" aria-labelledby="home-hero-title">
-    <div class="home-hero-copy">
-      <span class="home-hero-kicker">可检索的技术学习知识库</span>
-      <h1 id="home-hero-title">把逆向、安全与 AI 的学习过程，整理成可复用的路线</h1>
-      <p>这里记录软件逆向、安全研究、人工智能与开发实践。你可以从专题路线开始，也可以直接检索 10 篇学习笔记。</p>
-      <div class="home-hero-actions">
-        <button class="home-hero-search" type="button" data-open-search>
-          <i class="fa fa-search" aria-hidden="true"></i>
-          搜索全部文章
-          <kbd>Ctrl K</kbd>
-        </button>
-        <a class="home-hero-primary" href="/learning-paths/">
-          浏览学习路线 <span aria-hidden="true">→</span>
-        </a>
-      </div>
-    </div>
-    <nav class="home-hero-map" aria-label="快速开始">
-      <a href="/learning-paths/">
-        <span>01</span><strong>学习路线</strong><small>按系列循序阅读</small>
-      </a>
-      <a href="/tags/">
-        <span>02</span><strong>主题标签</strong><small>按技术方向筛选</small>
-      </a>
-      <a href="/archives/">
-        <span>03</span><strong>时间归档</strong><small>查看全部积累</small>
-      </a>
-    </nav>
-  </section>
 
   <div class="home-latest-heading" aria-hidden="true">
     <span>LATEST NOTES</span><strong>最近更新</strong>
@@ -1398,6 +1387,43 @@
 
 <script src="/js/instant-search.js"></script>
 <script src="/js/post-enhancements.js"></script>
+<div class="blog-intro" data-blog-intro aria-label="Silen1 begins exploring the world" hidden>
+  <canvas class="blog-intro-stars" data-intro-stars aria-hidden="true"></canvas>
+  <div class="blog-intro-nebula" aria-hidden="true"></div>
 
+  <div class="blog-intro-content">
+    <div class="blog-intro-orbit" aria-hidden="true">
+      <span class="blog-intro-planet"></span>
+      <span class="blog-intro-satellite"></span>
+    </div>
+
+    <p class="blog-intro-kicker">
+      <span>MISSION LOG</span>
+      <span class="blog-intro-kicker-line"></span>
+      <span>01</span>
+    </p>
+
+    <h1 class="blog-intro-title">
+      <span style="--word-index: 0">Silen1</span>
+      <span style="--word-index: 1">Begins</span>
+      <span style="--word-index: 2">Exploring</span>
+      <span style="--word-index: 3">the</span>
+      <span style="--word-index: 4">World</span><b>.</b>
+    </h1>
+
+    <p class="blog-intro-subtitle">Observe &middot; Question &middot; Discover</p>
+    <div class="blog-intro-progress" aria-hidden="true"><span></span></div>
+  </div>
+
+  <div class="blog-intro-coordinates" aria-hidden="true">
+    <span>31.2304&deg; N</span>
+    <span>121.4737&deg; E</span>
+  </div>
+
+  <button class="blog-intro-skip" type="button" data-intro-skip>
+    Skip intro <span aria-hidden="true">&#8599;</span>
+  </button>
+</div>
+<script src="/js/blog-intro.js"></script>
 </body>
 </html>
