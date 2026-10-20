@@ -99,6 +99,12 @@ function main() {
     return;
   }
 
+  // Git keeps no empty folders, so a blog without posts has no source/_posts at all.
+  if (!fs.existsSync(postsDirectory) && !process.argv.includes('--dir')) {
+    console.warn(`[WARN] 还没有文章目录，跳过检查：${postsDirectory}`);
+    return;
+  }
+
   if (!fs.existsSync(postsDirectory) || !fs.statSync(postsDirectory).isDirectory()) {
     console.error(`[ERROR] 文章目录不存在：${postsDirectory}`);
     process.exitCode = 2;
