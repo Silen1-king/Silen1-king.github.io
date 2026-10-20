@@ -9,6 +9,10 @@
  *
  * When `series` is absent, category names are used if
  * `learning_paths.category_fallback` is enabled (the default).
+ *
+ * Posts that share the same `order` inside a series are drawn side by side
+ * as a branch of the route. Optional planned steps can be listed under
+ * `learning_paths.planned` (series name -> titles or { title, order }).
  */
 
 const DEFAULTS = {
@@ -16,7 +20,8 @@ const DEFAULTS = {
   path: 'learning-paths/',
   title: '学习路线',
   description: '按专栏整理的系列教程，循序渐进地开始学习。',
-  category_fallback: true
+  category_fallback: true,
+  planned: {}
 };
 
 function escapeHtml(value) {
@@ -96,6 +101,84 @@ function joinRoot(root, postPath) {
   return normalizedRoot + String(postPath || '').replace(/^\/+/, '');
 }
 
+function plannedSteps(options, seriesName) {
+  const planned = options.planned && options.planned[seriesName];
+  return toArray(planned)
+    .map(item => (typeof item === 'string' ? { title: item } : item || {}))
+    .map(item => ({ title: String(item.title ?? '').trim(), order: numericOrder(item.order) }))
+    .filter(item => item.title);
+}
+
+// Rows of the route graph: a row with more than one step is a branch.
+function routeRows(group, options, root) {
+  const published = group.posts.map(post => ({
+    title: post.title || '未命名文章',
+    url: joinRoot(root, post.path),
+    date: dateInfo(post.date).iso.slice(0, 10),
+    order: numericOrder(post.order)
+  }));
+  const publishedTitles = new Set(published.map(step => step.title));
+  const planned = plannedSteps(options, group.name)
+    .filter(step => !publishedTitles.has(step.title))
+    .map(step => ({ title: step.title, url: '', date: '', order: step.order }));
+
+  const steps = [...published, ...planned]
+    .map((step, index) => ({ step, index }))
+    .sort((a, b) => {
+      const aOrder = a.step.order;
+      const bOrder = b.step.order;
+      if (aOrder !== null && bOrder !== null && aOrder !== bOrder) return aOrder - bOrder;
+      if (aOrder !== null && bOrder === null) return -1;
+      if (aOrder === null && bOrder !== null) return 1;
+      return a.index - b.index;
+    })
+    .map(item => item.step);
+
+  const rows = [];
+  for (const step of steps) {
+    const lastRow = rows[rows.length - 1];
+    if (lastRow && step.order !== null && lastRow[0].order === step.order) lastRow.push(step);
+    else rows.push([step]);
+  }
+
+  return rows.map(row => row.map(({ title, url, date }) => ({ title, url, date })));
+}
+
+function groupPosts(postsInput, options) {
+  const groupedPosts = new Map();
+  const posts = postsInput && typeof postsInput.toArray === 'function'
+    ? postsInput.toArray()
+    : toArray(postsInput);
+
+  for (const post of posts) {
+    for (const name of seriesNames(post, options.category_fallback)) {
+      if (!groupedPosts.has(name)) groupedPosts.set(name, []);
+      groupedPosts.get(name).push(post);
+    }
+  }
+
+  return [...groupedPosts.entries()]
+    .map(([name, groupPosts]) => ({
+      name,
+      posts: groupPosts.sort((a, b) => {
+        const aOrder = numericOrder(a.order);
+        const bOrder = numericOrder(b.order);
+        if (aOrder !== null && bOrder !== null && aOrder !== bOrder) return aOrder - bOrder;
+        if (aOrder !== null && bOrder === null) return -1;
+        if (aOrder === null && bOrder !== null) return 1;
+
+        const dateDifference = dateInfo(a.date).timestamp - dateInfo(b.date).timestamp;
+        if (dateDifference !== 0) return dateDifference;
+        return String(a.title || '').localeCompare(String(b.title || ''), 'zh-CN');
+      })
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+}
+
+function learningOptions() {
+  return Object.assign({}, DEFAULTS, hexo.config.learning_paths || {});
+}
+
 function renderPost(post, index, root) {
   const date = dateInfo(post.date);
   const order = numericOrder(post.order);
@@ -126,6 +209,7 @@ function renderPage(groups, options, root) {
           <span class="learning-path-card-count">${group.posts.length} 篇教程</span>
         </div>
       </header>
+      <div class="route-graph" data-route="${escapeHtml(JSON.stringify({ name: group.name, rows: routeRows(group, options, root) }))}" aria-hidden="true"></div>
       <ol class="learning-path-steps">
         ${group.posts.map((post, postIndex) => renderPost(post, postIndex, root)).join('')}
       </ol>
@@ -144,38 +228,21 @@ function renderPage(groups, options, root) {
     </div>`;
 }
 
+// Route data for the home page 远征 section, one entry per series.
+hexo.extend.helper.register('learning_path_routes', function learningPathRoutes(posts) {
+  const options = learningOptions();
+  if (!options.enable) return [];
+  return groupPosts(posts, options).map(group => ({
+    name: group.name,
+    rows: routeRows(group, options, hexo.config.root)
+  }));
+});
+
 hexo.extend.generator.register('learning-paths', function generateLearningPaths(locals) {
-  const options = Object.assign({}, DEFAULTS, hexo.config.learning_paths || {});
+  const options = learningOptions();
   if (!options.enable) return [];
 
-  const groupedPosts = new Map();
-  const posts = locals.posts && typeof locals.posts.toArray === 'function'
-    ? locals.posts.toArray()
-    : [];
-
-  for (const post of posts) {
-    for (const name of seriesNames(post, options.category_fallback)) {
-      if (!groupedPosts.has(name)) groupedPosts.set(name, []);
-      groupedPosts.get(name).push(post);
-    }
-  }
-
-  const groups = [...groupedPosts.entries()]
-    .map(([name, groupPosts]) => ({
-      name,
-      posts: groupPosts.sort((a, b) => {
-        const aOrder = numericOrder(a.order);
-        const bOrder = numericOrder(b.order);
-        if (aOrder !== null && bOrder !== null && aOrder !== bOrder) return aOrder - bOrder;
-        if (aOrder !== null && bOrder === null) return -1;
-        if (aOrder === null && bOrder !== null) return 1;
-
-        const dateDifference = dateInfo(a.date).timestamp - dateInfo(b.date).timestamp;
-        if (dateDifference !== 0) return dateDifference;
-        return String(a.title || '').localeCompare(String(b.title || ''), 'zh-CN');
-      })
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+  const groups = groupPosts(locals.posts, options);
 
   const outputPath = String(options.path || DEFAULTS.path)
     .replace(/^\/+/, '')

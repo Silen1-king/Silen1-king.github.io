@@ -1,0 +1,61 @@
+# NexT theme overrides for Silen1Blog.
+# NexT deep-merges this file over themes/next/_config.yml, so only the
+# settings that differ from the theme defaults live here. Keep the theme
+# folder untouched so NexT can be upgraded by replacing it.
+# Docs: https://theme-next.js.org/docs/getting-started/configuration
+
+custom_file_path:
+  head: source/_data/head.njk
+  sidebar: source/_data/sidebar-stats.njk
+  postBodyEnd: source/_data/post-body-end.njk
+  footer: source/_data/footer.njk
+  bodyEnd: source/_data/body-end.njk
+  style: source/_data/styles.styl
+
+scheme: Mist
+
+# The SIGNAL home page sections; each one links on to its full page.
+menu:
+  疆域: /#realms || fa fa-compass
+  札记: /#codex || fa fa-book
+  远征: /#odyssey || fa fa-route
+  年鉴: /#almanac || fa fa-chart-bar
+
+menu_settings:
+  icons: false
+  badges: false
+
+theme_color:
+  light: "#05060b"
+  dark: "#05060b"
+
+toc:
+  wrap: true
+  max_depth: 4
+
+mobile_layout_economy: true
+
+codeblock:
+  theme:
+    # The site is permanently dark, so both OS modes need a syntax palette
+    # designed for a dark code background.
+    light: stackoverflow-dark
+  prism:
+    light: prism-dark
+  copy_button:
+    enable: true
+    style: flat
+  language: true
+
+reading_progress:
+  enable: true
+
+motion:
+  # Avoid hiding the whole page while the external animation runtime loads.
+  enable: false
+
+busuanzi_count:
+  enable: true
+
+# Search is provided by the local, dependency-free modal in source/js,
+# so NexT's own local_search stays disabled (theme default).

@@ -1,10 +1,15 @@
 <link rel="alternate" type="application/atom+xml" title="{{ config.title }}" href="/atom.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&display=swap">
 <script>
 (function() {
+  // The graphic intro plays on the home page once per browser tab.
   var isHome = /^(?:\/?|\/index\.html)$/.test(window.location.pathname);
-  var shouldPlay = true;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var shouldPlay = !reduceMotion;
   try {
-    shouldPlay = window.sessionStorage.getItem('silen1:intro-seen') !== '1';
+    shouldPlay = shouldPlay && window.sessionStorage.getItem('silen1:intro-seen') !== '1';
   } catch (error) {
     // The intro can still run when storage is unavailable.
   }

@@ -3,21 +3,31 @@
 
 {% block title %}{{ title }}{% if theme.index_with_subtitle and subtitle %} - {{ subtitle }}{% endif %}{% endblock %}
 
-{% block class %}index posts-expand{% endblock %}
+{% block class %}index posts-expand signal-index{% endblock %}
 
 {% block content %}
+  {#- SIGNAL home sections come from scripts/signal-home.js. -#}
+  {%- if page.current === 1 %}
+    {{ signal_home_intro() }}
+  {%- endif %}
 
+  <section class="signal-section signal-codex" id="codex" aria-labelledby="codex-title">
+    <div class="signal-inner">
+      <div class="signal-head">
+        <h2 class="signal-h2" id="codex-title">札记<small>entries, newest first</small></h2>
+        {{ signal_codex_filters() }}
+      </div>
+      {{ signal_codex(page.posts) }}
+      <div class="signal-codex-foot">
+        {%- include '_partials/pagination.njk' -%}
+        <a class="signal-more" href="{{ url_for(config.archive_dir + '/') }}">全部归档 →</a>
+      </div>
+    </div>
+  </section>
 
-  <div class="home-latest-heading" aria-hidden="true">
-    <span>LATEST NOTES</span><strong>最近更新</strong>
-  </div>
-
-  {%- for post in page.posts.toArray() %}
-    {{ partial('_macro/post.njk', {post: post, is_index: true}) }}
-  {%- endfor %}
-
-  {%- include '_partials/pagination.njk' -%}
-
+  {%- if page.current === 1 %}
+    {{ signal_home_outro() }}
+  {%- endif %}
 {% endblock %}
 
 {% block sidebar %}
