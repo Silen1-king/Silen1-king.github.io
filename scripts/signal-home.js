@@ -3,7 +3,7 @@
 /**
  * SIGNAL home page sections, rendered by themes/next/layout/index.njk.
  *
- *   signal_home_intro()     hero, Prelude and 疆域 (one card per category)
+ *   signal_home_intro()     hero and 疆域 (one card per category)
  *   signal_codex(posts)     札记 rows for the current index page
  *   signal_codex_filters()  realm filter chips, shown once there are 2+ realms
  *   signal_home_outro()     远征 (series route) and 年鉴 (stats)
@@ -124,12 +124,6 @@ function renderHero(config) {
         <h1 class="signal-hero-title" id="signal-hero-title">Signal,<br><span>out of noise.</span></h1>
       </div>
       <span class="signal-scroll-hint" aria-hidden="true"></span>
-    </div>
-  </section>
-  <section class="signal-prelude" id="prelude" aria-hidden="true">
-    <div class="signal-prelude-stage">
-      <canvas class="signal-prelude-canvas"></canvas>
-      <div class="signal-prelude-readout">f₁ <b>2.000</b> · f₂ <b>3.010</b><br>t <b data-prelude-time>0.00</b> s</div>
     </div>
   </section>`;
 }

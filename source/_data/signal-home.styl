@@ -1,4 +1,4 @@
-// SIGNAL home page: hero, Prelude, 疆域, 札记, 远征, 年鉴 (scripts/signal-home.js).
+// SIGNAL home page: hero, 疆域, 札记, 远征, 年鉴 (scripts/signal-home.js).
 @css {
   .signal-inner {
     max-width: 1240px;
@@ -106,24 +106,25 @@
   /* ───── Hero ───── */
   .signal-hero {
     position: relative;
-    height: 190vh;
+    height: 150vh;
   }
 
-  .signal-hero-stage,
-  .signal-prelude-stage {
+  .signal-hero-stage {
     position: sticky;
     top: 0;
     height: 100vh;
     overflow: hidden;
   }
 
-  .signal-hero-canvas,
-  .signal-prelude-canvas {
+  .signal-hero-canvas {
     position: absolute;
     inset: 0;
     display: block;
     width: 100%;
     height: 100%;
+    /* Let the scattered dust thin out instead of ending on a hard edge. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent);
   }
 
   .signal-hero-copy {
@@ -177,28 +178,6 @@
     to {
       top: 70px;
     }
-  }
-
-  /* ───── Prelude ───── */
-  .signal-prelude {
-    position: relative;
-    height: 260vh;
-  }
-
-  .signal-prelude-readout {
-    position: absolute;
-    right: var(--gutr);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
-    color: var(--mute);
-    font: 11px/1.8 var(--f-mono);
-    letter-spacing: .1em;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .signal-prelude-readout b {
-    color: var(--cyan);
-    font-weight: 400;
   }
 
   /* ───── 疆域: layout follows the number of categories ───── */

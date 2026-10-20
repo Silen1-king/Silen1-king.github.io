@@ -1,9 +1,10 @@
 /* global CONFIG */
 
 // SIGNAL interface: header address readout, home page canvases (hero
-// particles, Prelude harmonograph, realm emblems), the series route graph,
-// counters, and the hex reading offset on posts. Mouse input only adds a
-// slight parallax to the hero; there is no cursor follower.
+// particles, realm emblems), the series route graph, counters, the hex
+// reading offset on posts, and the harmonograph that closes every page.
+// Mouse input only adds a slight parallax to the hero; there is no cursor
+// follower.
 (function() {
   'use strict';
 
@@ -151,7 +152,9 @@
           if (data[(y * width + x) * 4 + 3] <= 140) continue;
           const old = previous[particles.length];
           const angle = Math.random() * Math.PI * 2;
-          const radius = (0.6 + Math.random() * 0.9) * Math.max(width, height);
+          // Scatter into dust that mostly stays on screen, so the hand-off to
+          // 疆域 never passes through an empty frame.
+          const radius = (0.15 + Math.random() * 0.6) * Math.max(width, height);
           particles.push({
             hx: x,
             hy: y,
@@ -210,8 +213,8 @@
         p.x += p.vx;
         p.y += p.vy;
         const speed = Math.min(1, Math.hypot(p.vx, p.vy) / 6);
-        context.fillStyle = `rgba(${124 + 44 * p.t | 0}, ${236 - 97 * p.t | 0}, 255, ${0.72 + speed * 0.28})`;
-        const size = p.size * (1 + spread * 1.4);
+        context.fillStyle = `rgba(${124 + 44 * p.t | 0}, ${236 - 97 * p.t | 0}, 255, ${(0.72 + speed * 0.28) * (1 - spread * 0.55)})`;
+        const size = p.size * (1 + spread * 0.6);
         context.fillRect(p.x, p.y, size + speed * 3, size);
       }
 
@@ -270,65 +273,91 @@
     resizeHandlers.push(reduceMotion ? drawStill : buildParticles);
   }
 
-  /* ───── Prelude: a harmonograph drawn by scrolling ───── */
-  const prelude = $('.signal-prelude');
-  const preludeCanvas = $('.signal-prelude-canvas');
-  if (prelude && preludeCanvas) {
-    const timeLabel = $('[data-prelude-time]');
+  /* ───── Coda: every page rings out on a harmonograph ───── */
+  // It draws itself once the footer comes into view, so it never holds the
+  // scroll. The home page keeps the 2 : 3 figure; every other page gets its
+  // own ratio and phases from its path, a small signature at the end of it.
+  const codaCanvas = $('[data-coda-trace]');
+  if (codaCanvas) {
+    const timeLabel = $('[data-coda-time]');
+    const RATIOS = [[2, 3], [3, 4], [3, 2], [4, 5], [1, 2], [5, 4], [3, 5], [2, 1]];
     const TMAX = 140;
+    const DURATION = 4200;
+    const isHome = Boolean($('#signal-hero'));
+    let seed = 0;
+    for (const char of location.pathname.replace(/index\.html$/, '')) seed = (seed * 31 + char.codePointAt(0)) >>> 0;
+    const [a, b] = isHome ? [2, 3] : RATIOS[seed % RATIOS.length];
+    const phases = isHome ? [0.3, 1.2, 0, 0.7] : [0, 1, 2, 3].map(i => (seed >>> (i * 8) & 255) / 255 * Math.PI * 2);
+    $('[data-coda-f1]').textContent = a.toFixed(3);
+    $('[data-coda-f2]').textContent = (b + 0.01).toFixed(3);
+
     let context;
     let width = 0;
     let height = 0;
-    let lastDrawn = -1;
+    let shown = 0;
 
-    const size = () => {
-      [context, width, height] = fitCanvas(preludeCanvas);
-      lastDrawn = -1;
-    };
     const point = t => {
       const amplitude = Math.min(width, height) * 0.34;
-      const x = amplitude * Math.sin(2 * t + 0.3) * Math.exp(-0.012 * t) + amplitude * 0.45 * Math.sin(3.01 * t + 1.2) * Math.exp(-0.018 * t);
-      const y = amplitude * Math.sin(3 * t) * Math.exp(-0.014 * t) + amplitude * 0.45 * Math.sin(2.005 * t + 0.7) * Math.exp(-0.02 * t);
+      const x = amplitude * Math.sin(a * t + phases[0]) * Math.exp(-0.012 * t) + amplitude * 0.45 * Math.sin((b + 0.01) * t + phases[1]) * Math.exp(-0.018 * t);
+      const y = amplitude * Math.sin(b * t + phases[2]) * Math.exp(-0.014 * t) + amplitude * 0.45 * Math.sin((a + 0.005) * t + phases[3]) * Math.exp(-0.02 * t);
       return [width / 2 + x, height / 2 + y];
     };
     const draw = progress => {
-      if (!width || Math.abs(progress - lastDrawn) < 0.001) return;
-      lastDrawn = progress;
+      shown = progress;
+      if (!width || !height) return;
       context.clearRect(0, 0, width, height);
       const tEnd = TMAX * progress;
-      const steps = Math.max(2, Math.floor(tEnd * 22));
+      if (timeLabel) timeLabel.textContent = tEnd.toFixed(2);
+      if (tEnd <= 0) return;
+      const steps = Math.max(3, Math.floor(tEnd * 22));
       let previous = point(0);
       context.lineWidth = 0.7;
-      for (let i = 1; i <= steps; i++) {
-        const t = i / steps * tEnd;
-        const current = point(t);
-        const mix = t / TMAX;
-        if (i % 3 === 1) context.strokeStyle = `rgba(${124 + 44 * mix | 0}, ${236 - 97 * mix | 0}, 255, ${0.25 + 0.45 * (t / tEnd)})`;
+      // Three segments per stroke; the colour drifts cyan to violet as it decays.
+      for (let i = 1; i <= steps; i += 3) {
+        const mix = i / steps * tEnd / TMAX;
+        context.strokeStyle = `rgba(${124 + 44 * mix | 0}, ${236 - 97 * mix | 0}, 255, ${0.25 + 0.45 * (i / steps)})`;
         context.beginPath();
         context.moveTo(previous[0], previous[1]);
-        context.lineTo(current[0], current[1]);
+        for (let j = i; j < i + 3 && j <= steps; j++) {
+          previous = point(j / steps * tEnd);
+          context.lineTo(previous[0], previous[1]);
+        }
         context.stroke();
-        previous = current;
       }
-      const pen = context.createRadialGradient(previous[0], previous[1], 0, previous[0], previous[1], 18);
+      const pen = context.createRadialGradient(previous[0], previous[1], 0, previous[0], previous[1], 16);
       pen.addColorStop(0, 'rgba(231, 234, 244, .95)');
       pen.addColorStop(0.3, 'rgba(124, 236, 255, .4)');
       pen.addColorStop(1, 'rgba(124, 236, 255, 0)');
       context.fillStyle = pen;
       context.beginPath();
-      context.arc(previous[0], previous[1], 18, 0, Math.PI * 2);
+      context.arc(previous[0], previous[1], 16, 0, Math.PI * 2);
       context.fill();
-      if (timeLabel) timeLabel.textContent = tEnd.toFixed(2);
+    };
+    const size = () => {
+      [context, width, height] = fitCanvas(codaCanvas);
+      draw(shown);
+    };
+    const ringOut = () => {
+      if (reduceMotion) {
+        draw(1);
+        return;
+      }
+      const begin = performance.now();
+      const tick = now => {
+        const k = clamp((now - begin) / DURATION);
+        draw(1 - Math.pow(1 - k, 3));
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
     };
 
     size();
     resizeHandlers.push(size);
-    scrollHandlers.push(() => {
-      const rect = prelude.getBoundingClientRect();
-      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
-      const progress = (-rect.top + window.innerHeight * 0.5) / (rect.height - window.innerHeight * 0.5);
-      draw(reduceMotion ? 1 : Math.max(0.08, clamp(progress)));
-    });
+    new IntersectionObserver((entries, observer) => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      observer.disconnect();
+      ringOut();
+    }, { threshold: 0.3 }).observe(codaCanvas);
   }
 
   /* ───── 疆域: emblems, and a horizontal track once there are 3+ realms ───── */
