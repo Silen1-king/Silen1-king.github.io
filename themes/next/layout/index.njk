@@ -20,7 +20,9 @@
       {{ signal_codex(page.posts) }}
       <div class="signal-codex-foot">
         {%- include '_partials/pagination.njk' -%}
+        {%- if site.posts.length %}
         <a class="signal-more" href="{{ url_for(config.archive_dir + '/') }}">全部归档 →</a>
+        {%- endif %}
       </div>
     </div>
   </section>
