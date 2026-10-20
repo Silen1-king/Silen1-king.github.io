@@ -126,4 +126,8 @@ hexo.extend.helper.register('blog_stats', function blogStats(posts) {
   return buildStats(posts);
 });
 
+hexo.extend.helper.register('post_word_count', function postWordCount(post) {
+  return countWords(post && (post.content || post.excerpt) || '');
+});
+
 module.exports = { buildStats, countWords, renderArchive };

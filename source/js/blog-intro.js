@@ -1,6 +1,8 @@
 (function() {
   'use strict';
 
+  // Graphic intro, no text: a point of light blooms into rotating rose curves
+  // and a tick ring, then collapses into a single line like a CRT power-off.
   const root = document.documentElement;
   const intro = document.querySelector('[data-blog-intro]');
   if (!intro || !root.classList.contains('blog-intro-pending')) {
@@ -8,14 +10,15 @@
     return;
   }
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const skipButton = intro.querySelector('[data-intro-skip]');
-  const canvas = intro.querySelector('[data-intro-stars]');
+  const canvas = intro.querySelector('[data-intro-canvas]');
   const context = canvas?.getContext('2d');
+  const LAYERS = [[3, 1], [5, 2], [7, 3], [4, 3], [2, 5]];
+  const DURATION = 3.1;
   const startedAt = performance.now();
-  let stars = [];
+  let width = 0;
+  let height = 0;
   let animationFrame = 0;
-  let lastFrame = startedAt;
   let closing = false;
   let failsafeTimer = 0;
 
@@ -27,73 +30,92 @@
 
   intro.hidden = false;
   root.classList.add('blog-intro-active');
-  requestAnimationFrame(() => intro.classList.add('is-ready'));
 
-  function createStars(width, height) {
-    const density = Math.min(170, Math.max(80, Math.floor((width * height) / 9500)));
-    return Array.from({ length: density }, () => ({
-      x: (Math.random() - 0.5) * width,
-      y: (Math.random() - 0.5) * height,
-      z: Math.random() * width + 1,
-      size: Math.random() * 1.25 + 0.25,
-      brightness: Math.random() * 0.55 + 0.25
-    }));
-  }
+  const clamp = value => Math.min(1, Math.max(0, value));
+  const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
   function resizeCanvas() {
     if (!canvas || !context) return;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    canvas.width = Math.floor(width * dpr);
-    canvas.height = Math.floor(height * dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    width = window.innerWidth;
+    height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    stars = createStars(width, height);
+    context.fillStyle = '#05060b';
+    context.fillRect(0, 0, width, height);
   }
 
-  function drawStars(now) {
-    if (!context || !canvas || closing) return;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const delta = Math.min(40, now - lastFrame);
-    lastFrame = now;
+  function drawFrame(now) {
+    if (closing || !context) return;
+    const t = (now - startedAt) / 1000;
+    const radius = Math.min(width, height) * 0.36;
+    const grow = ease(clamp((t - 0.25) / 1.5));
+    const flatten = ease(clamp((t - 2.4) / 0.55));
 
-    context.clearRect(0, 0, width, height);
-    for (const star of stars) {
-      const previousZ = star.z;
-      star.z -= delta * 0.029;
-      if (star.z < 1) {
-        star.x = (Math.random() - 0.5) * width;
-        star.y = (Math.random() - 0.5) * height;
-        star.z = width;
-      }
+    context.fillStyle = 'rgba(5, 6, 11, 0.22)';
+    context.fillRect(0, 0, width, height);
+    context.save();
+    context.translate(width / 2, height / 2);
+    context.scale(1 + flatten * 1.8, Math.max(0.004, 1 - flatten));
 
-      const scale = 92 / star.z;
-      const previousScale = 92 / previousZ;
-      const x = centerX + star.x * scale;
-      const y = centerY + star.y * scale;
-      const previousX = centerX + star.x * previousScale;
-      const previousY = centerY + star.y * previousScale;
+    const core = clamp(t / 0.4) * (1 - grow * 0.6);
+    const glow = context.createRadialGradient(0, 0, 0, 0, 0, radius * 0.25);
+    glow.addColorStop(0, `rgba(231, 234, 244, ${0.9 * core})`);
+    glow.addColorStop(0.25, `rgba(124, 236, 255, ${0.35 * core})`);
+    glow.addColorStop(1, 'rgba(124, 236, 255, 0)');
+    context.fillStyle = glow;
+    context.beginPath();
+    context.arc(0, 0, radius * 0.25, 0, Math.PI * 2);
+    context.fill();
 
-      if (x < 0 || x > width || y < 0 || y > height) {
-        star.z = width;
-        continue;
-      }
-
-      const alpha = Math.min(0.85, star.brightness + (1 - star.z / width) * 0.45);
+    LAYERS.forEach(([n, d], layer) => {
+      const k = n / d;
+      const turns = d * Math.PI * 2;
+      const r0 = radius * grow * (0.42 + layer * 0.14);
+      const rotation = t * (0.25 + layer * 0.07) * (layer % 2 ? 1 : -1);
+      const mix = layer / (LAYERS.length - 1);
       context.beginPath();
-      context.moveTo(previousX, previousY);
-      context.lineTo(x, y);
-      context.strokeStyle = `rgba(181, 193, 255, ${alpha})`;
-      context.lineWidth = Math.max(0.5, star.size * (1 - star.z / width));
+      for (let i = 0; i <= 900; i++) {
+        const theta = i / 900 * turns;
+        const r = r0 * Math.cos(k * theta + t * 0.8);
+        const x = r * Math.cos(theta + rotation);
+        const y = r * Math.sin(theta + rotation);
+        if (i) context.lineTo(x, y);
+        else context.moveTo(x, y);
+      }
+      context.strokeStyle = `rgba(${124 + 44 * mix | 0}, ${236 - 97 * mix | 0}, 255, ${0.16 + 0.2 * grow})`;
+      context.lineWidth = 0.8;
       context.stroke();
+    });
+
+    const ring = radius * 1.08 * grow;
+    context.strokeStyle = `rgba(150, 170, 255, ${0.35 * grow})`;
+    context.lineWidth = 1;
+    context.beginPath();
+    for (let i = 0; i < 144; i++) {
+      const angle = i / 144 * Math.PI * 2 + t * 0.1;
+      const length = i % 12 === 0 ? 14 : (i % 4 === 0 ? 7 : 3);
+      context.moveTo(Math.cos(angle) * ring, Math.sin(angle) * ring);
+      context.lineTo(Math.cos(angle) * (ring + length), Math.sin(angle) * (ring + length));
+    }
+    context.stroke();
+
+    const sweep = t * 1.6;
+    context.strokeStyle = `rgba(124, 236, 255, ${0.6 * grow})`;
+    context.beginPath();
+    context.moveTo(0, 0);
+    context.lineTo(Math.cos(sweep) * ring, Math.sin(sweep) * ring);
+    context.stroke();
+    context.restore();
+
+    if (flatten > 0.6) {
+      context.fillStyle = `rgba(124, 236, 255, ${(flatten - 0.6) * 2.2})`;
+      context.fillRect(0, height / 2 - 1, width, 2);
     }
 
-    animationFrame = requestAnimationFrame(drawStars);
+    if (t < DURATION) animationFrame = requestAnimationFrame(drawFrame);
+    else finishIntro();
   }
 
   function finishIntro() {
@@ -105,36 +127,28 @@
     window.removeEventListener('resize', resizeCanvas);
     root.classList.remove('blog-intro-pending');
     intro.classList.add('is-leaving');
+    window.dispatchEvent(new CustomEvent('blog-intro:end'));
 
     window.setTimeout(() => {
       intro.remove();
       root.classList.remove('blog-intro-pending', 'blog-intro-active');
-    }, reduceMotion ? 20 : 760);
+    }, 720);
   }
 
-  function finishWhenReady() {
-    const minimumDuration = reduceMotion ? 650 : 3600;
-    const remaining = Math.max(0, minimumDuration - (performance.now() - startedAt));
-    window.setTimeout(finishIntro, remaining);
+  function handleKeydown() {
+    finishIntro();
   }
 
-  function handleKeydown(event) {
-    if (event.key === 'Escape') finishIntro();
-  }
-
+  intro.addEventListener('click', finishIntro);
   skipButton?.addEventListener('click', finishIntro);
   window.addEventListener('keydown', handleKeydown);
   window.addEventListener('resize', resizeCanvas, { passive: true });
 
-  if (!reduceMotion && context) {
+  if (context) {
     resizeCanvas();
-    animationFrame = requestAnimationFrame(drawStars);
-  }
-
-  if (document.readyState === 'complete') {
-    finishWhenReady();
+    animationFrame = requestAnimationFrame(drawFrame);
   } else {
-    window.addEventListener('load', finishWhenReady, { once: true });
+    finishIntro();
   }
 
   failsafeTimer = window.setTimeout(finishIntro, 6500);

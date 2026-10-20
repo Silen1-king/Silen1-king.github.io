@@ -16,7 +16,7 @@
 
     <a href="{{ config.root }}" class="brand" rel="start">
       <i class="logo-line"></i>
-      <p class="site-title">{{ title }}</p>
+      <p class="site-title">{{ title | escape | replace('1', '<em>1</em>') | safe }}</p>
       <i class="logo-line"></i>
     </a>
     {%- if subtitle %}
@@ -28,6 +28,7 @@
   </div>
 
   <div class="site-nav-right">
+    <span class="signal-rip" aria-hidden="true"><span data-signal-rip-label>RIP</span> <b data-signal-rip>0x00401000</b></span>
     {%- if config.search and config.search.path %}
       <button class="global-search-trigger" type="button" data-open-search aria-haspopup="dialog" aria-controls="global-search-modal">
         <i class="fa fa-search" aria-hidden="true"></i><span>搜索</span><kbd>Ctrl K</kbd>
@@ -37,8 +38,8 @@
         <section class="global-search-panel">
           <header class="global-search-header">
             <i class="fa fa-search" aria-hidden="true"></i>
-            <label id="global-search-title" class="global-search-label" for="global-search-input">全站搜索</label>
-            <input id="global-search-input" class="global-search-input" type="search" placeholder="搜索标题、标签、分类和正文…" autocomplete="off" spellcheck="false">
+            <label id="global-search-title" class="global-search-label" for="global-search-input"><span aria-hidden="true">(gdb) seek</span><span class="signal-sr-only">全站搜索</span></label>
+            <input id="global-search-input" class="global-search-input" type="search" placeholder="搜索文章，例如 编码 或 pcap" autocomplete="off" spellcheck="false">
             <button class="global-search-close" type="button" data-search-close aria-label="关闭搜索">×</button>
           </header>
           <div class="global-search-status" role="status" aria-live="polite">输入关键词开始检索</div>

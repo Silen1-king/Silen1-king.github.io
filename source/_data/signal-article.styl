@@ -1,0 +1,717 @@
+// SIGNAL reader: post header, body typography, alerts, code, related posts,
+// discussion and image zoom. Features come from scripts/post-render-enhancements.js
+// and source/js/post-enhancements.js; only their look lives here.
+@css {
+  .main-inner.post {
+    max-width: 860px;
+  }
+
+  .posts-expand .post-header {
+    margin-bottom: 44px;
+    text-align: left;
+  }
+
+  .posts-expand .post-title {
+    margin: 0 0 22px;
+    color: var(--fg);
+    font: 900 clamp(34px, 5vw, 62px)/1.2 var(--f-cn-display);
+    text-wrap: balance;
+  }
+
+  .posts-expand .post-title-link {
+    border: 0;
+    color: var(--fg);
+  }
+
+  .posts-expand .post-title-link::before {
+    background: var(--cyan);
+  }
+
+  .post-meta-container {
+    margin-top: 0;
+  }
+
+  .posts-expand .post-meta,
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 4px 16px;
+    color: var(--mute);
+    font: 12px var(--f-mono);
+  }
+
+  .post-meta-item {
+    margin: 0;
+  }
+
+  .post-meta-item::before,
+  .post-meta-item-icon {
+    display: none;
+  }
+
+  .post-meta a {
+    border-bottom: 1px solid var(--line-2);
+    color: var(--cyan);
+  }
+
+  .posts-expand .post-meta-container time {
+    border-bottom: 0;
+  }
+
+  .posts-expand .post-header .post-description {
+    max-width: 60ch;
+    font-family: var(--f-body);
+    margin: 26px 0 0;
+    padding-left: 18px;
+    border-left: 2px solid var(--violet);
+    color: var(--mute);
+    font-size: 18px;
+    line-height: 1.7;
+    text-align: left;
+  }
+
+  /* ───── Body ───── */
+  .post-body {
+    color: var(--text);
+    font-family: var(--f-body);
+    font-size: 16.5px;
+    line-height: 1.9;
+  }
+
+  .post-body p {
+    margin: 0 0 1.1em;
+  }
+
+  .post-body a {
+    border-bottom: 1px solid rgba(124, 236, 255, .3);
+    color: var(--cyan);
+  }
+
+  .post-body a:hover {
+    border-bottom-color: var(--cyan);
+    color: #fff;
+  }
+
+  .post-body h1,
+  .post-body h2,
+  .post-body h3,
+  .post-body h4,
+  .post-body h5,
+  .post-body h6 {
+    padding: 0;
+    border: 0;
+    color: var(--fg);
+    font-family: var(--f-cn-display);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .post-body h2 {
+    margin: 52px 0 14px;
+    font-size: 26px;
+  }
+
+  .post-body h2[data-loc]::before {
+    content: attr(data-loc);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--cyan);
+    font: 11px var(--f-mono);
+    letter-spacing: .1em;
+  }
+
+  .post-body h3 {
+    margin: 36px 0 12px;
+    font-size: 20px;
+  }
+
+  .post-body h4 {
+    margin: 28px 0 10px;
+    padding-left: 11px;
+    border-left: 2px solid var(--cyan);
+    font-size: 17px;
+  }
+
+  .post-body h5 {
+    color: #bec5e4;
+    font-size: 16px;
+  }
+
+  .post-body h6 {
+    color: var(--mute);
+    font-size: 15px;
+    letter-spacing: .04em;
+  }
+
+  .post-body .headerlink {
+    border: 0;
+  }
+
+  .post-body .headerlink::before {
+    color: var(--mute);
+  }
+
+  .post-body ul,
+  .post-body ol {
+    padding-left: 1.4em;
+  }
+
+  .post-body li::marker {
+    color: var(--mute);
+  }
+
+  .post-body blockquote {
+    margin: 24px 0;
+    padding: 2px 0 2px 18px;
+    border-left: 2px solid var(--line-2);
+    background: none;
+    color: var(--mute);
+  }
+
+  .post-body hr {
+    height: 1px;
+    margin: 40px 0;
+    border: 0;
+    background: var(--line);
+  }
+
+  .post-body img {
+    border: 1px solid var(--line);
+  }
+
+  .post-body table {
+    border: 1px solid var(--line);
+    font-size: 14.5px;
+  }
+
+  .post-body th {
+    border-color: var(--line);
+    background: var(--ink-2);
+    color: var(--fg);
+    font: 600 12px var(--f-mono);
+    letter-spacing: .06em;
+  }
+
+  .post-body td {
+    border-color: var(--line);
+  }
+
+  .post-body :not(pre) > code {
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--ink-2);
+    color: #d6dbf0;
+    font: .86em var(--f-mono);
+    overflow-wrap: anywhere;
+  }
+
+  /* ───── Code blocks ───── */
+  .post-body figure.highlight,
+  .post-body .post-code-container {
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 24px 0;
+    border: 1px solid var(--line-2);
+    border-radius: 0;
+    background: #080a12;
+    box-shadow: none;
+  }
+
+  .post-body .code-container {
+    position: relative;
+    padding-top: 36px;
+  }
+
+  .post-body .code-container::before {
+    content: "";
+    position: absolute;
+    top: 35px;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .post-body figure.highlight .table-container,
+  .post-body pre {
+    overflow-x: auto;
+  }
+
+  .post-body pre,
+  .post-body .highlight pre,
+  .post-body .highlight .gutter pre,
+  .post-body .highlight .code pre {
+    background: #080a12;
+    font: 13.5px/1.75 var(--f-mono);
+    tab-size: 2;
+  }
+
+  .post-body .highlight .gutter pre {
+    color: #3c4460;
+  }
+
+  .post-body .highlight table,
+  .post-body .highlight td {
+    border: 0;
+    background: none;
+  }
+
+  .post-body .code-lang {
+    top: 0 !important;
+    right: auto !important;
+    left: 14px;
+    max-width: calc(100% - 120px);
+    height: 36px;
+    overflow: hidden;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--mute);
+    font: 11px/36px var(--f-mono) !important;
+    letter-spacing: .1em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 1 !important;
+  }
+
+  .post-body .copy-btn {
+    top: 6px;
+    right: 8px;
+    z-index: 4;
+    display: inline-flex;
+    min-width: 0;
+    min-height: 0;
+    align-items: center;
+    padding: 3px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 2px;
+    background: none !important;
+    color: var(--fg) !important;
+    font: 11px var(--f-mono);
+    opacity: .85;
+  }
+
+  /* Text labels instead of Font Awesome glyphs, so the button reads even when the icon CDN is slow. */
+  .post-body .copy-btn i {
+    display: none;
+  }
+
+  .post-body .copy-btn::before {
+    content: "COPY";
+    letter-spacing: .08em;
+  }
+
+  .post-body .copy-btn:has(.fa-check-circle)::before {
+    content: "COPIED";
+    color: var(--green);
+  }
+
+  .post-body .copy-btn:has(.fa-times-circle)::before {
+    content: "FAILED";
+    color: var(--rose);
+  }
+
+  .post-body .copy-btn:hover,
+  .post-body .copy-btn:focus-visible {
+    border-color: var(--cyan);
+    opacity: 1;
+  }
+
+  .post-body .post-code-container > pre {
+    margin: 0;
+    padding: 46px 16px 16px;
+  }
+
+  @media (any-hover: none), (pointer: coarse) {
+    .post-body .copy-btn {
+      min-height: 30px;
+      opacity: 1;
+    }
+  }
+
+  /* ───── Alerts and the stale notice ───── */
+  .markdown-alert,
+  .post-stale-notice {
+    --alert-color: var(--cyan);
+    margin: 24px 0;
+    padding: 14px 18px;
+    border: 1px solid rgba(124, 236, 255, .4);
+    border-color: color-mix(in srgb, var(--alert-color) 45%, transparent);
+    border-radius: 0;
+    background: var(--ink);
+    box-shadow: none;
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  .markdown-alert p {
+    margin: 6px 0;
+  }
+
+  .markdown-alert .markdown-alert-title {
+    display: block;
+    margin: 0 0 4px;
+    color: var(--alert-color);
+    font: 600 12px var(--f-mono);
+    letter-spacing: .14em;
+  }
+
+  .markdown-alert .markdown-alert-title span {
+    display: none;
+  }
+
+  .markdown-alert .markdown-alert-body > :first-child {
+    margin-top: 0;
+  }
+
+  .markdown-alert .markdown-alert-body > :last-child {
+    margin-bottom: 0;
+  }
+
+  .markdown-alert-note {
+    --alert-color: var(--cyan);
+  }
+
+  .markdown-alert-note .markdown-alert-title::before {
+    content: "NOTE · ";
+  }
+
+  .markdown-alert-tip {
+    --alert-color: var(--green);
+  }
+
+  .markdown-alert-tip .markdown-alert-title::before {
+    content: "TIP · ";
+  }
+
+  .markdown-alert-important {
+    --alert-color: var(--violet);
+  }
+
+  .markdown-alert-important .markdown-alert-title::before {
+    content: "IMPORTANT · ";
+  }
+
+  .markdown-alert-warning {
+    --alert-color: var(--heat);
+  }
+
+  .markdown-alert-warning .markdown-alert-title::before {
+    content: "WARNING · ";
+  }
+
+  .markdown-alert-caution {
+    --alert-color: var(--rose);
+  }
+
+  .markdown-alert-caution .markdown-alert-title::before {
+    content: "CAUTION · ";
+  }
+
+  .post-stale-notice {
+    --alert-color: var(--heat);
+    display: block;
+    margin: 0 0 30px;
+  }
+
+  .post-stale-notice::before {
+    content: "STALE · 时效提示";
+    display: block;
+    margin-bottom: 4px;
+    color: var(--heat);
+    font: 600 12px var(--f-mono);
+    letter-spacing: .14em;
+  }
+
+  .post-stale-notice-icon {
+    display: none;
+  }
+
+  .post-stale-notice p {
+    margin: 0;
+  }
+
+  .post-stale-notice em {
+    font-style: normal;
+  }
+
+  /* ───── Post footer ───── */
+  .post-footer {
+    margin-top: 20px;
+  }
+
+  .post-tags {
+    margin-top: 44px;
+    font: 12px var(--f-mono);
+  }
+
+  .post-tags a,
+  .posts-expand .post-tags a {
+    margin: 0 10px 6px 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--violet);
+    font-size: 12px;
+  }
+
+  .post-tags a:hover {
+    color: #fff;
+  }
+
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 28px;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .post-nav-item {
+    min-width: 0;
+  }
+
+  .post-nav-item a {
+    display: block;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    background: var(--ink);
+    color: var(--fg);
+    font-size: 14.5px;
+    line-height: 1.5;
+    transition: border-color .2s ease;
+  }
+
+  .post-nav-item a:hover {
+    border-color: var(--cyan);
+    color: #fff;
+  }
+
+  .post-nav-item:last-child a {
+    text-align: right;
+  }
+
+  .post-nav-item i {
+    color: var(--cyan);
+  }
+
+  .related-posts-section,
+  .post-community {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  .related-posts-heading,
+  .post-community-heading {
+    margin-bottom: 16px;
+  }
+
+  .related-posts-heading h2,
+  .post-community-heading h2 {
+    margin: 4px 0 0;
+    padding: 0;
+    border: 0;
+    color: var(--fg);
+    font: 700 22px/1.4 var(--f-cn-display);
+  }
+
+  .related-posts-kicker,
+  .post-community-kicker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--mute);
+    font: 12px var(--f-mono);
+    letter-spacing: .22em;
+  }
+
+  .related-posts-kicker::before,
+  .post-community-kicker::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--cyan);
+  }
+
+  .related-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .related-post-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 130px;
+    flex-direction: column;
+    padding: 16px;
+    border: 1px solid var(--line) !important;
+    background: var(--ink);
+    color: var(--fg) !important;
+    transition: border-color .2s ease;
+  }
+
+  .related-post-card:hover {
+    border-color: var(--cyan) !important;
+  }
+
+  .related-post-card h3 {
+    margin: 8px 0 12px;
+    color: var(--fg);
+    font: 500 15px/1.5 var(--f-body);
+  }
+
+  .related-post-card time {
+    margin-top: auto;
+    color: var(--mute);
+    font: 11px var(--f-mono);
+  }
+
+  .related-post-reason {
+    overflow: hidden;
+    color: var(--cyan);
+    font: 11px var(--f-mono);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .related-post-arrow {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    color: var(--cyan);
+  }
+
+  .post-community-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .post-community-intro {
+    margin: 0 0 22px;
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  .post-error-report {
+    display: inline-flex;
+    min-height: 40px;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid var(--line-2) !important;
+    border-radius: 2px;
+    background: none;
+    color: var(--fg) !important;
+    font: 12px var(--f-mono);
+    letter-spacing: .06em;
+  }
+
+  .post-error-report:hover {
+    border-color: var(--cyan) !important;
+    background: rgba(124, 236, 255, .06);
+  }
+
+  .giscus,
+  .giscus-frame {
+    width: 100%;
+  }
+
+  @media (max-width: 900px) {
+    .related-posts-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .related-post-card {
+      min-height: 110px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .post-body {
+      font-size: 16px;
+    }
+
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-community-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  /* ───── Image zoom ───── */
+  .post-image-zoomable {
+    cursor: zoom-in;
+  }
+
+  .image-zoom-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(5, 6, 11, .94);
+    opacity: 0;
+    transition: opacity .18s ease;
+  }
+
+  .image-zoom-overlay.is-open {
+    opacity: 1;
+  }
+
+  .image-zoom-figure {
+    display: grid;
+    max-width: min(94vw, 1440px);
+    max-height: 92dvh;
+    margin: 0;
+    place-items: center;
+  }
+
+  .image-zoom-figure img {
+    max-width: 100%;
+    max-height: calc(92dvh - 44px);
+    object-fit: contain;
+    border: 1px solid var(--line);
+  }
+
+  .image-zoom-figure figcaption {
+    margin-top: 10px;
+    color: var(--mute);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .image-zoom-close {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    right: calc(14px + env(safe-area-inset-right, 0px));
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--line-2);
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--fg);
+    font-size: 1.6em;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  body.image-zoom-open {
+    overflow: hidden;
+  }
+}
