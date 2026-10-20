@@ -1,5 +1,9 @@
 <div class="signal-coda">
-  <div class="signal-coda-mark" aria-hidden="true">SILEN1</div>
+  <div class="signal-coda-stage" aria-hidden="true">
+    <div class="signal-coda-mark">SILEN1</div>
+    <canvas class="signal-coda-trace" data-coda-trace></canvas>
+    <div class="signal-coda-readout">f₁ <b data-coda-f1>2.000</b> · f₂ <b data-coda-f2>3.010</b><br>t <b data-coda-time>0.00</b> s</div>
+  </div>
 {%- if config.blog_runtime and config.blog_runtime.enable %}
   <div class="blog-runtime" data-blog-runtime data-since="{{ config.blog_runtime.since }}">
     <span class="blog-runtime-label">本站已运行</span>
