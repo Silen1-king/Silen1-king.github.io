@@ -36,6 +36,17 @@ Partial RELRO   No canary found   NX disabled   No PIE
 - 单独的 `text` 代码块不显示行号。
 - 只改显示效果，Markdown 原文不变。
 
+### 同址高亮
+
+用鼠标指着代码里的一个地址或名字，文章里所有代码块和行内代码中相同的值会一起
+高亮，就像在 IDA 里点中一个符号。地址按数值比较，所以 nm 打印的
+`0000000000401186`、objdump 里的 `401186` 和 exploit 里的 `0x401186` 算同一个。
+
+- 地址：`0x` 开头的十六进制，或 6 到 16 位、至少含一个数字的十六进制（nm、objdump 的写法）。
+- 名字：两个字符以上的标识符，如 `fun`、`FUN_ADDR`、`rdi`，大小写敏感。
+- 写文章时不用做任何标记。只在用鼠标时生效，由 `source/js/post-enhancements.js`
+  通过 CSS Custom Highlight API 绘制，不改动代码的 HTML，复制不受影响。
+
 ## Alert 提示框
 
 支持 GitHub/Obsidian 风格的五种提示：`NOTE`、`TIP`、`IMPORTANT`、

@@ -3,8 +3,11 @@
 // SIGNAL interface: header address readout, home page canvases (hero
 // particles, realm emblems), the series route graph, counters, the hex
 // reading offset on posts, and the harmonograph that closes every page.
-// Mouse input only adds a slight parallax to the hero; there is no cursor
-// follower.
+// The mouse only nudges things that are already there: a slight parallax and
+// a magnet on the hero, a breakpoint on 札记 rows, a tuning knob on the
+// harmonograph. There is no cursor follower. None of it runs for touch, and
+// the parts that move (parallax, magnet, tuning) stay still with reduced
+// motion.
 (function() {
   'use strict';
 
@@ -94,19 +97,47 @@
   const ripValue = $('[data-signal-rip]');
   const postBody = $('.post-body');
   const isPost = Boolean(window.CONFIG && CONFIG.page && CONFIG.page.isPost && postBody);
+  // Set while the readout shows where a 札记 row would jump to (below).
+  let jumpTarget = '';
+  let rolling = 0;
+
+  function scrollReadout() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = max > 0 ? clamp(window.scrollY / max) : 0;
+    if (isPost) {
+      const total = Math.max(0x400, postBody.textContent.length * 3);
+      return `${hex(progress * total, 4)} / ${hex(total, 4)}`;
+    }
+    return hex(BASE_ADDRESS + progress * 0xFFFF);
+  }
+
+  // The readout settles on its new value digit by digit, left to right.
+  function rollReadout() {
+    window.clearInterval(rolling);
+    const target = () => jumpTarget || scrollReadout();
+    if (reduceMotion) {
+      rolling = 0;
+      ripValue.textContent = target();
+      return;
+    }
+    let step = 0;
+    rolling = window.setInterval(() => {
+      step++;
+      const text = target();
+      const settled = 2 + (text.length - 2) * step / 8;
+      ripValue.textContent = [...text].map((char, i) =>
+        i < settled || !/[0-9A-F]/.test(char) ? char : '0123456789ABCDEF'[Math.random() * 16 | 0]).join('');
+      if (step >= 8) {
+        window.clearInterval(rolling);
+        rolling = 0;
+      }
+    }, 28);
+  }
 
   if (isPost && ripLabel) ripLabel.textContent = 'OFFSET';
   scrollHandlers.push(() => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = max > 0 ? clamp(window.scrollY / max) : 0;
     header?.classList.toggle('is-scrolled', window.scrollY > 8);
-    if (!ripValue) return;
-    if (isPost) {
-      const total = Math.max(0x400, postBody.textContent.length * 3);
-      ripValue.textContent = `${hex(progress * total, 4)} / ${hex(total, 4)}`;
-    } else {
-      ripValue.textContent = hex(BASE_ADDRESS + progress * 0xFFFF);
-    }
+    if (ripValue && !jumpTarget && !rolling) ripValue.textContent = scrollReadout();
   });
 
   // Floating buttons hide while scrolling down and return on the way up or
@@ -136,6 +167,9 @@
     const heroCopy = $('.signal-hero-copy');
     const wordmark = heroCanvas.dataset.wordmark || 'SILEN1';
     const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+    // The magnet: particles near the mouse step aside and spring back.
+    // Reach and push follow the size of the wordmark.
+    const magnet = { x: -1e4, y: -1e4, reach: 90, push: 8 };
     let context;
     let width = 0;
     let height = 0;
@@ -156,6 +190,8 @@
       draw.fillText(wordmark, width / 2, width < 760 ? height * 0.36 : height * 0.4);
       const data = draw.getImageData(0, 0, width, height).data;
       const step = Math.max(3, Math.round(fontSize / (width < 760 ? 30 : 52)));
+      magnet.reach = clamp(fontSize * 0.26, 70, 130);
+      magnet.push = clamp(step * 1.4, 6, 12);
       const previous = particles;
       particles = [];
       for (let y = 0; y < height; y += step) {
@@ -215,10 +251,25 @@
 
       const T = time * 0.001;
       const spread = reduceMotion ? 0 : scatter;
+      const box = heroCanvas.getBoundingClientRect();
+      const px = magnet.x - box.left;
+      const py = magnet.y - box.top;
+      const { reach } = magnet;
+      const push = magnet.push * (1 - spread);
       for (const p of particles) {
         const parallax = 2 + p.depth * 5;
-        const tx = p.hx + (p.sx - p.hx) * spread + Math.sin(T * 1.3 + p.phase) * 0.8 - mouse.x * parallax;
-        const ty = p.hy + (p.sy - p.hy) * spread + Math.cos(T * 1.1 + p.phase) * 0.8 - mouse.y * parallax;
+        let tx = p.hx + (p.sx - p.hx) * spread + Math.sin(T * 1.3 + p.phase) * 0.8 - mouse.x * parallax;
+        let ty = p.hy + (p.sy - p.hy) * spread + Math.cos(T * 1.1 + p.phase) * 0.8 - mouse.y * parallax;
+        const dx = tx - px;
+        const dy = ty - py;
+        if (push > 0 && Math.abs(dx) < reach && Math.abs(dy) < reach) {
+          const distance = Math.hypot(dx, dy);
+          if (distance > 0.01 && distance < reach) {
+            const force = Math.pow(1 - distance / reach, 2) * push / distance;
+            tx += dx * force;
+            ty += dy * force;
+          }
+        }
         p.vx = (p.vx + (tx - p.x) * 0.06) * 0.78;
         p.vy = (p.vy + (ty - p.y) * 0.06) * 0.78;
         p.x += p.vx;
@@ -254,7 +305,13 @@
         if (event.pointerType !== 'mouse') return;
         mouse.tx = event.clientX / window.innerWidth * 2 - 1;
         mouse.ty = event.clientY / window.innerHeight * 2 - 1;
+        magnet.x = event.clientX;
+        magnet.y = event.clientY;
       }, { passive: true });
+      document.documentElement.addEventListener('mouseleave', () => {
+        magnet.x = -1e4;
+        magnet.y = -1e4;
+      });
     }
 
     // With reduced motion the wordmark is drawn once, already assembled.
@@ -299,18 +356,22 @@
     for (const char of location.pathname.replace(/index\.html$/, '')) seed = (seed * 31 + char.codePointAt(0)) >>> 0;
     const [a, b] = isHome ? [2, 3] : RATIOS[seed % RATIOS.length];
     const phases = isHome ? [0.3, 1.2, 0, 0.7] : [0, 1, 2, 3].map(i => (seed >>> (i * 8) & 255) / 255 * Math.PI * 2);
+    const f2Label = $('[data-coda-f2]');
     $('[data-coda-f1]').textContent = a.toFixed(3);
-    $('[data-coda-f2]').textContent = (b + 0.01).toFixed(3);
+    f2Label.textContent = (b + 0.01).toFixed(3);
 
     let context;
     let width = 0;
     let height = 0;
     let shown = 0;
+    // Set by the mouse over the trace (below); both rest at 0.
+    const tune = { detune: 0, phase: 0, toDetune: 0, toPhase: 0 };
 
     const point = t => {
       const amplitude = Math.min(width, height) * 0.34;
-      const x = amplitude * Math.sin(a * t + phases[0]) * Math.exp(-0.012 * t) + amplitude * 0.45 * Math.sin((b + 0.01) * t + phases[1]) * Math.exp(-0.018 * t);
-      const y = amplitude * Math.sin(b * t + phases[2]) * Math.exp(-0.014 * t) + amplitude * 0.45 * Math.sin((a + 0.005) * t + phases[3]) * Math.exp(-0.02 * t);
+      const f2 = b + tune.detune;
+      const x = amplitude * Math.sin(a * t + phases[0] + tune.phase) * Math.exp(-0.012 * t) + amplitude * 0.45 * Math.sin((f2 + 0.01) * t + phases[1]) * Math.exp(-0.018 * t);
+      const y = amplitude * Math.sin(f2 * t + phases[2]) * Math.exp(-0.014 * t) + amplitude * 0.45 * Math.sin((a + 0.005) * t + phases[3]) * Math.exp(-0.02 * t);
       return [width / 2 + x, height / 2 + y];
     };
     const draw = progress => {
@@ -369,6 +430,42 @@
       observer.disconnect();
       ringOut();
     }, { threshold: 0.3 }).observe(codaCanvas);
+
+    // Over the trace the mouse is a pair of knobs: left to right detunes f₂
+    // by up to ±0.04, top to bottom turns the phase by up to ±π/4. When the
+    // mouse leaves, the figure eases back to this page's own values. The
+    // canvas ignores the pointer, so the stage around it listens.
+    const stage = codaCanvas.closest('.signal-coda-stage');
+    if (stage && finePointer && !reduceMotion) {
+      let easing = 0;
+      const ease = () => {
+        tune.detune += (tune.toDetune - tune.detune) * 0.12;
+        tune.phase += (tune.toPhase - tune.phase) * 0.12;
+        const settled = Math.abs(tune.toDetune - tune.detune) < 1e-4 && Math.abs(tune.toPhase - tune.phase) < 1e-3;
+        if (settled) {
+          tune.detune = tune.toDetune;
+          tune.phase = tune.toPhase;
+        }
+        f2Label.textContent = (b + 0.01 + tune.detune).toFixed(3);
+        draw(shown);
+        easing = settled ? 0 : requestAnimationFrame(ease);
+      };
+      const retune = (detune, phase) => {
+        if (detune === tune.toDetune && phase === tune.toPhase) return;
+        tune.toDetune = detune;
+        tune.toPhase = phase;
+        if (!easing) easing = requestAnimationFrame(ease);
+      };
+      stage.addEventListener('pointermove', event => {
+        if (event.pointerType !== 'mouse') return;
+        const rect = codaCanvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width;
+        const y = (event.clientY - rect.top) / rect.height;
+        if (x < 0 || x > 1 || y < 0 || y > 1) retune(0, 0);
+        else retune((x - 0.5) * 0.08, (y - 0.5) * Math.PI / 2);
+      });
+      stage.addEventListener('pointerleave', () => retune(0, 0));
+    }
   }
 
   /* ───── 疆域: emblems, and a horizontal track once there are 3+ realms ───── */
@@ -482,6 +579,34 @@
       $$('.signal-seg').forEach(row => {
         row.hidden = Boolean(realm) && row.dataset.realm !== realm;
       });
+    });
+  }
+
+  /* ───── 札记: a breakpoint on the row under the mouse ───── */
+  // The row's address lights up beside a breakpoint (signal-home.styl), and
+  // the header readout jumps to it, the way a debugger shows where a jump
+  // will land. Keyboard focus does the same.
+  if (ripValue && ripLabel) {
+    const rip = ripValue.closest('.signal-rip');
+    const jump = row => {
+      jumpTarget = $('.signal-seg-addr', row)?.textContent.trim() || '';
+      if (!jumpTarget) return;
+      rip?.classList.add('is-jump');
+      ripLabel.textContent = 'JMP';
+      rollReadout();
+    };
+    const land = () => {
+      if (!jumpTarget) return;
+      jumpTarget = '';
+      rip?.classList.remove('is-jump');
+      ripLabel.textContent = isPost ? 'OFFSET' : 'RIP';
+      rollReadout();
+    };
+    $$('.signal-seg').forEach(row => {
+      row.addEventListener('mouseenter', () => jump(row));
+      row.addEventListener('mouseleave', land);
+      row.addEventListener('focusin', () => jump(row));
+      row.addEventListener('focusout', land);
     });
   }
 

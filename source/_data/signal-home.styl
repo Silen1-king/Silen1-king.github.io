@@ -71,7 +71,7 @@
     color: var(--mute);
     font: 12px var(--f-mono);
     letter-spacing: .06em;
-    cursor: pointer;
+    cursor: var(--cursor-pointer, pointer);
   }
 
   .signal-chip:hover {
@@ -482,6 +482,43 @@
     font: 12px var(--f-mono);
   }
 
+  /* With a mouse the address gets a breakpoint gutter: pointing at a row
+     sets a breakpoint and lights the address, while source/js/signal.js
+     sends the header readout to it. */
+  @media (hover: hover) {
+    .signal-seg-addr {
+      padding-left: 16px;
+      transition: color .2s ease;
+    }
+
+    .signal-seg-addr::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 7px;
+      height: 7px;
+      margin-top: -4px;
+      border-radius: 50%;
+      background: var(--rose);
+      box-shadow: 0 0 10px var(--rose);
+      opacity: 0;
+      transform: scale(.4);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .signal-seg:hover .signal-seg-addr,
+    .signal-seg:focus-within .signal-seg-addr {
+      color: var(--cyan);
+    }
+
+    .signal-seg:hover .signal-seg-addr::before,
+    .signal-seg:focus-within .signal-seg-addr::before {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   .signal-seg time {
     color: var(--mute);
     font: 12px var(--f-mono);
@@ -808,6 +845,45 @@
   .signal-register-label {
     color: var(--mute);
     font: italic 500 20px var(--f-poem);
+  }
+
+  /* Watch: hovering a register shows its value in hex and binary. Space is
+     kept for it so nothing moves; touch screens never show it. */
+  .signal-register-watch {
+    display: none;
+  }
+
+  @media (hover: hover) {
+    .signal-register {
+      transition: background-color .2s ease;
+    }
+
+    .signal-register:hover {
+      background: var(--ink);
+    }
+
+    .signal-register-watch {
+      display: block;
+      margin-top: 12px;
+      color: #4b5372;
+      font: 11px/1.6 var(--f-mono);
+      letter-spacing: .04em;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .signal-register-watch b {
+      color: var(--cyan);
+      font-weight: 400;
+    }
+
+    .signal-register:hover .signal-register-watch {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .signal-spectrum {

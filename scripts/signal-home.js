@@ -258,6 +258,14 @@ function renderRoutes(routes, urlFor) {
   </section>`;
 }
 
+// What a debugger shows when you hover a register: the value in hex, and in
+// binary grouped by four bits. Revealed on hover (signal-home.styl).
+function registerWatch(value) {
+  const number = Math.max(0, Math.round(Number(value) || 0));
+  const bits = number.toString(2).replace(/\B(?=(\d{4})+(?!\d))/g, ' ');
+  return `<span class="signal-register-watch" aria-hidden="true"><b>${hex(number)}</b><br>0b ${bits}</span>`;
+}
+
 function renderAlmanac(site, realms, urlFor) {
   const blogStats = hexo.extend.helper.get('blog_stats');
   const stats = blogStats ? blogStats(site.posts) : { postCount: toArray(site.posts).length, words: 0 };
@@ -284,6 +292,7 @@ function renderAlmanac(site, realms, urlFor) {
           <span class="signal-register-name">${name}</span>
           <span class="signal-register-value" data-count-to="${value}">${Number(value).toLocaleString('en')}</span>
           <span class="signal-register-label">${label}</span>
+          ${registerWatch(value)}
         </div>`).join('')}
       </div>
       ${spectrum.length ? `

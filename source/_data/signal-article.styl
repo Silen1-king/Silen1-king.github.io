@@ -302,6 +302,19 @@
     mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
   }
 
+  /* Same address (source/js/post-enhancements.js): the address or name under
+     the mouse, and every other place in the post's code that holds it.
+     Highlight styles take literal colours, not the tokens. */
+  ::highlight(signal-same) {
+    background-color: rgba(124, 236, 255, .16);
+    color: #e7eaf4;
+  }
+
+  ::highlight(signal-here) {
+    background-color: rgba(124, 236, 255, .34);
+    color: #fff;
+  }
+
   .post-body .highlight table,
   .post-body .highlight td {
     border: 0;
@@ -778,7 +791,7 @@
     color: var(--fg);
     font-size: 1.6em;
     line-height: 1;
-    cursor: pointer;
+    cursor: var(--cursor-pointer, pointer);
   }
 
   body.image-zoom-open {

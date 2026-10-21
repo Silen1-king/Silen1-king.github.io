@@ -212,9 +212,129 @@
     });
   }
 
+  // Same address: hovering an address or a name in code lights up every
+  // place in the post's code that holds it, the way IDA marks a symbol
+  // everywhere. Addresses compare by value, so 0000000000401186 (nm),
+  // 401186 (objdump) and 0x401186 (exploit.py) light up together. It paints
+  // with the CSS Custom Highlight API and leaves the code's DOM alone;
+  // browsers without the API, and touch screens, get nothing.
+  const WORD = /[A-Za-z0-9_]+/g;
+
+  function wordKey(word) {
+    if (/^0x[0-9a-f]+$/i.test(word)) return 'a' + BigInt(word).toString(16);
+    // Bare hex as nm and objdump print it; needs a digit, so words like "deadbeef" stay names.
+    if (/^[0-9a-f]{6,16}$/i.test(word) && /\d/.test(word)) return 'a' + BigInt('0x' + word).toString(16);
+    if (/^[A-Za-z_]\w+$/.test(word)) return 's' + word;
+    return '';
+  }
+
+  function caretAt(x, y) {
+    if (document.caretPositionFromPoint) {
+      const position = document.caretPositionFromPoint(x, y);
+      return position && { node: position.offsetNode, offset: position.offset };
+    }
+    if (document.caretRangeFromPoint) {
+      const range = document.caretRangeFromPoint(x, y);
+      return range && { node: range.startContainer, offset: range.startOffset };
+    }
+    return null;
+  }
+
+  function rangeOf(node, start, end) {
+    const range = document.createRange();
+    range.setStart(node, start);
+    range.setEnd(node, end);
+    return range;
+  }
+
+  function watchSameAddress(root = document) {
+    const body = root.querySelector('.post-body');
+    if (!body || body.dataset.sameAddress === 'true') return;
+    if (!window.CSS || !CSS.highlights || typeof Highlight !== 'function') return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    body.dataset.sameAddress = 'true';
+
+    let places = null; // key -> [{ node, start, end }]
+    let words = null; // text node -> [{ start, end, key }]
+    let current = null;
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+
+    // Built on first use, after NexT has finished wrapping the code blocks.
+    function index() {
+      places = new Map();
+      words = new Map();
+      const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, {
+        acceptNode: node => node.parentElement.closest('pre, code') && !node.parentElement.closest('.gutter')
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT
+      });
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const list = [];
+        for (const match of node.nodeValue.matchAll(WORD)) {
+          const key = wordKey(match[0]);
+          if (!key) continue;
+          const word = { start: match.index, end: match.index + match[0].length, key };
+          list.push(word);
+          if (!places.has(key)) places.set(key, []);
+          places.get(key).push({ node, start: word.start, end: word.end });
+        }
+        if (list.length) words.set(node, list);
+      }
+    }
+
+    function show(word) {
+      if (!word && !current) return;
+      if (word && current && word.node === current.node && word.start === current.start) return;
+      current = word;
+      if (!word) {
+        CSS.highlights.delete('signal-same');
+        CSS.highlights.delete('signal-here');
+        return;
+      }
+      CSS.highlights.set('signal-same', new Highlight(...places.get(word.key).map(place => rangeOf(place.node, place.start, place.end))));
+      const here = new Highlight(rangeOf(word.node, word.start, word.end));
+      here.priority = 1;
+      CSS.highlights.set('signal-here', here);
+    }
+
+    function update() {
+      frame = 0;
+      if (!places) index();
+      const caret = caretAt(x, y);
+      const list = caret && words.get(caret.node);
+      // The caret lands between characters, so check the word's box really holds the pointer.
+      const word = list && list.find(item => item.start <= caret.offset && caret.offset <= item.end
+        && [...rangeOf(caret.node, item.start, item.end).getClientRects()].some(box =>
+          x >= box.left - 1 && x <= box.right + 1 && y >= box.top - 1 && y <= box.bottom + 1));
+      show(word ? { node: caret.node, ...word } : null);
+    }
+
+    body.addEventListener('pointermove', event => {
+      if (event.pointerType !== 'mouse' || event.buttons) return;
+      if (!event.target.closest('pre, code')) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        show(null);
+        return;
+      }
+      x = event.clientX;
+      y = event.clientY;
+      if (!frame) frame = requestAnimationFrame(update);
+    }, { passive: true });
+    body.addEventListener('pointerleave', () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      show(null);
+    });
+  }
+
   function enhancePost(root = document) {
     enhanceCodeBlocks(root);
     enhanceImages(root);
+    watchSameAddress(root);
     requestAnimationFrame(() => markClippedCode(root));
   }
 
