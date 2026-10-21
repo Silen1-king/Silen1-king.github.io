@@ -6,7 +6,6 @@
 
 custom_file_path:
   head: source/_data/head.njk
-  sidebar: source/_data/sidebar-stats.njk
   postMeta: source/_data/post-meta.njk
   postBodyEnd: source/_data/post-body-end.njk
   footer: source/_data/footer.njk
@@ -60,6 +59,17 @@ reading_progress:
 motion:
   # Avoid hiding the whole page while the external animation runtime loads.
   enable: false
+
+# Share card for links posted to chats and social sites (1200x630).
+open_graph:
+  options:
+    image: /images/og-card.png
+    twitter_card: summary_large_image
+
+# The few icons the site uses, as inline SVG (source/css/icons.css), instead
+# of the full Font Awesome stylesheet and fonts from a CDN.
+vendors:
+  fontawesome: /css/icons.css
 
 busuanzi_count:
   enable: true

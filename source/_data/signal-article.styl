@@ -2,8 +2,9 @@
 // discussion and image zoom. Features come from scripts/post-render-enhancements.js
 // and source/js/post-enhancements.js; only their look lives here.
 @css {
+  /* About 40 Chinese characters a line; --post-w also places the TOC rail. */
   .main-inner.post {
-    max-width: 860px;
+    max-width: var(--post-w);
   }
 
   .posts-expand .post-header {
@@ -128,8 +129,11 @@
     font-size: 26px;
   }
 
+  /* The address is decoration; the empty alt keeps screen readers from
+     reading it out before every heading. */
   .post-body h2[data-loc]::before {
     content: attr(data-loc);
+    content: attr(data-loc) / "";
     display: block;
     margin-bottom: 4px;
     color: var(--cyan);
@@ -268,6 +272,34 @@
 
   .post-body .highlight .gutter pre {
     color: #3c4460;
+  }
+
+  /* Blocks without line numbers: shell sessions and plain output. */
+  .post-body .highlight td.code:first-child pre,
+  .post-body .highlight td.output pre {
+    padding-left: 16px;
+  }
+
+  /* Shell sessions (scripts/post-render-enhancements.js): a $ prompt instead
+     of line numbers, and the output in the same frame, a step quieter. The
+     prompt is generated content, so copying leaves it out. */
+  .post-body .terminal .line.cmd::before {
+    content: "$ ";
+    color: var(--cyan);
+  }
+
+  .post-body .terminal tr:has(+ tr) td.code pre {
+    padding-bottom: 0;
+  }
+
+  .post-body .terminal td.output pre {
+    padding-top: 4px;
+    color: #9aa3bf;
+  }
+
+  .post-body figure.highlight .table-container.is-clipped {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
   }
 
   .post-body .highlight table,

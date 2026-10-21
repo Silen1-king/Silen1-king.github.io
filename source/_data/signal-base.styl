@@ -2,6 +2,36 @@
 // Written as plain CSS inside @css: Stylus would otherwise rewrite min(),
 // max() and clamp(), which this design relies on.
 @css {
+  /* Self-hosted Latin fonts (source/fonts/, latin subset, variable weight).
+     Noto Serif SC for headings comes from /fonts/display.css, built by
+     scripts/signal-fonts.js; body text uses the system Chinese font. */
+  @font-face {
+    font-family: "Big Shoulders Display";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/fonts/big-shoulders-display.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: "Cormorant Garamond";
+    font-style: italic;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url("/fonts/cormorant-garamond-italic.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 100 800;
+    font-display: swap;
+    src: url("/fonts/jetbrains-mono.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
   :root {
     --void: #05060b;
     --ink: #0c0f19;
@@ -19,12 +49,13 @@
     --f-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
     --f-poem: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
     --f-cn-display: "Noto Serif SC", "Songti SC", "SimSun", serif;
-    --f-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    --f-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
     --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
     --gut: max(16px, env(safe-area-inset-left, 0px));
     --gutr: max(16px, env(safe-area-inset-right, 0px));
     --header-h: 60px;
     --header-top: env(safe-area-inset-top, 0px);
+    --post-w: 760px;
 
     /* NexT's own palette, pointed at the SIGNAL tokens. */
     --body-bg-color: var(--void);
@@ -510,6 +541,49 @@
     user-select: none;
   }
 
+  /* Only the home page ends on the full Coda. Elsewhere the outlined SILEN1
+     would repeat the hero and outweigh short pages, so the footer keeps the
+     harmonograph beside the uptime, then the credits. */
+  body:not(:has(.signal-index)) :is(.signal-coda-mark, .signal-coda-readout) {
+    display: none;
+  }
+
+  body:not(:has(.signal-index)) .signal-coda-stage {
+    height: 120px;
+    padding-top: 0;
+  }
+
+  body:not(:has(.signal-index)) .signal-coda-trace {
+    right: auto;
+    left: 0;
+    width: min(260px, 70vw);
+    height: 120px;
+    transform: none;
+  }
+
+  @media (min-width: 821px) {
+    body:not(:has(.signal-index)) .signal-coda {
+      position: relative;
+    }
+
+    body:not(:has(.signal-index)) .signal-coda-stage {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: min(260px, 30vw);
+    }
+
+    body:not(:has(.signal-index)) .blog-runtime {
+      min-height: 120px;
+      max-width: calc(100% - min(260px, 30vw) - 40px);
+      box-sizing: border-box;
+      align-content: center;
+      margin: 0 0 8px;
+      padding: 0;
+      border: 0;
+    }
+  }
+
   .footer .with-love {
     color: var(--violet);
     animation: none;
@@ -628,7 +702,10 @@
     padding: 9px 8px;
   }
 
-  body:has(.signal-index) .sidebar-toggle {
+  /* ───── Sidebar: only the post's table of contents ───── */
+  /* Pages without a TOC have nothing to open. */
+  body:not(:has(.post-toc)) .sidebar-toggle,
+  .sidebar:not(:has(.post-toc)) {
     display: none;
   }
 
@@ -640,7 +717,47 @@
   }
 
   .sidebar-inner {
+    padding: calc(var(--header-h) + var(--header-top) + 24px) 20px 24px;
     color: var(--mute);
+    text-align: left;
+  }
+
+  .sidebar-toc-title {
+    margin: 0 0 12px;
+    color: var(--mute);
+    font: 11px var(--f-mono);
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  /* Wide screens: a slim rail in the left margin, always shown, while the
+     text stays centred. NexT would push the page right by 320px. */
+  @media (min-width: 1200px) {
+    .sidebar-active {
+      padding-left: 0;
+    }
+
+    .sidebar,
+    .sidebar-active .sidebar {
+      --rail: min(220px, calc((100vw - var(--post-w)) / 2 - 72px));
+      top: calc(var(--header-h) + var(--header-top) + 56px);
+      bottom: auto;
+      left: calc((100vw - var(--post-w)) / 2 - var(--rail) - 40px);
+      width: var(--rail);
+      max-height: calc(100vh - var(--header-h) - var(--header-top) - 170px);
+      border: 0;
+      background: none;
+      transition: none;
+    }
+
+    .sidebar-inner {
+      padding: 0;
+    }
+
+    .sidebar-toggle,
+    .sidebar-dimmer {
+      display: none;
+    }
   }
 
   .sidebar a {
@@ -652,27 +769,18 @@
     color: var(--fg);
   }
 
-  .sidebar-nav li {
-    color: var(--mute);
-    font: 12px var(--f-mono);
-    letter-spacing: .1em;
-  }
-
-  .sidebar-nav .sidebar-nav-active {
-    border-bottom-color: var(--cyan);
-    color: var(--fg);
-  }
-
-  .sidebar-nav .sidebar-nav-active:hover {
-    color: var(--fg);
-  }
-
   .post-toc .nav-item {
     line-height: 1.6;
   }
 
   .post-toc .nav .nav-child {
     padding-left: 12px;
+  }
+
+  /* NexT sizes an open sub-list for one line per item; in the narrow rail
+     long titles wrap, so let it take its natural height. */
+  .post-toc .nav .active > .nav-child {
+    height: auto;
   }
 
   .post-toc .nav-item a {
@@ -698,91 +806,6 @@
   .post-toc .nav-number {
     font-family: var(--f-mono);
     font-size: 11px;
-  }
-
-  .site-author-name {
-    color: var(--fg);
-    font: 900 24px/1 var(--f-display);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-  }
-
-  .site-description {
-    color: var(--mute);
-    font-size: 13px;
-  }
-
-  .site-state-item-count {
-    color: var(--fg);
-    font: 900 26px/1.1 var(--f-display);
-  }
-
-  .site-state-item-name {
-    font: 11px var(--f-mono);
-    letter-spacing: .1em;
-  }
-
-  .sidebar-tech-stats {
-    margin: 22px 12px 0;
-    padding: 16px;
-    border: 1px solid var(--line);
-    background: var(--void);
-    text-align: left;
-  }
-
-  .sidebar-tech-stats h2 {
-    margin: 0 0 10px;
-    color: var(--fg);
-    font: 600 12px var(--f-mono);
-    letter-spacing: .12em;
-  }
-
-  .sidebar-stats-summary {
-    margin: 0 0 15px;
-    color: var(--mute);
-    font-size: 12.5px;
-    line-height: 1.7;
-  }
-
-  .sidebar-stats-summary strong {
-    color: var(--cyan);
-    font-weight: 500;
-  }
-
-  .sidebar-tag-bars {
-    display: grid;
-    gap: 9px;
-  }
-
-  .sidebar-tag-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-    color: var(--mute);
-    font: 11px var(--f-mono);
-  }
-
-  .sidebar-tag-track {
-    height: 3px;
-    overflow: hidden;
-    background: var(--line);
-  }
-
-  .sidebar-tag-track span {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, var(--cyan), var(--violet));
-  }
-
-  @media (min-width: 1200px) {
-    .sidebar-active header.header {
-      left: 320px;
-    }
-
-    .sidebar-active .reading-progress-bar {
-      left: 320px;
-      max-width: calc(100% - 320px);
-    }
   }
 
   /* The floating buttons step aside while reading: they hide on the way
@@ -839,6 +862,13 @@
     .sidebar-toggle-icon {
       display: block;
       width: 20px;
+    }
+
+    /* NexT turns the lines into a cross with :first-child / :last-child,
+       which also catch this wrapper once it is a block; keep it upright. */
+    .sidebar-active .sidebar-toggle .sidebar-toggle-icon {
+      top: 0;
+      transform: none;
     }
   }
 
