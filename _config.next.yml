@@ -7,6 +7,7 @@
 custom_file_path:
   head: source/_data/head.njk
   sidebar: source/_data/sidebar-stats.njk
+  postMeta: source/_data/post-meta.njk
   postBodyEnd: source/_data/post-body-end.njk
   footer: source/_data/footer.njk
   bodyEnd: source/_data/body-end.njk
@@ -14,12 +15,12 @@ custom_file_path:
 
 scheme: Mist
 
-# The SIGNAL home page sections; each one links on to its full page.
+# Each menu word opens its full page; the home page keeps the same words
+# as section headings. 年鉴 (stats) lives on the home page only.
 menu:
-  疆域: /#realms || fa fa-compass
-  札记: /#codex || fa fa-book
-  远征: /#odyssey || fa fa-route
-  年鉴: /#almanac || fa fa-chart-bar
+  札记: /archives/ || fa fa-book
+  远征: /learning-paths/ || fa fa-route
+  疆域: /categories/ || fa fa-compass
 
 menu_settings:
   icons: false

@@ -8,7 +8,7 @@
 {% block content %}
   {#- SIGNAL home sections come from scripts/signal-home.js. -#}
   {%- if page.current === 1 %}
-    {{ signal_home_intro() }}
+    {{ signal_home_hero() }}
   {%- endif %}
 
   <section class="signal-section signal-codex" id="codex" aria-labelledby="codex-title">

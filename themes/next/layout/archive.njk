@@ -9,9 +9,8 @@
   <div class="post-block archive-block">
     <div class="post-content">
       <header class="archive-page-header">
-        <span class="archive-page-kicker">ARCHIVE</span>
-        <h1>文章归档</h1>
-        <p>共收录 {{ page.posts.length }} 篇文章，按年份与月份浏览。</p>
+        <h1>札记<small>every entry, by date</small></h1>
+        <p>共 {{ page.posts.length }} 篇，按年份与月份浏览。</p>
       </header>
       <div class="archive-tree">
         {{ archive_tree(page.posts) }}

@@ -137,7 +137,8 @@ blog_runtime:
 learning_paths:
   enable: true
   path: learning-paths/
-  title: 学习路线
+  title: 远征
+  subtitle: a route through the series
   description: 按专栏整理的系列教程，循序渐进地开始学习。
   category_fallback: true
   # Optional steps not written yet, shown as PLANNED on the route:

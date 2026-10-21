@@ -24,6 +24,27 @@
     letter-spacing: .04em;
   }
 
+  /* One page head everywhere, like the home sections: a Chinese title, an
+     English italic subtitle, then one plain line. */
+  .page .post-title .post-title-sub,
+  .archive-page-header h1 small {
+    display: block;
+    margin-top: 10px;
+    color: var(--mute);
+    font: italic 500 22px var(--f-poem);
+    letter-spacing: 0;
+  }
+
+  .main-inner.page .post-header .post-description,
+  .archive-page-header p {
+    max-width: none;
+    margin: 18px 0 0;
+    padding: 0;
+    border: 0;
+    color: var(--mute);
+    font: 15px/1.7 var(--f-body);
+  }
+
   /* NexT prints 分类 / 标签 here. Chinese is never set in italic, so the
      visible subtitle is the English word, in the poem italic. */
   .posts-collapse .collection-title .collection-header small {
@@ -116,8 +137,10 @@
     text-align: left;
   }
 
+  /* NexT centres this line and draws the count as a badge; match the
+     tag page instead. */
   .tag-cloud-title,
-  .category-all-title {
+  .category-all-page .category-all-title {
     margin-bottom: 18px;
     color: var(--mute);
     font: 12px var(--f-mono);
@@ -162,14 +185,21 @@
     border-bottom: 1px solid var(--line);
   }
 
-  .category-list-link {
+  .category-all-page .category-list-link {
     border: 0;
     color: var(--fg);
     font: 900 40px/1 var(--f-display);
     letter-spacing: .03em;
   }
 
-  .category-list-count {
+  .category-all-page .category-list-item {
+    margin: 0;
+  }
+
+  .category-all-page .category-list-count {
+    padding: 0;
+    border-radius: 0;
+    background: none;
     color: var(--cyan);
     font: 12px var(--f-mono);
   }
@@ -200,37 +230,18 @@
     letter-spacing: .04em;
   }
 
-  .archive-page-header p {
-    margin: 0;
-    color: var(--mute);
-  }
-
-  .archive-page-kicker {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--mute);
-    font: 12px var(--f-mono);
-    letter-spacing: .22em;
-  }
-
-  .archive-page-kicker::before {
-    content: "";
-    width: 28px;
-    height: 1px;
-    background: var(--cyan);
-  }
-
+  /* Years and months are plain rules over one list, like the category
+     pages; no boxes inside boxes. */
   .archive-tree {
     display: grid;
-    gap: 14px;
+    gap: 8px;
   }
 
   .archive-year,
   .archive-month {
     overflow: hidden;
-    border: 1px solid var(--line);
-    background: var(--ink);
+    border: 0;
+    background: none;
   }
 
   .archive-year > summary,
@@ -247,24 +258,26 @@
     display: none;
   }
 
+  /* A chevron that turns down when open; a rotated + read as "close". */
   .archive-year > summary::after,
   .archive-month > summary::after {
-    content: "+";
-    width: 25px;
+    content: "\203A";
+    width: 20px;
     margin-left: 12px;
-    color: var(--cyan);
-    font: 16px var(--f-mono);
+    color: var(--mute);
+    font: 18px/1 var(--f-mono);
     text-align: center;
     transition: transform .2s ease;
   }
 
   .archive-year[open] > summary::after,
   .archive-month[open] > summary::after {
-    transform: rotate(45deg);
+    transform: rotate(90deg);
   }
 
   .archive-year > summary {
-    padding: 16px 20px;
+    padding: 16px 4px 12px;
+    border-bottom: 1px solid var(--line);
   }
 
   .archive-year-name {
@@ -280,16 +293,12 @@
 
   .archive-months {
     display: grid;
-    gap: 10px;
-    padding: 0 14px 14px;
-  }
-
-  .archive-month {
-    background: var(--void);
+    gap: 0;
+    padding: 0;
   }
 
   .archive-month > summary {
-    padding: 12px 15px;
+    padding: 14px 4px 8px;
   }
 
   .archive-month-name {
@@ -301,7 +310,7 @@
 
   .archive-post-list {
     margin: 0;
-    padding: 0 16px 10px;
+    padding: 0 0 8px;
     list-style: none;
   }
 
