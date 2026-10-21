@@ -77,7 +77,15 @@ nm：查看 ELF 文件的符号表，因为前面说过的 not stripped，所以
 strings chall1
 ```
 
-这个的直接输出就好长一段了，可以给这个命令增加一点要求，如 `strings chall1 | grep -iE 'sh|system|/bin'`，但是呢，后面要是出现一些加密，也会漏掉一些信息。在这个题目中的关键信息就是字符串里有 `/bin/sh` 和导入了 `system`。
+这个的直接输出就好长一段了，可以给这个命令增加一点要求，如 `strings chall1 | grep -iE 'sh|system|/bin'`，但是呢，后面要是出现一些加密，也会漏掉一些信息。在这个题目中的关键信息就是字符串里有 `/bin/sh` 和 `system`。可以推断一下 system("/bin/sh") 的存在
+
+```text
+system
+/bin/sh
+system@@GLIBC_2.2.5
+.shstrtab
+.gnu.hash
+```
 
 ## 反汇编分析
 
@@ -87,7 +95,8 @@ strings chall1
 objdump -d -M intel chall1
 ```
 
-又是一大串东西，仔细阅读，找 main 和危险函数，如 gets、read、strcpy、printf。这里你就会发现：
+因为我们前面发现了 system 和 /bin/sh，是不是有谁调用了 system，去找 call system。
+又是一大串东西，仔细阅读，找 main ，fun和危险函数，如 gets、read、strcpy、printf。这里你就会发现：
 
 在 `0000000000401142 <main>`：
 
@@ -107,7 +116,20 @@ objdump -d -M intel chall1
 401191:       e8 aa fe ff ff          call   401040 <system@plt>
 ```
 
-小知识：`call xxx@plt` = 调用一个函数，函数名就是 xxx，带 @plt 说明调的是外部库函数。`system@plt` 就是在调 system 这个函数。在 64 位 Linux 里，函数的第 1 个参数永远先放进 rdi，而塞进 rdi 的，是 `/bin/sh` 这串字的地址。
+所以 call system 在 fun 函数里，rdi 被设成了 0x40201b（# 40201b是反汇编工具计算出来的目标地址）
+小知识：`call xxx@plt` = 调用一个函数，函数名就是 xxx，带 @plt 说明调的是外部库函数。`system@plt` 就是在调 system 这个函数。在 64 位 Linux 里，函数的第 1 个参数永远先放进 rdi。
+而现在塞进 rdi 的，是 40201b，有理由怀疑是 /bin/sh
+
+我们进行 gdb
+
+```text
+gdb ./chall1
+x/s 0x40201b
+0x40201b:       "/bin/sh"
+```
+
+x/s 就是从这个运行时地址读一个字符串。发现果然是 /bin/sh，破案！
+fun 里是 system("/bin/sh") 后门
 
 综合分析：调用 system，参数（rdi）指向 `/bin/sh` 为什么是 → `system("/bin/sh")`。
 
@@ -116,6 +138,8 @@ objdump -d -M intel chall1
 gets 很危险，读取用户输入时，不检查目标缓冲区的大小，而我们的偏移量大小为 8+15。
 
 构造 payload：`[ 填充 23 字节 ] + [ 8 字节返回地址 = fun 的地址 ]`。
+
+测试一下，
 
 ## 编写并运行 exploit
 
