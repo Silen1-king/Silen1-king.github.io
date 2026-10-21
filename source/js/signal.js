@@ -618,24 +618,16 @@
     }, { threshold: 0.4 }).observe(registers);
   }
 
-  /* ───── Home navigation follows the section in view ───── */
-  const sections = ['realms', 'codex', 'odyssey', 'almanac']
-    .map(id => document.getElementById(id))
-    .filter(Boolean);
-  if (sections.length) {
-    const links = $$('.main-menu a[href*="#"]');
-    scrollHandlers.push(() => {
-      let currentId = '';
-      sections.forEach(section => {
-        if (section.getBoundingClientRect().top < window.innerHeight * 0.4) currentId = section.id;
-      });
-      links.forEach(link => {
-        const active = link.hash === '#' + currentId;
-        if (active) link.setAttribute('aria-current', 'true');
-        else link.removeAttribute('aria-current');
-      });
-    });
-  }
+  /* ───── Navigation marks the page you are on ───── */
+  // Each menu word opens a page (札记 /archives/, 远征 /learning-paths/,
+  // 疆域 /categories/); pages under it count too, and a post belongs to 札记.
+  const root = (window.CONFIG && CONFIG.root) || '/';
+  $$('.main-menu .menu-item a[href]').forEach(link => {
+    const path = link.pathname;
+    const inside = path !== root && location.pathname.startsWith(path);
+    const postHome = isPost && path === root + 'archives/';
+    if (inside || postHome) link.setAttribute('aria-current', 'page');
+  });
 
   onScroll();
 })();

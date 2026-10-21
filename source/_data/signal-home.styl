@@ -129,11 +129,18 @@
     mask-image: linear-gradient(to bottom, #000 72%, transparent);
   }
 
+  /* Slogan on the left, the newest entry across from it on the right;
+     stacked on phones. */
   .signal-hero-copy {
     position: absolute;
     right: 0;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 10vh);
     left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px 48px;
     max-width: 1240px;
     margin: 0 auto;
     padding: 0 var(--gutr) 0 var(--gut);
@@ -145,6 +152,47 @@
     color: var(--fg);
     font: italic 500 clamp(40px, 6.4vw, 92px)/1.02 var(--f-poem);
     letter-spacing: -.01em;
+  }
+
+  /* The newest entry, one tap from the first screen. */
+  .signal-hero-latest {
+    display: inline-flex;
+    max-width: 360px;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: .6em;
+    border: 0;
+    color: var(--fg);
+    pointer-events: auto;
+  }
+
+  /* Keep clear of the scroll hint once the copy reaches the screen edge. */
+  @media (max-width: 1340px) {
+    .signal-hero-latest {
+      margin-right: 32px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .signal-hero-latest {
+      margin-bottom: 0;
+    }
+  }
+
+  .signal-hero-latest-meta {
+    color: var(--mute);
+    font: 12px var(--f-mono);
+    letter-spacing: .12em;
+  }
+
+  .signal-hero-latest-title {
+    border-bottom: 1px solid var(--line-2);
+    font: 500 17px/1.5 var(--f-body);
+    transition: border-color .2s ease;
+  }
+
+  .signal-hero-latest:hover .signal-hero-latest-title {
+    border-bottom-color: var(--cyan);
   }
 
   .signal-hero-title span {
@@ -511,9 +559,13 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
-    margin-top: 28px;
+    margin-top: 20px;
+  }
+
+  .signal-codex-foot .pagination {
+    margin-right: auto;
   }
 
   .signal-codex-foot .pagination {
@@ -649,6 +701,67 @@
 
   .signal-legend .signal-more {
     margin-left: auto;
+  }
+
+  /* 远征 before any series has enough steps to draw: one line per route. */
+  .signal-route-list {
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+
+  .signal-route-list li {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 8px 24px;
+    margin: 0;
+    padding: 20px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .signal-route-name {
+    color: var(--fg);
+    font: 900 28px/1 var(--f-display);
+    letter-spacing: .03em;
+  }
+
+  .signal-route-steps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 12px;
+  }
+
+  .signal-route-steps a {
+    border-bottom: 1px solid var(--line-2);
+    color: var(--text);
+  }
+
+  .signal-route-steps a:hover {
+    border-bottom-color: var(--cyan);
+    color: var(--fg);
+  }
+
+  .signal-route-steps .is-planned {
+    color: var(--mute);
+  }
+
+  .signal-route-steps i {
+    color: var(--mute);
+    font: normal 12px var(--f-mono);
+  }
+
+  @media (max-width: 640px) {
+    .signal-route-list li {
+      grid-template-columns: 1fr auto;
+    }
+
+    .signal-route-steps {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
   }
 
   /* ───── 年鉴 ───── */

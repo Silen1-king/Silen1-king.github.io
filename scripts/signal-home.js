@@ -3,10 +3,17 @@
 /**
  * SIGNAL home page sections, rendered by themes/next/layout/index.njk.
  *
- *   signal_home_intro()     hero and 疆域 (one card per category)
+ *   signal_home_hero()      hero, with a link to the newest entry
  *   signal_codex(posts)     札记 rows for the current index page
  *   signal_codex_filters()  realm filter chips, shown once there are 2+ realms
- *   signal_home_outro()     远征 (series route) and 年鉴 (stats)
+ *   signal_home_outro()     远征 (series route), 疆域 (one card per category)
+ *                           and 年鉴 (stats)
+ *   signal_reading_minutes(post)  reading time, shared with the post header
+ *
+ * Content comes first: 札记 follows the hero, the atmosphere after it.
+ * Modules that need volume to mean anything wait for it: the route graph
+ * draws once a series has ROUTE_MIN steps, the tag spectrum once the blog
+ * has SPECTRUM_MIN entries. Until then they fall back to a plain line.
  *
  * Realms come from site.categories, optionally described in _config.yml:
  *
@@ -22,6 +29,8 @@
 
 const BASE_ADDRESS = 0x401000;
 const ADDRESS_STRIDE = 0x1A40;
+const ROUTE_MIN = 2;
+const SPECTRUM_MIN = 5;
 const SPECTRUM = ['var(--cyan)', 'var(--violet)', '#5f9dff', 'var(--heat)', 'var(--green)', '#e58bff', '#3a4260'];
 
 function escapeHtml(value) {
@@ -114,14 +123,19 @@ function realmMode(count) {
   return count === 2 ? 'pair' : 'track';
 }
 
-function renderHero(config) {
+function renderHero(config, latest, total, urlFor) {
   const wordmark = (config.signal && config.signal.wordmark) || 'SILEN1';
+  const latestLink = latest ? `
+        <a class="signal-hero-latest" href="${escapeHtml(urlFor(latest.path))}">
+          <span class="signal-hero-latest-meta">LATEST · ${escapeHtml(dotDate(latest.date))} · ${pad2(total)} ${total === 1 ? 'ENTRY' : 'ENTRIES'}</span>
+          <span class="signal-hero-latest-title">${escapeHtml(latest.title || '未命名文章')} →</span>
+        </a>` : '';
   return `
   <section class="signal-hero" id="signal-hero" aria-labelledby="signal-hero-title">
     <div class="signal-hero-stage">
       <canvas class="signal-hero-canvas" data-wordmark="${escapeHtml(wordmark)}" aria-hidden="true"></canvas>
       <div class="signal-hero-copy">
-        <h1 class="signal-hero-title" id="signal-hero-title">Signal,<br><span>out of noise.</span></h1>
+        <h1 class="signal-hero-title" id="signal-hero-title">Signal,<br><span>out of noise.</span></h1>${latestLink}
       </div>
       <span class="signal-scroll-hint" aria-hidden="true"></span>
     </div>
@@ -201,13 +215,30 @@ function renderCodexRow(post, address, urlFor) {
     </article>`;
 }
 
+function stepCount(route) {
+  return route.rows.reduce((sum, row) => sum + row.length, 0);
+}
+
 function renderRoutes(routes, urlFor) {
-  const tabs = routes.length > 1
+  const drawn = routes.some(route => stepCount(route) >= ROUTE_MIN);
+  const tabs = !drawn ? '' : routes.length > 1
     ? `<div class="signal-chips" role="group" aria-label="选择系列" data-route-tabs>${routes.map((route, index) =>
       `<button class="signal-chip" type="button" aria-pressed="${index === 0}" data-route-index="${index}">${escapeHtml(route.name)}</button>`).join('')}</div>`
     : (routes[0] ? `<span class="signal-count">${escapeHtml(routes[0].name.toUpperCase())}</span>` : '');
   const hasPlanned = routes.some(route => route.rows.some(row => row.some(step => !step.url)));
   const learningPath = (hexo.config.learning_paths && hexo.config.learning_paths.path) || 'learning-paths/';
+  const more = `<a class="signal-more" href="${escapeHtml(urlFor(learningPath))}">全部路线 →</a>`;
+  const list = `
+      <ol class="signal-route-list">${routes.map(route => `
+        <li>
+          <span class="signal-route-name">${escapeHtml(route.name)}</span>
+          <span class="signal-route-steps">${route.rows.flat().map(step => step.url
+            ? `<a href="${escapeHtml(step.url)}">${escapeHtml(step.title)}</a>`
+            : `<span class="is-planned">${escapeHtml(step.title)}</span>`).join('<i aria-hidden="true">→</i>')}</span>
+          <span class="signal-count">${pad2(stepCount(route))} ${stepCount(route) === 1 ? 'STEP' : 'STEPS'}</span>
+        </li>`).join('')}
+      </ol>
+      <div class="signal-legend">${more}</div>`;
 
   return `
   <section class="signal-section signal-odyssey" id="odyssey" aria-labelledby="odyssey-title">
@@ -216,13 +247,13 @@ function renderRoutes(routes, urlFor) {
         <h2 class="signal-h2" id="odyssey-title">远征<small>a route through the series</small></h2>
         ${tabs}
       </div>
-      ${routes.length ? `
+      ${!routes.length ? '<p class="signal-empty">路线正在铺设中。</p>' : drawn ? `
       <div class="route-graph route-graph-home" data-routes="${escapeHtml(JSON.stringify(routes))}"></div>
       <div class="signal-legend">
         <span><i class="is-published"></i>Published</span>
         ${hasPlanned ? '<span><i class="is-planned"></i>Planned</span>' : ''}
-        <a class="signal-more" href="${escapeHtml(urlFor(learningPath))}">全部路线 →</a>
-      </div>` : '<p class="signal-empty">路线正在铺设中。</p>'}
+        ${more}
+      </div>` : list}
     </div>
   </section>`;
 }
@@ -240,7 +271,7 @@ function renderAlmanac(site, realms, urlFor) {
     ['RCX', 'Tags', tagCounts.length],
     ['RDX', 'Realms', realms.length]
   ];
-  const spectrum = tagCounts.slice(0, SPECTRUM.length);
+  const spectrum = stats.postCount >= SPECTRUM_MIN ? tagCounts.slice(0, SPECTRUM.length) : [];
   const total = Math.max(1, stats.postCount);
 
   return `
@@ -268,9 +299,14 @@ function renderAlmanac(site, realms, urlFor) {
   </section>`;
 }
 
-hexo.extend.helper.register('signal_home_intro', function signalHomeIntro() {
+hexo.extend.helper.register('signal_home_hero', function signalHomeHero() {
   const urlFor = path => this.url_for(path);
-  return renderHero(this.config) + renderRealms(realmList(this.site, this.config), urlFor);
+  const posts = sortedPosts(this.site);
+  return renderHero(this.config, posts[0], posts.length, urlFor);
+});
+
+hexo.extend.helper.register('signal_reading_minutes', function signalReadingMinutes(post) {
+  return readingMinutes(post);
 });
 
 hexo.extend.helper.register('signal_codex_filters', function signalCodexFilters() {
@@ -296,9 +332,9 @@ hexo.extend.helper.register('signal_home_outro', function signalHomeOutro() {
   const urlFor = path => this.url_for(path);
   const routesHelper = hexo.extend.helper.get('learning_path_routes');
   // The longest series opens first, so the home graph starts with the fullest route.
-  const stepCount = route => route.rows.reduce((sum, row) => sum + row.length, 0);
   const routes = (routesHelper ? routesHelper(this.site.posts) : []).sort((a, b) => stepCount(b) - stepCount(a));
-  return renderRoutes(routes, urlFor) + renderAlmanac(this.site, realmList(this.site, this.config), urlFor);
+  const realms = realmList(this.site, this.config);
+  return renderRoutes(routes, urlFor) + renderRealms(realms, urlFor) + renderAlmanac(this.site, realms, urlFor);
 });
 
 // hexo-generator-index writes nothing when there are no posts yet, which leaves

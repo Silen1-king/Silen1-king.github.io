@@ -2,6 +2,7 @@
 
 <h1 class="post-title" itemprop="name headline">
   {{- page.title }}
+  {%- if page.subtitle %}<small class="post-title-sub">{{ page.subtitle }}</small>{%- endif %}
   {{- post_edit(page.source) }}
 </h1>
 

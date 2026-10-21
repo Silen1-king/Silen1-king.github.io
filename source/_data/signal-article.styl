@@ -59,6 +59,22 @@
     border-bottom: 0;
   }
 
+  /* Reading time and tags (source/_data/post-meta.njk). */
+  .post-meta .post-meta-tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 10px;
+  }
+
+  .post-meta .post-meta-tags a {
+    border-bottom: 0;
+    color: var(--violet);
+  }
+
+  .post-meta .post-meta-tags a:hover {
+    color: #fff;
+  }
+
   .posts-expand .post-header .post-description {
     max-width: 60ch;
     font-family: var(--f-body);
@@ -441,8 +457,28 @@
   }
 
   /* ───── Post footer ───── */
+  /* Reading order at the end of a post: tags, then where to go next
+     (previous / next, related), then the discussion. */
   .post-footer {
+    display: flex;
+    flex-direction: column;
     margin-top: 20px;
+  }
+
+  .post-footer > .post-tags {
+    order: 1;
+  }
+
+  .post-footer > .post-nav {
+    order: 2;
+  }
+
+  .post-footer > .related-posts-section {
+    order: 3;
+  }
+
+  .post-footer > .post-community {
+    order: 4;
   }
 
   .post-tags {

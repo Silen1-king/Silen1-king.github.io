@@ -19,6 +19,7 @@ const DEFAULTS = {
   enable: true,
   path: 'learning-paths/',
   title: '学习路线',
+  subtitle: '',
   description: '按专栏整理的系列教程，循序渐进地开始学习。',
   category_fallback: true,
   planned: {}
@@ -198,6 +199,14 @@ function renderPost(post, index, root) {
     </li>`;
 }
 
+// A route is drawn once it has two steps; a single node on a grid says nothing
+// the step list below it does not.
+function graphFor(group, options, root) {
+  const rows = routeRows(group, options, root);
+  if (rows.reduce((sum, row) => sum + row.length, 0) < 2) return '';
+  return `<div class="route-graph" data-route="${escapeHtml(JSON.stringify({ name: group.name, rows }))}" aria-hidden="true"></div>`;
+}
+
 function renderPage(groups, options, root) {
   const totalPosts = new Set(groups.flatMap(group => group.posts.map(post => post._id || post.path))).size;
   const cards = groups.map((group, index) => `
@@ -209,7 +218,7 @@ function renderPage(groups, options, root) {
           <span class="learning-path-card-count">${group.posts.length} 篇教程</span>
         </div>
       </header>
-      <div class="route-graph" data-route="${escapeHtml(JSON.stringify({ name: group.name, rows: routeRows(group, options, root) }))}" aria-hidden="true"></div>
+      ${graphFor(group, options, root)}
       <ol class="learning-path-steps">
         ${group.posts.map((post, postIndex) => renderPost(post, postIndex, root)).join('')}
       </ol>
@@ -253,6 +262,7 @@ hexo.extend.generator.register('learning-paths', function generateLearningPaths(
     layout: 'page',
     data: {
       title: options.title,
+      subtitle: options.subtitle,
       description: options.description,
       type: 'learning-paths',
       comments: false,
