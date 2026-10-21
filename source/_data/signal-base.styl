@@ -133,11 +133,13 @@
   }
 
   /* ───── Pointer ─────
-     A slim arrow, corner brackets that lock onto anything clickable, and an
-     I-beam over text (source/images/cursor/). Still the system's own cursor,
-     only redrawn, so it never lags. Mouse only. Components that want the
-     clickable cursor use var(--cursor-pointer, pointer), which falls back to
-     the system hand everywhere else. */
+     signal-cursor.js draws the cursor itself: a phosphor dot on a canvas.
+     Before it has seen the mouse move, or if it never loads, the system
+     cursor shows, redrawn to match (source/images/cursor/): a slim arrow,
+     corner brackets that lock onto anything clickable, and an I-beam over
+     text. Mouse only. Components that want the clickable cursor use
+     var(--cursor-pointer, pointer), which falls back to the system hand
+     everywhere else. */
   @media (hover: hover) and (pointer: fine) {
     :root {
       --cursor-default: url("/images/cursor/arrow.svg") 4 3, auto;
@@ -159,6 +161,25 @@
     :is(a, button:not(:disabled), [role="button"]:not(img), summary, .copy-btn) *,
     .back-to-top.back-to-top-on {
       cursor: var(--cursor-pointer);
+    }
+
+    html.signal-cursor-on,
+    html.signal-cursor-on * {
+      cursor: none !important;
+    }
+  }
+
+  .signal-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    pointer-events: none;
+  }
+
+  @media print {
+    .signal-cursor {
+      display: none;
     }
   }
 

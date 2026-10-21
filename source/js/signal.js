@@ -5,9 +5,9 @@
 // reading offset on posts, and the harmonograph that closes every page.
 // The mouse only nudges things that are already there: a slight parallax and
 // a magnet on the hero, a breakpoint on 札记 rows, a tuning knob on the
-// harmonograph. There is no cursor follower. None of it runs for touch, and
-// the parts that move (parallax, magnet, tuning) stay still with reduced
-// motion.
+// harmonograph. The cursor itself is drawn by signal-cursor.js; nothing else
+// follows the pointer. None of it runs for touch, and the parts that move
+// (parallax, magnet, tuning) stay still with reduced motion.
 (function() {
   'use strict';
 
