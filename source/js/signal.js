@@ -109,6 +109,17 @@
     }
   });
 
+  // Floating buttons hide while scrolling down and return on the way up or
+  // at the end of the page, so they never sit on the line being read.
+  let lastScrollY = window.scrollY;
+  scrollHandlers.push(() => {
+    const y = window.scrollY;
+    if (Math.abs(y - lastScrollY) < 6) return;
+    const atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 40;
+    document.documentElement.classList.toggle('signal-chrome-hidden', y > lastScrollY && y > 240 && !atEnd);
+    lastScrollY = y;
+  });
+
   // Post headings carry a code-address label, like the prototype reader.
   if (postBody) {
     $$('.post-body > h2').forEach((heading, index) => {
@@ -263,7 +274,7 @@
 
     scrollHandlers.push(() => {
       const rect = hero.getBoundingClientRect();
-      const progress = clamp(-rect.top / Math.max(1, rect.height - window.innerHeight));
+      const progress = clamp(-rect.top / Math.max(1, rect.height * 0.9));
       scatter = Math.pow(progress, 1.6);
       if (heroCopy) {
         heroCopy.style.opacity = String(1 - clamp(progress * 2.2));

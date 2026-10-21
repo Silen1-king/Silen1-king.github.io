@@ -785,21 +785,55 @@
     }
   }
 
+  /* The floating buttons step aside while reading: they hide on the way
+     down and come back on the way up or at the end of the page
+     (signal.js sets .signal-chrome-hidden). */
+  .back-to-top,
+  .sidebar-toggle {
+    transition: bottom .25s ease, transform .25s ease, opacity .25s ease;
+  }
+
+  @media (max-width: 1199px) {
+    .signal-chrome-hidden .back-to-top,
+    .signal-chrome-hidden body:not(.sidebar-active) .sidebar-toggle {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+    }
+  }
+
+  /* On phones they move to the right edge, clear of where lines start. */
   @media (max-width: 767px) {
+    .back-to-top,
     .sidebar-toggle {
-      display: flex;
-      width: auto;
-      min-width: 76px;
+      right: max(16px, env(safe-area-inset-right, 0px));
+      left: auto;
+      width: 44px;
       height: 44px;
-      align-items: center;
-      gap: 9px;
-      padding: 0 12px;
-      color: var(--fg);
     }
 
-    .sidebar-toggle::after {
-      content: attr(data-label);
-      font: 600 13px var(--f-body);
+    .back-to-top {
+      justify-content: center;
+      padding: 0;
+    }
+
+    .back-to-top::before {
+      content: "\2191";
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .back-to-top.back-to-top-on {
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .sidebar-toggle {
+      display: flex;
+      bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      color: var(--fg);
     }
 
     .sidebar-toggle-icon {

@@ -104,15 +104,17 @@
   }
 
   /* ───── Hero ───── */
+  /* One screen, never pinned: the wordmark scatters into dust as it scrolls
+     away, so the page keeps its own scrolling rhythm. */
   .signal-hero {
     position: relative;
-    height: 150vh;
+    height: 100vh;
+    height: 100svh;
   }
 
   .signal-hero-stage {
-    position: sticky;
-    top: 0;
-    height: 100vh;
+    position: relative;
+    height: 100%;
     overflow: hidden;
   }
 
