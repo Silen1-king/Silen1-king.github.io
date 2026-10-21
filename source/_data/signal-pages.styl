@@ -24,12 +24,26 @@
     letter-spacing: .04em;
   }
 
+  /* NexT prints 分类 / 标签 here. Chinese is never set in italic, so the
+     visible subtitle is the English word, in the poem italic. */
   .posts-collapse .collection-title .collection-header small {
     display: block;
     margin-top: 10px;
     color: var(--mute);
-    font: italic 500 22px var(--f-poem);
+    font-size: 0;
     letter-spacing: 0;
+  }
+
+  .posts-collapse .collection-title .collection-header small::after {
+    font: italic 500 22px var(--f-poem);
+  }
+
+  .category .collection-title .collection-header small::after {
+    content: "realm";
+  }
+
+  .tag .collection-title .collection-header small::after {
+    content: "tag";
   }
 
   /* ───── Category / tag post lists ───── */

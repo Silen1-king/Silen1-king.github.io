@@ -35,6 +35,12 @@ toc:
 
 mobile_layout_economy: true
 
+# Justified Chinese and English on a narrow screen stretches the gaps
+# between words, so phones read ragged-right.
+text_align:
+  desktop: justify
+  mobile: left
+
 codeblock:
   theme:
     # The site is permanently dark, so both OS modes need a syntax palette
