@@ -18,7 +18,7 @@
     background: #05060b;
     clip-path: inset(0 0 0 0);
     transition: clip-path .7s cubic-bezier(.8, 0, .2, 1);
-    cursor: pointer;
+    cursor: var(--cursor-pointer, pointer);
   }
 
   .blog-intro[hidden] {
@@ -51,7 +51,7 @@
     border-radius: 50%;
     background: none;
     color: #7f88a3;
-    cursor: pointer;
+    cursor: var(--cursor-pointer, pointer);
   }
 
   .blog-intro-skip:hover,

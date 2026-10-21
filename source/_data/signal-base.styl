@@ -132,6 +132,36 @@
     background: rgba(150, 170, 255, .36);
   }
 
+  /* ───── Pointer ─────
+     A slim arrow, corner brackets that lock onto anything clickable, and an
+     I-beam over text (source/images/cursor/). Still the system's own cursor,
+     only redrawn, so it never lags. Mouse only. Components that want the
+     clickable cursor use var(--cursor-pointer, pointer), which falls back to
+     the system hand everywhere else. */
+  @media (hover: hover) and (pointer: fine) {
+    :root {
+      --cursor-default: url("/images/cursor/arrow.svg") 4 3, auto;
+      --cursor-pointer: url("/images/cursor/lock.svg") 16 16, pointer;
+      --cursor-text: url("/images/cursor/beam.svg") 16 16, text;
+    }
+
+    html {
+      cursor: var(--cursor-default);
+    }
+
+    :is(p, li, dt, dd, td:not(.gutter), th, blockquote, figcaption, pre, code, kbd, h1, h2, h3, h4, h5, h6, input:not([type]), input[type="text"], input[type="search"], textarea) {
+      cursor: var(--cursor-text);
+    }
+
+    /* Listed after the text rule, so a link inside a paragraph, or a heading
+       inside a link, takes the clickable cursor. */
+    :is(a, button:not(:disabled), [role="button"]:not(img), summary, label[for], select, input[type="checkbox"], input[type="radio"], input[type="submit"], .copy-btn),
+    :is(a, button:not(:disabled), [role="button"]:not(img), summary, .copy-btn) *,
+    .back-to-top.back-to-top-on {
+      cursor: var(--cursor-pointer);
+    }
+  }
+
   .signal-sr-only {
     position: absolute;
     width: 1px;
@@ -285,7 +315,7 @@
     padding: 12px 0 12px 12px;
     border: 0;
     background: none;
-    cursor: pointer;
+    cursor: var(--cursor-pointer, pointer);
   }
 
   .site-nav-toggle .toggle .toggle-line {
@@ -303,6 +333,11 @@
     font-weight: 400;
   }
 
+  /* JMP: a 札记 row is under the mouse and the readout shows its address. */
+  .signal-rip.is-jump [data-signal-rip-label] {
+    color: var(--rose);
+  }
+
   .global-search-trigger {
     display: inline-flex;
     align-items: center;
@@ -314,7 +349,7 @@
     color: var(--fg);
     font: 12px var(--f-mono);
     letter-spacing: .08em;
-    cursor: pointer;
+    cursor: var(--cursor-pointer, pointer);
     transition: border-color .2s ease;
   }
 
