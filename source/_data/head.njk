@@ -1,7 +1,9 @@
 <link rel="alternate" type="application/atom+xml" title="{{ config.title }}" href="/atom.xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&display=swap">
+{#- Fonts are self-hosted (source/fonts/, scripts/signal-fonts.js). The two
+    used above the fold are preloaded. -#}
+<link rel="preload" href="{{ config.root }}fonts/big-shoulders-display.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ config.root }}fonts/cormorant-garamond-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ config.root }}fonts/display.css">
 <script>
 (function() {
   // The graphic intro plays on the home page once per browser tab.

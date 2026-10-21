@@ -201,7 +201,7 @@ function renderCodexRow(post, address, urlFor) {
 
   return `
     <article class="signal-seg" data-realm="${escapeHtml(realm)}">
-      <span class="signal-seg-addr">${hex(address)}</span>
+      <span class="signal-seg-addr" aria-hidden="true">${hex(address)}</span>
       <time datetime="${Number.isNaN(date.getTime()) ? '' : date.toISOString()}">${escapeHtml(dotDate(post.date))}</time>
       <div class="signal-seg-main">
         <h3><a class="signal-seg-link" href="${escapeHtml(urlFor(post.path))}">${escapeHtml(post.title || '未命名文章')}</a></h3>
@@ -284,7 +284,6 @@ function renderAlmanac(site, realms, urlFor) {
           <span class="signal-register-name">${name}</span>
           <span class="signal-register-value" data-count-to="${value}">${Number(value).toLocaleString('en')}</span>
           <span class="signal-register-label">${label}</span>
-          <span class="signal-register-hex">${hex(value)}</span>
         </div>`).join('')}
       </div>
       ${spectrum.length ? `

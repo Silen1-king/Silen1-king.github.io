@@ -1,0 +1,14 @@
+Fonts in this folder, and the Noto Serif SC subset that
+scripts/signal-fonts.js adds to /fonts/ at build time, are Latin or
+heading-only subsets of the original families from Google Fonts. All four
+are licensed under the SIL Open Font License, Version 1.1:
+https://openfontlicense.org/open-font-license-official-text/
+
+  Big Shoulders Display  Copyright 2019 The Big Shoulders Project Authors
+                         https://github.com/xotypeco/big_shoulders
+  Cormorant Garamond     Copyright 2015 The Cormorant Project Authors
+                         https://github.com/CatharsisFonts/Cormorant
+  JetBrains Mono         Copyright 2020 The JetBrains Mono Project Authors
+                         https://github.com/JetBrains/JetBrainsMono
+  Noto Serif SC          (c) 2017-2024 Adobe (http://www.adobe.com/)
+                         https://github.com/notofonts/noto-cjk

@@ -13,6 +13,29 @@ console.log('Hello');
 构建后会自动显示语言标签与复制按钮。兼容 Hexo Highlight.js 的
 `figure.highlight`、Prism 的 `language-*`，以及普通 `<pre><code>` 结构。
 
+### 终端风格
+
+`bash`、`sh`、`shell`、`zsh`、`console` 代码块显示为终端：每条命令前有 `$`
+提示符，没有行号。紧跟在命令后面的 `text` 代码块被当作它的输出，合并进同一个框，
+颜色稍暗；复制按钮只复制命令。
+
+````markdown
+```bash
+checksec --file=chall1
+```
+
+```text
+RELRO           STACK CANARY      NX            PIE
+Partial RELRO   No canary found   NX disabled   No PIE
+```
+````
+
+- 两个代码块之间不能有文字，有文字就各自显示。
+- 以 `\` 结尾的续行、heredoc（`<< 'EOF'` 到 `EOF`）、空行和注释不加提示符。
+- 以 `#!` 开头的脚本、或已经自己写了 `$ ` 的代码块保持原样，带行号显示。
+- 单独的 `text` 代码块不显示行号。
+- 只改显示效果，Markdown 原文不变。
+
 ## Alert 提示框
 
 支持 GitHub/Obsidian 风格的五种提示：`NOTE`、`TIP`、`IMPORTANT`、

@@ -547,7 +547,7 @@
       const title = node.title.length > node.maxChars ? node.title.slice(0, node.maxChars - 1) + '…' : node.title;
       const body = `<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${NODE_H}"/>`
         + `<rect class="route-bar" x="${node.x}" y="${node.y}" width="3" height="${NODE_H}"/>`
-        + `<text class="route-addr" x="${node.x + 14}" y="${node.y + 20}">loc_${(BASE_ADDRESS + address * 0x40).toString(16)}${published ? '' : '  PLANNED'}</text>`
+        + `<text class="route-addr" x="${node.x + 14}" y="${node.y + 20}"><tspan aria-hidden="true">loc_${(BASE_ADDRESS + address * 0x40).toString(16)}</tspan>${published ? '' : '  PLANNED'}</text>`
         + `<text class="route-title" x="${node.x + 14}" y="${node.y + 44}">${escapeHtml(title)}</text>`
         + `<title>${escapeHtml(node.title)}</title>`;
       markup += published

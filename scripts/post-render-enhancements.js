@@ -41,6 +41,91 @@ function addImageLoadingHints(html) {
   });
 }
 
+// Shell sessions read as a terminal: a $ prompt instead of line numbers, and
+// a command's output, when it follows directly in a text block, joins it in
+// the same frame. The output sits in its own row (td.output, not td.code), so
+// the copy button still copies only the commands. Only the markup changes;
+// what the author wrote is untouched.
+const SESSION_LANGUAGES = new Set(['bash', 'sh', 'shell', 'zsh', 'console', 'shell-session']);
+const OUTPUT_LANGUAGES = new Set(['text', 'plaintext', 'plain', 'txt', 'output', 'log']);
+const HIGHLIGHT_FIGURE = /<figure class="highlight ([\w+-]+)"><table><tr>(?:<td class="gutter"><pre>[\s\S]*?<\/pre><\/td>)?<td class="code"><pre>([\s\S]*?)<\/pre><\/td><\/tr><\/table><\/figure>/g;
+
+function lineText(line) {
+  return line.replace(/<[^>]*>/g, '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, '&');
+}
+
+// Marks each line as a command (gets a prompt) or a continuation: the rest
+// of a line ending in \, the body of a heredoc, blank lines and comments.
+function promptLines(lines) {
+  let heredoc = null;
+  let continued = false;
+  return lines.map(line => {
+    const text = lineText(line);
+    let kind = 'cmd';
+    if (heredoc) {
+      kind = 'cont';
+      if (text.trim() === heredoc) heredoc = null;
+    } else if (continued || !text.trim() || text.trimStart().startsWith('#')) {
+      kind = 'cont';
+    }
+    if (kind === 'cmd' || continued) {
+      const start = text.match(/<<-?\s*(['"]?)([\w.-]+)\1/);
+      if (start) heredoc = start[2];
+    }
+    continued = !heredoc && /\\$/.test(text);
+    return line.replace(/^<span class="line">/, `<span class="line ${kind}">`);
+  });
+}
+
+function splitLines(pre) {
+  return pre.split('<br>').filter((line, index, all) => index < all.length - 1 || line);
+}
+
+function transformTerminals(html) {
+  const source = String(html || '');
+  const figures = [...source.matchAll(HIGHLIGHT_FIGURE)].map(match => ({
+    figure: match[0],
+    start: match.index,
+    end: match.index + match[0].length,
+    language: match[1].toLowerCase(),
+    pre: match[2]
+  }));
+  if (!figures.length) return html;
+
+  const isSession = item => SESSION_LANGUAGES.has(item.language)
+    && !lineText(item.pre).startsWith('#!')
+    && !/^\$ /m.test(lineText(item.pre.replace(/<br>/g, '\n')));
+  const isOutput = item => OUTPUT_LANGUAGES.has(item.language);
+  const commandRow = item => `<tr><td class="code"><pre>${promptLines(splitLines(item.pre)).join('<br>')}<br></pre></td></tr>`;
+  const terminal = (item, rows) => `<figure class="highlight terminal ${item.language}"><table>${rows}</table></figure>`;
+
+  let result = '';
+  let cursor = 0;
+  for (let i = 0; i < figures.length; i++) {
+    const item = figures[i];
+    const next = figures[i + 1];
+    result += source.slice(cursor, item.start);
+    if (isSession(item) && next && isOutput(next) && !source.slice(item.end, next.start).trim()) {
+      result += terminal(item, commandRow(item) + `<tr><td class="output"><pre>${next.pre}</pre></td></tr>`);
+      cursor = next.end;
+      i++;
+      continue;
+    }
+    if (isSession(item)) {
+      result += terminal(item, commandRow(item));
+    } else if (isOutput(item)) {
+      // A lone output block keeps its frame but loses line numbers.
+      result += `<figure class="highlight ${item.language}"><table><tr><td class="code"><pre>${item.pre}</pre></td></tr></table></figure>`;
+    } else {
+      result += item.figure;
+    }
+    cursor = item.end;
+  }
+  return result + source.slice(cursor);
+}
+
 function asDate(value) {
   if (!value) return null;
   const date = value && typeof value.toDate === 'function' ? value.toDate() : new Date(value);
@@ -153,7 +238,7 @@ hexo.extend.filter.register('after_post_render', function enhancePost(post) {
   if (post.layout !== 'post') return post;
 
   const staleNotice = staleNoticeFor(post);
-  post.content = staleNotice + addImageLoadingHints(transformAlerts(post.content));
+  post.content = staleNotice + addImageLoadingHints(transformAlerts(transformTerminals(post.content)));
   return post;
 });
 
