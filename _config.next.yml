@@ -63,7 +63,7 @@ motion:
 # Share card for links posted to chats and social sites (1200x630).
 open_graph:
   options:
-    image: /images/og-card.png
+    image: /images/og-card.png?v=2
     twitter_card: summary_large_image
 
 # The few icons the site uses, as inline SVG (source/css/icons.css), instead
