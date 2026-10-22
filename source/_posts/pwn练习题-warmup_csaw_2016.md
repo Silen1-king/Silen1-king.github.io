@@ -1,7 +1,7 @@
 ---
 title: pwn练习题-warmup_csaw_2016
 date: 2026-10-21
-updated: 2026-10-21
+updated: 2026-10-22
 description: 从一道 DASCTF 的 pwn 入门赛题出发，演示在 stripped 的 64 位程序里如何用 ret2text 跳到后门函数，并通过补一个 ret 解决栈对齐问题。
 categories: CTF
 tags:
@@ -139,3 +139,5 @@ p.interactive()
 ```
 
 成功！
+
+自己的话：这道题目的栈溢出利用方式是：ret2win — 跳转到已有函数，我们写了 exploit，提供了恶意输入，被 gets 这个工具读取进去了，而调用 gets 的函数的返回地址在被调用的时候被放到了栈顶，但是 gets 读取的内容超过了缓冲区，覆盖掉了调用者真实的返回地址，当函数要返回时，我们让 cpu 返回到了我们希望它返回的地址（不是原来的地址），那里有我们希望他做的事，如给出 flag。
