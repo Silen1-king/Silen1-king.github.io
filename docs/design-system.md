@@ -137,8 +137,9 @@
 
 ## 暗室（隐藏日记）
 
-日记和小心得放在 `source/0x7f/<名字>.md`，front-matter 只要 `title` 和 `date`
-（模板见 `scaffolds/diary.md`）。它们是独立页面，
-不进首页、札记、分类、标签、搜索和 RSS；`scripts/signal-diary.js` 再把它们排除出
-sitemap、加上 `noindex`，并生成 `/0x7f/` 目录页。唯一入口是每篇文章末尾那行几乎
-看不见的 `EOF · 0x7f`。不要在 robots.txt 里写这个路径，那等于公开告诉别人。
+日记写在一个文件 `source/_diary.md` 里：每条是一个 `## 2026-10-24 22:30` 日期行
+（时间可省），下面一句话或一段话，没有标题。文件名以 `_` 开头，Hexo 不会把它当成
+页面或文章，所以不进首页、札记、分类、标签、搜索、RSS 和 sitemap；
+`scripts/signal-diary.js` 读它，生成带 `noindex` 的 `/0x7f/`，全文从新到旧铺开。
+唯一入口是每篇文章末尾那行几乎看不见的 `EOF · 0x7f`。不要在 robots.txt 里写这个
+路径，那等于公开告诉别人。

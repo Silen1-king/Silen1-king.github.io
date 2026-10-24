@@ -3,77 +3,82 @@
 /**
  * 暗室 (/0x7f/): a diary kept off every list.
  *
- * Each entry is a standalone page at source/0x7f/<name>.md. Pages are not
- * posts, so entries never reach the home page, 札记, categories, tags, the
- * search index (search.field is `post`) or the Atom feed. This script keeps
- * them out of sitemap.xml and search engines too, and builds the /0x7f/
- * index. The only way in is the dim "EOF · 0x7f" line at the end of every
- * post (source/_data/post-body-end.njk).
+ * The whole diary is one file, source/_diary.md. Each entry is a date line
+ * and then a sentence or a paragraph, no title:
+ *
+ *   ## 2026-10-24 22:30
+ *
+ *   今天想明白了一件事。
+ *
+ * The time is optional. Anything above the first date line, and anything
+ * inside <!-- -->, is ignored.
+ * Hexo skips files whose names start with "_", so the diary never becomes a
+ * page or a post of its own: it is never on the home page, 札记, categories,
+ * tags, the search index, the Atom feed or sitemap.xml. This script reads it
+ * and builds /0x7f/, every entry in full, newest first. The only way in is
+ * the dim "EOF · 0x7f" line at the end of every post
+ * (source/_data/post-body-end.njk).
  *
  * Do not list /0x7f/ in robots.txt: that file is public and would point
- * straight at it. Entries carry <meta name="robots" content="noindex">.
+ * straight at it. The page carries <meta name="robots" content="noindex">.
  */
 
+const fs = require('fs');
+const path = require('path');
+
 const DIR = '0x7f/';
+const FILE = '_diary.md';
 const BASE_ADDRESS = 0x7f000000;
+const DATE_LINE = /^##[ \t]+(\d{4})-(\d{1,2})-(\d{1,2})(?:[ \t]+(\d{1,2}):(\d{2}))?[ \t]*$/gm;
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+const pad = value => String(value).padStart(2, '0');
+
+function readEntries() {
+  let text;
+  try {
+    text = fs.readFileSync(path.join(hexo.source_dir, FILE), 'utf8');
+  } catch (error) {
+    return [];
+  }
+
+  // HTML comments hold notes and examples, never entries.
+  const source = text.replace(/\r\n?/g, '\n').replace(/<!--[\s\S]*?-->/g, '');
+  const marks = [...source.matchAll(DATE_LINE)];
+  return marks.map((match, index) => {
+    const [, year, month, day, hour, minute] = match;
+    const end = index + 1 < marks.length ? marks[index + 1].index : source.length;
+    const date = `${year}.${pad(month)}.${pad(day)}`;
+    const time = hour === undefined ? '' : `${pad(hour)}:${minute}`;
+    return {
+      order: index,
+      date,
+      time,
+      key: `${date}${time || '99:99'}`,
+      body: source.slice(match.index + match[0].length, end).trim()
+    };
+  }).filter(entry => entry.body)
+    // Newest first; on the same day, what was written later comes first.
+    .sort((a, b) => b.key.localeCompare(a.key) || b.order - a.order);
 }
 
-const isEntry = page => typeof page.source === 'string'
-  && page.source.startsWith(DIR)
-  && page.source !== `${DIR}index.md`;
+hexo.extend.generator.register('signal-diary', async () => {
+  const entries = readEntries();
 
-function entries(pages) {
-  return pages.filter(isEntry).toArray()
-    .sort((a, b) => b.date.valueOf() - a.date.valueOf());
-}
-
-// Hidden pages: no sitemap, no search engines, no comments, no TOC rail.
-hexo.extend.filter.register('before_post_render', data => {
-  if (data.layout !== 'page' || !isEntry(data)) return data;
-  data.sitemap = false;
-  data.noindex = true;
-  data.comments = false;
-  data.toc = { enable: false };
-  if (!data.subtitle) data.subtitle = data.date.format('YYYY.MM.DD');
-  return data;
-});
-
-// A way back out at the end of each entry.
-hexo.extend.filter.register('after_post_render', data => {
-  if (data.layout !== 'page' || !isEntry(data)) return data;
-  const root = hexo.config.root;
-  data.content += `<p class="diary-back"><a href="${root}${DIR}">← 0x7f</a></p>`;
-  return data;
-});
-
-hexo.extend.generator.register('signal-diary', locals => {
-  const root = hexo.config.root;
-  const list = entries(locals.pages);
-
-  // Every entry in full, newest first, so the room reads like one journal.
-  const backLink = /<p class="diary-back">[\s\S]*?<\/p>$/;
-  const rows = list.map((page, index) => {
-    const address = (BASE_ADDRESS + (list.length - 1 - index) * 0x40).toString(16).toUpperCase();
-    const anchor = page.source.replace(DIR, '').replace(/\.md$/, '');
-    return `<article class="diary-entry" id="${escapeHtml(anchor)}">
+  const rows = await Promise.all(entries.map(async (entry, index) => {
+    const address = (BASE_ADDRESS + (entries.length - 1 - index) * 0x40).toString(16).toUpperCase();
+    const body = await hexo.render.render({ text: entry.body, engine: 'markdown' });
+    const iso = entry.date.replace(/\./g, '-') + (entry.time ? `T${entry.time}` : '');
+    return `<article class="diary-entry">
       <header class="diary-row">
         <span class="diary-addr" aria-hidden="true">0x${address}</span>
-        <time datetime="${page.date.toISOString()}">${page.date.format('YYYY.MM.DD')}</time>
-        <h2 class="diary-title"><a href="${root}${page.path.replace(/index\.html$/, '')}">${escapeHtml(page.title)}</a></h2>
+        <time datetime="${iso}">${entry.date}${entry.time ? ` ${entry.time}` : ''}</time>
       </header>
-      <div class="diary-body">${String(page.content || '').replace(backLink, '')}</div>
+      <div class="diary-body">${body}</div>
     </article>`;
-  }).join('');
+  }));
 
-  const content = `<p class="diary-intro">你读到了 EOF 之后。这里是一些不进目录的日记和小心得。</p>
-    ${rows ? `<div class="diary-feed">${rows}</div>` : '<p class="diary-empty">0x7f · 还是空的。</p>'}`;
+  const content = `<p class="diary-intro">你读到了 EOF 之后。这里是一些不进目录的随手记。</p>
+    ${rows.length ? `<div class="diary-feed">${rows.join('')}</div>` : '<p class="diary-empty">0x7f · 还是空的。</p>'}`;
 
   return {
     path: `${DIR}index.html`,
