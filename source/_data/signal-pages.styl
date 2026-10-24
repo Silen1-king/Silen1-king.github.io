@@ -534,4 +534,66 @@
       display: grid;
     }
   }
+
+  /* ───── 暗室 ───── */
+  .diary-intro {
+    color: var(--mute);
+  }
+
+  .diary-list,
+  .posts-expand .post-body .diary-list {
+    margin: 32px 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .diary-row,
+  .post-body .diary-list .diary-row {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content max-content minmax(0, 1fr);
+    gap: 24px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .diary-addr,
+  .diary-row time {
+    color: var(--mute);
+    font: 12px var(--f-mono);
+  }
+
+  .diary-addr {
+    color: var(--violet);
+  }
+
+  .diary-row a,
+  .posts-expand .post-body .diary-row a {
+    color: var(--fg);
+    border: 0;
+  }
+
+  .diary-row a:hover {
+    color: var(--cyan);
+  }
+
+  .diary-empty,
+  .diary-back {
+    margin-top: 48px;
+    color: var(--mute);
+    font: 12px var(--f-mono);
+  }
+
+  @media (max-width: 567px) {
+    .diary-row {
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 4px 16px;
+    }
+
+    .diary-addr {
+      display: none;
+    }
+  }
 }
