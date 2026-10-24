@@ -57,17 +57,23 @@ hexo.extend.generator.register('signal-diary', locals => {
   const root = hexo.config.root;
   const list = entries(locals.pages);
 
+  // Every entry in full, newest first, so the room reads like one journal.
+  const backLink = /<p class="diary-back">[\s\S]*?<\/p>$/;
   const rows = list.map((page, index) => {
     const address = (BASE_ADDRESS + (list.length - 1 - index) * 0x40).toString(16).toUpperCase();
-    return `<li class="diary-row">
-      <span class="diary-addr" aria-hidden="true">0x${address}</span>
-      <time datetime="${page.date.toISOString()}">${page.date.format('YYYY.MM.DD')}</time>
-      <a href="${root}${page.path.replace(/index\.html$/, '')}">${escapeHtml(page.title)}</a>
-    </li>`;
+    const anchor = page.source.replace(DIR, '').replace(/\.md$/, '');
+    return `<article class="diary-entry" id="${escapeHtml(anchor)}">
+      <header class="diary-row">
+        <span class="diary-addr" aria-hidden="true">0x${address}</span>
+        <time datetime="${page.date.toISOString()}">${page.date.format('YYYY.MM.DD')}</time>
+        <h2 class="diary-title"><a href="${root}${page.path.replace(/index\.html$/, '')}">${escapeHtml(page.title)}</a></h2>
+      </header>
+      <div class="diary-body">${String(page.content || '').replace(backLink, '')}</div>
+    </article>`;
   }).join('');
 
   const content = `<p class="diary-intro">你读到了 EOF 之后。这里是一些不进目录的日记和小心得。</p>
-    ${rows ? `<ol class="diary-list" reversed>${rows}</ol>` : '<p class="diary-empty">0x7f · 还是空的。</p>'}`;
+    ${rows ? `<div class="diary-feed">${rows}</div>` : '<p class="diary-empty">0x7f · 还是空的。</p>'}`;
 
   return {
     path: `${DIR}index.html`,
