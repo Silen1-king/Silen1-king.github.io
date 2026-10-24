@@ -545,28 +545,19 @@
   }
 
   .diary-entry {
-    padding: 28px 0 40px;
+    padding: 24px 0 28px;
     border-top: 1px solid var(--line);
   }
 
   .diary-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px 20px;
+    gap: 20px;
     align-items: baseline;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
   }
 
-  .post-body .diary-title {
-    flex-basis: 100%;
-    margin: 4px 0 0;
-    padding: 0;
-    border: 0;
-    font: 700 24px/1.4 var(--f-cn-display);
-  }
-
-  .post-body .diary-title::before {
-    display: none;
+  .diary-body > :last-child {
+    margin-bottom: 0;
   }
 
   .diary-addr,
@@ -579,18 +570,7 @@
     color: var(--violet);
   }
 
-  .diary-row a,
-  .posts-expand .post-body .diary-title a {
-    color: var(--fg);
-    border: 0;
-  }
-
-  .diary-row a:hover {
-    color: var(--cyan);
-  }
-
-  .diary-empty,
-  .diary-back {
+  .diary-empty {
     margin-top: 48px;
     color: var(--mute);
     font: 12px var(--f-mono);
