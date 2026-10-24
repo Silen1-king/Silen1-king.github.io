@@ -134,3 +134,11 @@
 - **空状态**：内容少时不显示需要数量才有意义的模块。远征路线至少 2 篇才画图，
   年鉴的标签光谱至少 5 篇才出现（`scripts/signal-home.js` 里的 `ROUTE_MIN`、`SPECTRUM_MIN`）。
 - **分享卡片**：`source/images/og-card.png`（1200×630），全站默认使用。
+
+## 暗室（隐藏日记）
+
+日记和小心得放在 `source/0x7f/<名字>.md`，front-matter 只要 `title` 和 `date`
+（模板见 `scaffolds/diary.md`）。它们是独立页面，
+不进首页、札记、分类、标签、搜索和 RSS；`scripts/signal-diary.js` 再把它们排除出
+sitemap、加上 `noindex`，并生成 `/0x7f/` 目录页。唯一入口是每篇文章末尾那行几乎
+看不见的 `EOF · 0x7f`。不要在 robots.txt 里写这个路径，那等于公开告诉别人。

@@ -510,6 +510,10 @@
     margin-top: 20px;
   }
 
+  .post-footer > .signal-eof {
+    order: 0;
+  }
+
   .post-footer > .post-tags {
     order: 1;
   }
@@ -524,6 +528,27 @@
 
   .post-footer > .post-community {
     order: 4;
+  }
+
+  /* Hidden entrance: a hair brighter than the page until pointed at. */
+  .signal-eof {
+    margin: 36px 0 0;
+    font: 11px var(--f-mono);
+    letter-spacing: .2em;
+  }
+
+  .signal-eof a,
+  .posts-expand .post-body .signal-eof a {
+    color: var(--ink-2);
+    border: 0;
+    text-decoration: none;
+    transition: color .4s, text-shadow .4s;
+  }
+
+  .signal-eof a:hover,
+  .signal-eof a:focus-visible {
+    color: var(--cyan);
+    text-shadow: 0 0 12px rgba(124, 236, 255, .45);
   }
 
   .post-tags {
