@@ -1,6 +1,6 @@
 ---
 title: nssctf比赛的wp（只有pwn题目的）（线上赛，有使用AI）
-date: 2026-10-24
+date: 2026-10-26 01:43:57
 description: NSSCTF 新生赛的 pwn 题 wp：nc 签到题里的格式化字符串漏洞（%p 和 %s 的用法），以及 creeper 题里用 usleep 窗口打出的竞态条件，附几个新学的 IDA 快捷键。
 categories: CTF
 tags:
