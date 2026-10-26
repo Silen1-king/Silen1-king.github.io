@@ -1,13 +1,14 @@
 ---
-title: nssctf比赛的wp（只有pwn题目的）（线上赛，有使用AI）
+title: nssctf比赛的wp（只有pwn，线上赛，有使用AI）
 date: 2026-10-26 01:43:57
-description: NSSCTF 新生赛的 pwn 题 wp：nc 签到题里的格式化字符串漏洞（%p 和 %s 的用法），以及 creeper 题里用 usleep 窗口打出的竞态条件，附几个新学的 IDA 快捷键。
+description: NSSCTF 新生赛的 pwn 题 wp：nc 签到题里的格式化字符串漏洞，creeper 题里用 usleep 窗口打出的竞态条件，never_arrive 题里 64 位转 32 位的截断，附几个新学的 IDA 快捷键。
 categories: CTF
 tags:
   - pwn
   - format-string
   - race-condition
   - ida
+  - integer-truncation
 ---
 
 看到这个什么新生赛过来参加一下，用用最新的方法论，找找感觉
@@ -130,7 +131,54 @@ sub_144B(a1: sub_13E3);
 
 **总结：这个漏洞叫竞态条件(Race Condition),具体是TOCTOU(检查时刻≠使用时刻)**
 
+## 第三题：never_arrive
+
+> 又大又小，该怎么办啊喵？
+
+`canary found      NX enabled    PIE enabled`
+
+在IDA里看main函数
+
+![alt text](/images/posts/nssctf-pwn-wp/never-arrive-1.png)
+
+先是一些初始化操作，然后是一个if语句
+
+关键就是这一步，只要满足`(int)vuln() <= 255`，就会执行`system(command: "/bin/sh")`，拿到shell
+
+我们一起去看一下vuln函数做了什么
+
+![alt text](/images/posts/nssctf-pwn-wp/never-arrive-2.png)
+
+- `_QWORD v1[2]` 一个名为 v1 的数组，里面有 2 个元素，每个元素占 8 字节（64 位）
+- `v1[1] = __readfsqword(0x28u)` 存储stack canary
+- `__isoc99_scanf(a1: "%lld", v1)` 读取用户输入
+
+这个条件判断也很奇诡，如果`v1[0] <= 255LL`，程序崩溃，如果`v1[0] > 255LL`，返回`v1[0]`的值，但在主函数里就不满足`(int)vuln() <= 255`
+
+Why？这不就形成一个悖论了吗？仔细寻找是否有什么地方存在漏洞。
+
+思考一下，为什么同样的一个数，在main函数的判断里是`<= 255`的，而在vuln函数的判断里是`> 255LL`
+
+没招，我问了一下Claude，让他给我一个停止我这个思考的最小提示：
+
+> 注意两个比较的「类型/位宽」不一样。 vuln 里是 `v1[0] > 255LL`（LL = 64 位 long long），而 main 里是 `(int)vuln() <= 255`（(int) = 32 位）。同一个数，用 64 位看和用 32 位看，可以是两个完全不同的值。
+
+豁然开朗，我们只要输入一个数，在64位的时候`> 255LL`，而在低32位时`<= 255`
+
+比如：`0x0000000100000000`，在低32位时是`0x00000000`。
+
+还有一个小细节:在scanf里读取的是`%lld`。十进制数，直接输入`0x0000000100000000`是不行的
+
+写exploit：
+
+![alt text](/images/posts/nssctf-pwn-wp/never-arrive-3.png)
+
+![alt text](/images/posts/nssctf-pwn-wp/never-arrive-4.png)
+
+结束，完胜到手！
+
 ## IDA知识：
 
 - 按 N 给变量改名
 - 按 X 键(交叉引用)，它会列出所有用到这个变量的地方
+- 按F5，把IDA View-A（汇编视图）反编译为Pseudocode（伪代码视图）。
