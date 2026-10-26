@@ -28,6 +28,8 @@
     '.back-to-top.back-to-top-on', '.post-image-zoomable', '.blog-intro', '.global-search-trigger',
     '.global-search-close', '.image-zoom-close', '.site-nav-toggle .toggle', '.signal-chip'
   ].join(', ');
+  // Links that cover their whole row, so the row is what they point at.
+  const ROW_LINKS = '.signal-seg-link';
   const TEXTUAL = 'p, li, dt, dd, td:not(.gutter), th, blockquote, figcaption, pre, code, kbd, h1, h2, h3, h4, h5, h6, input:not([type]), input[type="text"], input[type="search"], textarea';
   const TRAIL_LIFE = 300;
   const RING_LIFE = 560;
@@ -68,8 +70,17 @@
 
   function boxOf(element) {
     const rects = [...element.getClientRects()];
-    const rect = rects.find(r => pointer.x >= r.left - 3 && pointer.x <= r.right + 3 && pointer.y >= r.top - 3 && pointer.y <= r.bottom + 3)
-      || element.getBoundingClientRect();
+    const near = r => pointer.x >= r.left - 3 && pointer.x <= r.right + 3 && pointer.y >= r.top - 3 && pointer.y <= r.bottom + 3;
+    const hit = rects.find(near);
+    // A link stretched over its whole row by an absolute ::after (ROW_LINKS)
+    // frames its title only while the pointer is on the title, the whole
+    // title however wide. Elsewhere in the row the row's own hover speaks.
+    if (element.matches(ROW_LINKS)) {
+      if (!hit) return null;
+      const r = element.getBoundingClientRect();
+      return { x: r.left - 8, y: r.top - 6, w: r.width + 16, h: r.height + 12 };
+    }
+    const rect = hit || element.getBoundingClientRect();
     // Corners far apart stop reading as one frame, so a whole row, a large
     // image or the intro gets a small frame around the pointer instead.
     if (rect.width > Math.min(640, width * 0.7) || rect.height > Math.min(160, height * 0.4)) {
@@ -85,7 +96,10 @@
     // The comments are another page inside an iframe, with their own cursor.
     if (!element || element.tagName === 'IFRAME') return { kind: 'gone' };
     const target = element.closest(CLICKABLE);
-    if (target) return { kind: 'link', box: boxOf(target) };
+    if (target) {
+      const box = boxOf(target);
+      return box ? { kind: 'link', box } : { kind: 'free' };
+    }
     if (element.closest(TEXTUAL)) {
       if (element !== sizedElement) {
         sizedElement = element;

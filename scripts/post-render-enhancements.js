@@ -126,6 +126,20 @@ function transformTerminals(html) {
   return result + source.slice(cursor);
 }
 
+// Monospace fonts have no CJK glyphs, so Chinese in a code block falls back
+// to a font whose characters are not exactly two columns wide, and the right
+// edge of a box drawn with │ ─ drifts on every line that holds Chinese. Each
+// wide character gets a 2ch cell (.wide in signal-article.styl). Only text
+// between tags is touched, so copying still gives the original characters.
+const WIDE_CHAR = /[\u1100-\u115f\u2e80-\u303e\u3041-\u33ff\u3400-\u4dbf\u4e00-\u9fff\ua960-\ua97f\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/g;
+
+function alignWideChars(html) {
+  return String(html || '').replace(/<figure class="highlight[\s\S]*?<\/figure>/g, figure =>
+    figure.split(/(<[^>]*>)/).map(part => part.startsWith('<')
+      ? part
+      : part.replace(WIDE_CHAR, char => `<span class="wide">${char}</span>`)).join(''));
+}
+
 function asDate(value) {
   if (!value) return null;
   const date = value && typeof value.toDate === 'function' ? value.toDate() : new Date(value);
@@ -238,7 +252,7 @@ hexo.extend.filter.register('after_post_render', function enhancePost(post) {
   if (post.layout !== 'post') return post;
 
   const staleNotice = staleNoticeFor(post);
-  post.content = staleNotice + addImageLoadingHints(transformAlerts(transformTerminals(post.content)));
+  post.content = staleNotice + addImageLoadingHints(transformAlerts(alignWideChars(transformTerminals(post.content))));
   return post;
 });
 

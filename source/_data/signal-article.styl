@@ -274,6 +274,16 @@
     color: #3c4460;
   }
 
+  /* Chinese in code: a fixed two-column cell, so boxes drawn with │ ─ line up
+     (alignWideChars in scripts/post-render-enhancements.js). NexT's utils.js
+     renames span classes in code to hljs-*, so .wide arrives as .hljs-wide. */
+  .post-body .highlight .wide,
+  .post-body .highlight .hljs-wide {
+    display: inline-block;
+    width: 2ch;
+    text-align: center;
+  }
+
   /* Blocks without line numbers: shell sessions and plain output. */
   .post-body .highlight td.code:first-child pre,
   .post-body .highlight td.output pre {

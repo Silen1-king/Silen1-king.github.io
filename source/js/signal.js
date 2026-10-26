@@ -108,7 +108,8 @@
       const total = Math.max(0x400, postBody.textContent.length * 3);
       return `${hex(progress * total, 4)} / ${hex(total, 4)}`;
     }
-    return hex(BASE_ADDRESS + progress * 0xFFFF);
+    // Snapped to 16 bytes, like the 札记 addresses and a function entry.
+    return hex(BASE_ADDRESS + Math.round(progress * 0xFFF) * 0x10);
   }
 
   // The readout settles on its new value digit by digit, left to right.
