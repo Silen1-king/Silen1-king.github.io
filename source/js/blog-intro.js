@@ -14,9 +14,7 @@
   const canvas = intro.querySelector('[data-intro-canvas]');
   const context = canvas?.getContext('2d');
   const LAYERS = [[3, 1], [5, 2], [7, 3], [4, 3], [2, 5]];
-  // Timeline in animation seconds; SPEED plays it in about 1.5 real seconds.
   const DURATION = 3.1;
-  const SPEED = 2;
   const startedAt = performance.now();
   let width = 0;
   let height = 0;
@@ -50,7 +48,7 @@
 
   function drawFrame(now) {
     if (closing || !context) return;
-    const t = (now - startedAt) / 1000 * SPEED;
+    const t = (now - startedAt) / 1000;
     const radius = Math.min(width, height) * 0.36;
     const grow = ease(clamp((t - 0.25) / 1.5));
     const flatten = ease(clamp((t - 2.4) / 0.55));
@@ -155,5 +153,5 @@
     finishIntro();
   }
 
-  failsafeTimer = window.setTimeout(finishIntro, 3000);
+  failsafeTimer = window.setTimeout(finishIntro, 6500);
 })();
