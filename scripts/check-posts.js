@@ -9,6 +9,8 @@ const MARKDOWN_IMAGE_PATTERN = /!\[[^\]]*\]\(([^)]+)\)/g;
 const MARKDOWN_LINK_PATTERN = /(?<!!)\[[^\]]+\]\(([^)]+)\)/g;
 const HTML_IMAGE_PATTERN = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
 const ASSET_PATTERN = /\{%\s*asset_(?:img|link)\s+([^\s%]+)[^%]*%\}/g;
+// Large images slow down post pages; warn (without failing) so photos get compressed first.
+const IMAGE_SIZE_LIMIT = 500 * 1024;
 
 function findMarkdownFiles(directory) {
   const files = [];
@@ -70,12 +72,28 @@ function resolveLocalTarget(postsDirectory, filePath, target) {
   return path.resolve(path.dirname(filePath), target);
 }
 
-function missingLocalReferences(postsDirectory, filePath, content) {
-  const imageTargets = [
+function imageTargetsIn(content) {
+  return [
     ...referencedTargets(content, MARKDOWN_IMAGE_PATTERN),
     ...referencedTargets(content, HTML_IMAGE_PATTERN),
     ...referencedTargets(content, ASSET_PATTERN)
   ];
+}
+
+function oversizedLocalImages(postsDirectory, filePath, content) {
+  const oversized = [];
+  for (const target of new Set(imageTargetsIn(content))) {
+    if (isExternalTarget(target)) continue;
+    const resolved = resolveLocalTarget(postsDirectory, filePath, target);
+    if (!fs.existsSync(resolved)) continue;
+    const size = fs.statSync(resolved).size;
+    if (size > IMAGE_SIZE_LIMIT) oversized.push(`${target}（${Math.round(size / 1024)} KB）`);
+  }
+  return oversized;
+}
+
+function missingLocalReferences(postsDirectory, filePath, content) {
+  const imageTargets = imageTargetsIn(content);
   const linkTargets = referencedTargets(content, MARKDOWN_LINK_PATTERN)
     // Extensionless links are usually generated Hexo routes and are validated after build.
     .filter(target => /\.[a-z\d]{1,8}$/i.test(target));
@@ -139,6 +157,10 @@ function main() {
 
     const missingFields = REQUIRED_FIELDS.filter(field => isMissing(attributes[field]));
     const missingReferences = missingLocalReferences(postsDirectory, filePath, attributes._content || '');
+    const oversizedImages = oversizedLocalImages(postsDirectory, filePath, attributes._content || '');
+    if (oversizedImages.length) {
+      console.warn(`[WARN] ${fileName}: 图片超过 500 KB，建议压缩或转成 WebP：${oversizedImages.join(', ')}`);
+    }
     if (missingFields.length === 0 && missingReferences.length === 0) continue;
 
     if (missingFields.length) console.warn(`[WARN] ${fileName}: 缺少 ${missingFields.join(', ')}`);
