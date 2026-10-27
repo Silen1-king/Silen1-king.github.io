@@ -5,3 +5,9 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 20
+# Workflow actions are pinned to commit SHAs; Dependabot bumps the SHA and
+# the version comment together.
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: weekly

@@ -695,6 +695,17 @@
     font: 500 12px var(--f-body);
   }
 
+  .blog-visitors {
+    color: var(--mute);
+    font: 12px var(--f-mono);
+    letter-spacing: .08em;
+  }
+
+  .blog-visitors b {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
   .blog-runtime-since {
     color: var(--mute);
     font: italic 500 16px var(--f-poem);
@@ -879,16 +890,26 @@
       pointer-events: none;
       transform: translateY(16px);
     }
+
+    .signal-chrome-hidden .back-to-top:focus-visible,
+    .signal-chrome-hidden .sidebar-toggle:focus-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: none;
+    }
   }
 
   /* On phones they move to the right edge, clear of where lines start. */
   @media (max-width: 767px) {
     .back-to-top,
     .sidebar-toggle {
-      right: max(16px, env(safe-area-inset-right, 0px));
+      right: max(12px, env(safe-area-inset-right, 0px));
       left: auto;
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
+      background: rgba(12, 15, 25, .72);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
     }
 
     .back-to-top {
@@ -908,7 +929,7 @@
 
     .sidebar-toggle {
       display: flex;
-      bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(60px + env(safe-area-inset-bottom, 0px));
       align-items: center;
       justify-content: center;
       padding: 0 12px;
@@ -975,5 +996,64 @@
       transition-duration: .01ms !important;
       animation-duration: .01ms !important;
     }
+  }
+
+  /* Without JavaScript: a quiet note in the corner instead of NexT's red bar
+     over the header (themes/next/source/css/noscript.styl). */
+  html body {
+    margin-top: 0;
+  }
+
+  body .noscript-warning {
+    top: auto;
+    right: auto;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    max-width: calc(100vw - 24px);
+    padding: 6px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    background: rgba(12, 15, 25, .92);
+    color: var(--mute);
+    font: 12px/1.5 var(--f-mono);
+    text-align: left;
+  }
+
+  /* Keyboard: the first Tab stop jumps past the header to the content. */
+  .skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 1000;
+    padding: 8px 12px;
+    border: 1px solid var(--cyan);
+    border-radius: 3px;
+    background: var(--ink);
+    color: var(--fg);
+    font: 13px var(--f-mono);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
+  #main-content:focus {
+    outline: 0;
+  }
+
+  /* Tag and category links are small text; give each a 24px tall target
+     (WCAG 2.2 target size) without changing how they look. */
+  .signal-seg-tags a,
+  .post-meta-tags a,
+  .post-tags a,
+  .signal-spectrum-keys a,
+  .tag-cloud a,
+  .signal-more,
+  .footer .powered-by a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
   }
 }

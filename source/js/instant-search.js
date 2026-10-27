@@ -37,10 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#39;');
   }
 
+  // DOMParser builds an inert document: nothing in it loads or runs.
+  const parser = new DOMParser();
+
   function decodeHtml(value) {
-    const element = document.createElement('div');
-    element.innerHTML = String(value ?? '');
-    return (element.textContent || '').replace(/\s+/g, ' ').trim();
+    const text = parser.parseFromString(String(value ?? ''), 'text/html').body.textContent || '';
+    return text.replace(/\s+/g, ' ').trim();
   }
 
   function normalizeList(value) {

@@ -201,10 +201,17 @@
   // Code that runs past the right edge fades out there, as a hint that the
   // block scrolls sideways. NexT adds .table-container on DOMContentLoaded,
   // so this runs a frame later.
+  // A box that scrolls sideways also takes keyboard focus, so it can be
+  // scrolled with the arrow keys.
   function markClippedCode(root = document) {
-    root.querySelectorAll('.post-body figure.highlight .table-container').forEach(box => {
+    root.querySelectorAll('.post-body .table-container').forEach(box => {
       if (box.dataset.clipWatched === 'true') return;
-      const update = () => box.classList.toggle('is-clipped', box.scrollWidth - box.clientWidth - box.scrollLeft > 1);
+      const isCode = Boolean(box.closest('figure.highlight'));
+      const update = () => {
+        const scrolls = box.scrollWidth - box.clientWidth > 1;
+        if (scrolls && !box.hasAttribute('tabindex')) box.tabIndex = 0;
+        if (isCode) box.classList.toggle('is-clipped', box.scrollWidth - box.clientWidth - box.scrollLeft > 1);
+      };
       update();
       box.addEventListener('scroll', update, { passive: true });
       if (window.ResizeObserver) new ResizeObserver(update).observe(box);

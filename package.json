@@ -6,7 +6,6 @@
     "build": "hexo generate",
     "check:posts": "node scripts/check-posts.js",
     "clean": "hexo clean",
-    "deploy": "hexo deploy",
     "new:post": "hexo new post",
     "server": "hexo server"
   },
@@ -15,8 +14,7 @@
   },
   "dependencies": {
     "hexo": "^8.0.0",
-    "hexo-deployer-git": "^4.0.0",
-    "hexo-front-matter": "^4.2.1",
+    "hexo-front-matter": "^5.0.0",
     "hexo-generator-archive": "^2.0.0",
     "hexo-generator-category": "^2.0.0",
     "hexo-generator-feed": "^4.0.0",
@@ -30,6 +28,7 @@
   },
   "overrides": {
     "stylus": "0.64.0",
-    "glob": "13.0.6"
+    "glob": "13.0.6",
+    "yaml": "2.9.1"
   }
 }

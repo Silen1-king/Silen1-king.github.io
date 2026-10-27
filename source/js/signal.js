@@ -142,15 +142,29 @@
   });
 
   // Floating buttons hide while scrolling down and return on the way up or
-  // at the end of the page, so they never sit on the line being read.
+  // at the end of the page, so they never sit on the line being read. Shown
+  // anywhere but the end, they step aside again after a short pause.
   let lastScrollY = window.scrollY;
+  let chromeTimer = 0;
   scrollHandlers.push(() => {
     const y = window.scrollY;
     if (Math.abs(y - lastScrollY) < 6) return;
     const atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 40;
-    document.documentElement.classList.toggle('signal-chrome-hidden', y > lastScrollY && y > 240 && !atEnd);
+    const hide = y > lastScrollY && y > 240 && !atEnd;
+    window.clearTimeout(chromeTimer);
+    document.documentElement.classList.toggle('signal-chrome-hidden', hide);
+    if (!hide && !atEnd) restChrome();
     lastScrollY = y;
   });
+  function restChrome() {
+    window.clearTimeout(chromeTimer);
+    chromeTimer = window.setTimeout(() => {
+      if (!document.body.classList.contains('sidebar-active')) {
+        document.documentElement.classList.add('signal-chrome-hidden');
+      }
+    }, 2500);
+  }
+  restChrome();
 
   // Post headings carry a code-address label, like the prototype reader.
   if (postBody) {
@@ -655,6 +669,9 @@
       }));
     });
 
+    // On 远征 the graph repeats the list beside it and is hidden from
+    // assistive tech, so its links stay out of the tab order too.
+    const decorative = container.getAttribute('aria-hidden') === 'true';
     let markup = '<defs><marker id="route-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>';
     for (let r = 0; r < rows.length - 1; r++) {
       routeEdges(rows[r], rows[r + 1]).forEach(([a, b]) => {
@@ -677,12 +694,12 @@
         + `<text class="route-title" x="${node.x + 14}" y="${node.y + 44}">${escapeHtml(title)}</text>`
         + `<title>${escapeHtml(node.title)}</title>`;
       markup += published
-        ? `<a class="route-node is-published" href="${escapeHtml(node.url)}">${body}</a>`
+        ? `<a class="route-node is-published" href="${escapeHtml(node.url)}"${decorative ? ' tabindex="-1"' : ''}>${body}</a>`
         : `<g class="route-node is-planned">${body}</g>`;
       address++;
     });
 
-    container.innerHTML = `<svg class="route-svg${narrow ? ' is-narrow' : ''}" viewBox="0 0 ${VIEW_W} ${VIEW_H}" role="img" aria-label="${escapeHtml(route.name)}">${markup}</svg>`;
+    container.innerHTML = `<svg class="route-svg${narrow ? ' is-narrow' : ''}" viewBox="0 0 ${VIEW_W} ${VIEW_H}" role="group" aria-label="${escapeHtml(route.name)}">${markup}</svg>`;
     const svg = container.firstElementChild;
     $$('.route-edge', svg).forEach(path => path.style.setProperty('--len', Math.ceil(path.getTotalLength())));
     if (animate && !reduceMotion) {

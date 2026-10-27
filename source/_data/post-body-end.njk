@@ -33,12 +33,17 @@
       </a>
     </div>
     <p class="post-community-intro">欢迎补充资料、提出问题或指出文章中的错误。评论由 GitHub Discussions 提供。</p>
+    {#- Each post's thread is found by a fixed term: the post's path as it was
+        when published (what giscus' "pathname" mapping used). If a post's
+        URL ever changes, set comment_id in its front-matter to the old term
+        (e.g. 2026/10/24/how-to-touch-Cc/) and its comments stay with it. -#}
     <script src="https://giscus.app/client.js"
             data-repo="Silen1-king/Silen1-king.github.io"
             data-repo-id="R_kgDOSXxVIg"
             data-category="General"
             data-category-id="DIC_kwDOSXxVIs4DCILS"
-            data-mapping="pathname"
+            data-mapping="specific"
+            data-term="{{ page.comment_id or (url_for(page.path) | replace(r/^\//, '') | replace(r/index\.html$/, '')) }}"
             data-strict="1"
             data-reactions-enabled="1"
             data-emit-metadata="0"

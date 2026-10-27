@@ -71,8 +71,9 @@ open_graph:
 vendors:
   fontawesome: /css/icons.css
 
+# Visitor counts come from Vercount (source/js/visitor-count.js), not busuanzi.
 busuanzi_count:
-  enable: true
+  enable: false
 
 # Search is provided by the local, dependency-free modal in source/js,
 # so NexT's own local_search stays disabled (theme default).

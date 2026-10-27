@@ -14,7 +14,9 @@
   const canvas = intro.querySelector('[data-intro-canvas]');
   const context = canvas?.getContext('2d');
   const LAYERS = [[3, 1], [5, 2], [7, 3], [4, 3], [2, 5]];
+  // Timeline in animation seconds; SPEED plays it in about 1.5 real seconds.
   const DURATION = 3.1;
+  const SPEED = 2;
   const startedAt = performance.now();
   let width = 0;
   let height = 0;
@@ -48,7 +50,7 @@
 
   function drawFrame(now) {
     if (closing || !context) return;
-    const t = (now - startedAt) / 1000;
+    const t = (now - startedAt) / 1000 * SPEED;
     const radius = Math.min(width, height) * 0.36;
     const grow = ease(clamp((t - 0.25) / 1.5));
     const flatten = ease(clamp((t - 2.4) / 0.55));
@@ -123,7 +125,7 @@
     closing = true;
     window.clearTimeout(failsafeTimer);
     window.cancelAnimationFrame(animationFrame);
-    window.removeEventListener('keydown', handleKeydown);
+    SKIP_EVENTS.forEach(type => window.removeEventListener(type, handleSkip));
     window.removeEventListener('resize', resizeCanvas);
     root.classList.remove('blog-intro-pending');
     intro.classList.add('is-leaving');
@@ -135,13 +137,15 @@
     }, 720);
   }
 
-  function handleKeydown() {
+  function handleSkip() {
     finishIntro();
   }
 
+  // Any sign of the reader wanting the page ends the intro at once.
+  const SKIP_EVENTS = ['keydown', 'wheel', 'touchstart', 'pointerdown'];
   intro.addEventListener('click', finishIntro);
   skipButton?.addEventListener('click', finishIntro);
-  window.addEventListener('keydown', handleKeydown);
+  SKIP_EVENTS.forEach(type => window.addEventListener(type, handleSkip, { passive: true }));
   window.addEventListener('resize', resizeCanvas, { passive: true });
 
   if (context) {
@@ -151,5 +155,5 @@
     finishIntro();
   }
 
-  failsafeTimer = window.setTimeout(finishIntro, 6500);
+  failsafeTimer = window.setTimeout(finishIntro, 3000);
 })();

@@ -16,6 +16,16 @@ Actions 页面手动运行该工作流。
 
 旧的 `.github/workflows/pages.yml` 已移除，避免一次 Push 触发两次 Pages 部署。
 
+工作流里的 Action 都固定到提交 SHA（行尾注释写着版本号），由 Dependabot 每周提 PR 更新。
+
+## 安全策略（CSP）
+
+GitHub Pages 不能自定义响应头，所以 `scripts/signal-csp.js` 在构建时给每个页面写入
+`<meta http-equiv="Content-Security-Policy">`：脚本只允许本站和 giscus，页面里的内联
+脚本按 SHA-256 自动放行。新增第三方脚本、iframe 或接口时，要把它的域名加进该文件的
+`SOURCES`，否则浏览器会拦截。访问统计用的是 `source/js/visitor-count.js`（Vercount 接口），
+本地预览（localhost）不计数。
+
 ## 创建文章
 
 继续使用 Hexo CLI：
