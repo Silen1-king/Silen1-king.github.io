@@ -125,11 +125,19 @@
 
   ::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background: rgba(150, 170, 255, .22);
+    background: var(--scrollbar-lit, rgba(150, 170, 255, .22));
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(150, 170, 255, .36);
+    background: var(--scrollbar-lit, rgba(150, 170, 255, .36));
+  }
+
+  /* signal-cursor.js hides the cursor on the page scrollbar and sets
+     .signal-cursor-edge while the pointer is there; the thumb lights up.
+     A variable, because Chrome won't restyle the page scrollbar from a
+     class selector on html. */
+  html.signal-cursor-edge {
+    --scrollbar-lit: var(--cyan);
   }
 
   /* ───── Pointer ─────
@@ -166,11 +174,6 @@
     html.signal-cursor-on,
     html.signal-cursor-on * {
       cursor: none !important;
-    }
-
-    /* The page scrollbar, where signal-cursor.js can't draw. */
-    html.signal-cursor-edge {
-      cursor: url("/images/cursor/dot.svg") 16 16, auto !important;
     }
   }
 
