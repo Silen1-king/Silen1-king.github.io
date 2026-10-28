@@ -20,6 +20,8 @@ menu:
   札记: /archives/ || fa fa-book
   远征: /learning-paths/ || fa fa-route
   疆域: /categories/ || fa fa-compass
+  漫游: /wander/ || fa fa-globe
+  # 友链: /friends/ || fa fa-link   (shown once friends.yml has someone)
 
 menu_settings:
   icons: false

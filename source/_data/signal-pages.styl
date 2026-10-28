@@ -575,4 +575,246 @@
     color: var(--mute);
     font: 12px var(--f-mono);
   }
+
+  /* ───── Friends (scripts/signal-friends.js) ───── */
+  .post-body .friend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .friend-grid li {
+    margin: 0;
+  }
+
+  .post-body .friend-card {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 18px 20px;
+    border: 1px solid var(--line);
+    background: var(--ink);
+    color: var(--text);
+    transition: border-color .2s, background .2s;
+  }
+
+  .post-body .friend-card:hover {
+    border-color: var(--cyan);
+    background: var(--ink-2);
+  }
+
+  .friend-avatar {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    border: 1px solid var(--line-2);
+    object-fit: cover;
+  }
+
+  .friend-avatar-letter {
+    display: grid;
+    place-items: center;
+    background: var(--ink-2);
+    color: var(--cyan);
+    font: 700 26px/1 var(--f-display);
+  }
+
+  .friend-grid li:nth-child(even) .friend-avatar-letter {
+    color: var(--violet);
+  }
+
+  .friend-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding-right: 28px;
+  }
+
+  .friend-name {
+    color: var(--fg);
+    font: 700 18px/1.4 var(--f-cn-display);
+  }
+
+  .friend-card:hover .friend-name {
+    color: #fff;
+  }
+
+  .friend-host {
+    overflow: hidden;
+    color: var(--mute);
+    font: 12px var(--f-mono);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color .2s;
+  }
+
+  .friend-card:hover .friend-host {
+    color: var(--cyan);
+  }
+
+  .friend-description {
+    margin-top: 4px;
+    color: var(--mute);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .friend-loc {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    color: #4b5372;
+    font: 11px var(--f-mono);
+    letter-spacing: .1em;
+  }
+
+  .friends-empty {
+    padding: 28px 0;
+    color: var(--mute);
+  }
+
+  .friends-self {
+    margin-top: 64px;
+  }
+
+  .post-body .friends-self h2 {
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+    color: var(--fg);
+    font: 700 26px/1.3 var(--f-cn-display);
+  }
+
+  .post-body .friends-self h2::before {
+    display: none;
+  }
+
+  .friends-self h2 small {
+    display: block;
+    margin-top: 6px;
+    color: var(--mute);
+    font: italic 500 18px var(--f-poem);
+  }
+
+  .friends-self p {
+    color: var(--mute);
+    font-size: 15px;
+  }
+
+  .friends-self-card {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 8px 20px;
+    margin: 18px 0 0;
+    padding: 18px 20px;
+    border: 1px solid var(--line);
+    background: var(--ink);
+    font: 13px/1.7 var(--f-mono);
+  }
+
+  .friends-self-card dt {
+    color: var(--violet);
+    font-weight: 400;
+  }
+
+  .friends-self-card dt::after {
+    content: ":";
+    color: var(--mute);
+  }
+
+  .friends-self-card dd {
+    margin: 0;
+    color: var(--fg);
+    overflow-wrap: anywhere;
+  }
+
+  /* ───── Wander (scripts/signal-links.js) ───── */
+  .wander-group {
+    margin-top: 48px;
+  }
+
+  .wander-group:first-child {
+    margin-top: 8px;
+  }
+
+  .post-body .wander-group h2 {
+    margin: 0 0 8px;
+    padding: 0;
+    border: 0;
+    color: var(--fg);
+    font: 700 26px/1.3 var(--f-cn-display);
+  }
+
+  .post-body .wander-group h2::before {
+    display: none;
+  }
+
+  .wander-group h2 small {
+    display: block;
+    margin-top: 6px;
+    color: var(--mute);
+    font: italic 500 18px var(--f-poem);
+  }
+
+  .post-body .wander-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .wander-list li {
+    margin: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .post-body .wander-site {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 20px;
+    align-items: baseline;
+    padding: 16px 4px;
+    border: 0;
+    color: var(--text);
+  }
+
+  .wander-name {
+    color: var(--fg);
+    font-weight: 500;
+    transition: color .2s;
+  }
+
+  .wander-site:hover .wander-name {
+    color: var(--cyan);
+  }
+
+  .wander-host {
+    color: var(--mute);
+    font: 12px var(--f-mono);
+    text-align: right;
+  }
+
+  .wander-description {
+    grid-column: 1 / -1;
+    color: var(--mute);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 567px) {
+    .post-body .wander-site {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wander-host {
+      text-align: left;
+    }
+  }
 }

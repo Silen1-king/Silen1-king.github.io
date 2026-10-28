@@ -135,6 +135,15 @@
   年鉴的标签光谱至少 5 篇才出现（`scripts/signal-home.js` 里的 `ROUTE_MIN`、`SPECTRUM_MIN`）。
 - **分享卡片**：`source/images/og-card.png`（1200×630），全站默认使用。
 
+## 漫游与友链
+
+两个链接页由 `scripts/signal-links.js` 生成，内容只改数据文件：
+
+- 漫游 `/wander/`：`source/_data/wander.yml`，按领域分组（`field` 中文名、`en` 英文小字、`sites` 网站列表）。
+- 友链 `/friends/`：`source/_data/friends.yml`，每人 `name`、`url`，可选 `description`、`avatar`。
+  头像必须放在站内 `source/images/friends/`（CSP 不加载外站图片），没有头像显示名字首字母。
+  友链还没有人时，导航栏里那一行在 `_config.next.yml` 中注释掉，有人后再打开。
+
 ## 暗室（隐藏日记）
 
 日记写在一个文件 `source/_diary.md` 里：每条是一个 `## 2026-10-24 22:30` 日期行

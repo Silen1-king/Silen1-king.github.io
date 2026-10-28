@@ -1,0 +1,8 @@
+# 友链：/friends/ 按这里的顺序列出（scripts/signal-links.js）。
+#
+# - name: 名字（必填）
+#   url: https://example.com/（必填）
+#   description: 一句话简介（可选）
+#   avatar: /images/friends/example.png（可选，放在 source/images/friends/；
+#           站点的 CSP 不加载外站图片，没有头像就显示名字首字母）
+[]
