@@ -167,6 +167,11 @@
     html.signal-cursor-on * {
       cursor: none !important;
     }
+
+    /* The page scrollbar, where signal-cursor.js can't draw. */
+    html.signal-cursor-edge {
+      cursor: url("/images/cursor/dot.svg") 16 16, auto !important;
+    }
   }
 
   .signal-cursor {
