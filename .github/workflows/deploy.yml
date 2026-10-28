@@ -37,19 +37,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check post metadata and local resources
-        run: npm run check:posts
+      - name: Test publication checks
+        run: npm run test:checks
 
-
-      - name: Clean and generate
-        run: |
-          npm run clean
-          npm run build
+      - name: Validate posts, clean, build and verify artifacts
+        run: npm run build
         env:
           NODE_ENV: production
-
-      - name: Verify generated site
-        run: test -f public/index.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0

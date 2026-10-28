@@ -3,11 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "prebuild": "npm run check:posts && hexo clean",
     "build": "hexo generate",
+    "postbuild": "npm run check:site",
     "check:posts": "node scripts/check-posts.js",
+    "check:site": "node tools/check-site.js",
     "clean": "hexo clean",
     "new:post": "hexo new post",
-    "server": "hexo server"
+    "server": "hexo server",
+    "server:drafts": "hexo server --draft",
+    "test:checks": "node --test tools/check-site.test.js"
   },
   "hexo": {
     "version": "8.1.2"
@@ -30,5 +35,8 @@
     "stylus": "0.64.0",
     "glob": "13.0.6",
     "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "parse5": "7.3.0"
   }
 }

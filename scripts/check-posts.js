@@ -107,6 +107,16 @@ function missingLocalReferences(postsDirectory, filePath, content) {
   return missing;
 }
 
+function invalidImageLocations(filePath, content) {
+  const prefix = `/images/posts/${path.basename(filePath, path.extname(filePath))}/`;
+  return [
+    ...referencedTargets(content, MARKDOWN_IMAGE_PATTERN),
+    ...referencedTargets(content, HTML_IMAGE_PATTERN)
+  ].filter(target => !isExternalTarget(target) && (
+    !target.startsWith(prefix) || path.posix.normalize(target) !== target
+  ));
+}
+
 function main() {
   let postsDirectory;
   try {
@@ -161,11 +171,13 @@ function main() {
     if (oversizedImages.length) {
       console.warn(`[WARN] ${fileName}: 图片超过 500 KB，建议压缩或转成 WebP：${oversizedImages.join(', ')}`);
     }
-    if (missingFields.length === 0 && missingReferences.length === 0) continue;
+    const invalidImages = invalidImageLocations(filePath, attributes._content || '');
+    if (missingFields.length === 0 && missingReferences.length === 0 && invalidImages.length === 0) continue;
 
     if (missingFields.length) console.warn(`[WARN] ${fileName}: 缺少 ${missingFields.join(', ')}`);
     if (missingReferences.length) console.warn(`[WARN] ${fileName}: 本地资源不存在 ${missingReferences.join(', ')}`);
-    issueCount += missingFields.length + missingReferences.length;
+    if (invalidImages.length) console.warn(`[WARN] ${fileName}: 图片须使用 /images/posts/${path.basename(filePath, path.extname(filePath))}/ 下的绝对路径：${invalidImages.join(', ')}`);
+    issueCount += missingFields.length + missingReferences.length + invalidImages.length;
     affectedFiles += 1;
   }
 

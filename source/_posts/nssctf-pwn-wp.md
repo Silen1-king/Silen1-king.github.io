@@ -178,6 +178,77 @@ Why？这不就形成一个悖论了吗？仔细寻找是否有什么地方存�
 
 结束，完胜到手！
 
+
+第四题：going_run
+你跑不过我，你信不信
+
+张雪峰老师，我还记得你！
+
+No canary found   NX enabled    No PIE   还有啥好说的，栈溢出
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image.png)
+init（）我查了一下，是初始化的函数
+i和j初始都是0
+在这个for循环里，j从0开始，每一个循环+1，直到j>32，也就是这个循环经历33次
+read(fd: 0, buf: &s[i++], nbytes: 8u)  ---解释一下 read：Linux里读取数据的；&：取该元素的内存地址，该元素是s[i]，然后i自增；最多读取 8 字节
+然后做判定，i > 40 ，exit(0)。i <= 40.重新进入循环
+思考，当j等于33时，i等于多少？i=33，真的是这样吗？错！
+注意： char s[16]; // [rsp+0h] [rbp-20h] BYREF
+溢出了！
+这就呼应了一开始checksec --file=going_run得到的No canary found
+然后我在左侧函数里发现另外一个gitf函数![alt text](/images/posts/nssctf-pwn-wp/going-run-image-1.png)
+打开一看![alt text](/images/posts/nssctf-pwn-wp/going-run-image-2.png)哟，你在这啊
+现在问题就简单了，找到缓冲区大小，设计一下栈溢出，然后让cpu返回到gitf函数的地址，执行system(command: "/bin/sh")，拿到shell
+注意No PIE，主程序代码地址固定所以直接在wsl里执行 nm going_run | grep ' T \| t '，找到gitf的地址
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-4.png)
+gitf的地址是0x0040121d
+objdump -d -M intel going_run，主要看main和gitf
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-5.png)
+缓冲区大小32+rbp8
+看gitf
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-3.png)
+那我们就是40个'A'灌进去加一个返回地址咯
+写exploit
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-6.png)
+执行
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-7.png)
+没反应，失败，查找原因，重新理解一下这个题目
+请教一下Claude
+这并不是一个简单的普通的线性溢出，在简单的ret2win题目上有了一点小改变
+关键在于对read(0, &s[i++], 8)的理解
+每次读取8字节，但i每轮只增加1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## IDA知识：
 
 - 按 N 给变量改名
