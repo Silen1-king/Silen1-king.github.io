@@ -7,7 +7,7 @@
 // Mouse only. The system cursor is hidden once this script has seen the
 // mouse move, so until then, or if the script never loads, the redrawn
 // system cursor from signal-base.styl is what shows. In the comments iframe
-// and on the scrollbar the system cursor takes over. Reduced motion keeps
+// and on the page scrollbar the system cursor takes over. Reduced motion keeps
 // the shapes and drops the afterglow, the ring and the easing.
 (function() {
   'use strict';
@@ -273,9 +273,12 @@
       pointer.moved = performance.now();
       if (!pointer.on) {
         pointer.on = true;
-        root.classList.add('signal-cursor-on');
         settle();
       }
+      // The page scrollbar is outside the canvas, so the dot can't be drawn
+      // there. Hand that strip back to the system cursor instead of leaving
+      // the pointer invisible on it.
+      root.classList.toggle('signal-cursor-on', event.clientX < root.clientWidth && event.clientY < root.clientHeight);
       kick();
     }, { passive: true });
 
