@@ -178,76 +178,232 @@ Why？这不就形成一个悖论了吗？仔细寻找是否有什么地方存�
 
 结束，完胜到手！
 
+## 第四题：going_run
 
-第四题：going_run
-你跑不过我，你信不信
+> 你跑不过我，你信不信
 
 张雪峰老师，我还记得你！
 
-No canary found   NX enabled    No PIE   还有啥好说的，栈溢出
+`No canary found   NX enabled    No PIE`   还有啥好说的，栈溢出
+
 ![alt text](/images/posts/nssctf-pwn-wp/going-run-image.png)
+
 init（）我查了一下，是初始化的函数
+
 i和j初始都是0
+
 在这个for循环里，j从0开始，每一个循环+1，直到j>32，也就是这个循环经历33次
-read(fd: 0, buf: &s[i++], nbytes: 8u)  ---解释一下 read：Linux里读取数据的；&：取该元素的内存地址，该元素是s[i]，然后i自增；最多读取 8 字节
+
+`read(fd: 0, buf: &s[i++], nbytes: 8u)`  ---解释一下 read：Linux里读取数据的；&：取该元素的内存地址，该元素是s[i]，然后i自增；最多读取 8 字节
+
 然后做判定，i > 40 ，exit(0)。i <= 40.重新进入循环
+
 思考，当j等于33时，i等于多少？i=33，真的是这样吗？错！
-注意： char s[16]; // [rsp+0h] [rbp-20h] BYREF
+
+注意： `char s[16]; // [rsp+0h] [rbp-20h] BYREF`
+
 溢出了！
-这就呼应了一开始checksec --file=going_run得到的No canary found
-然后我在左侧函数里发现另外一个gitf函数![alt text](/images/posts/nssctf-pwn-wp/going-run-image-1.png)
-打开一看![alt text](/images/posts/nssctf-pwn-wp/going-run-image-2.png)哟，你在这啊
-现在问题就简单了，找到缓冲区大小，设计一下栈溢出，然后让cpu返回到gitf函数的地址，执行system(command: "/bin/sh")，拿到shell
-注意No PIE，主程序代码地址固定所以直接在wsl里执行 nm going_run | grep ' T \| t '，找到gitf的地址
+
+这就呼应了一开始`checksec --file=going_run`得到的No canary found
+
+然后我在左侧函数里发现另外一个gitf函数
+
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-1.png)
+
+打开一看
+
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-2.png)
+
+哟，你在这啊
+
+现在问题就简单了，找到缓冲区大小，设计一下栈溢出，然后让cpu返回到gitf函数的地址，执行`system(command: "/bin/sh")`，拿到shell
+
+注意No PIE，主程序代码地址固定所以直接在wsl里执行 `nm going_run | grep ' T \| t '`，找到gitf的地址
+
 ![alt text](/images/posts/nssctf-pwn-wp/going-run-image-4.png)
-gitf的地址是0x0040121d
-objdump -d -M intel going_run，主要看main和gitf
+
+gitf的地址是`0x0040121d`
+
+`objdump -d -M intel going_run`，主要看main和gitf
+
 ![alt text](/images/posts/nssctf-pwn-wp/going-run-image-5.png)
+
 缓冲区大小32+rbp8
+
 看gitf
+
 ![alt text](/images/posts/nssctf-pwn-wp/going-run-image-3.png)
+
 那我们就是40个'A'灌进去加一个返回地址咯
+
 写exploit
+
 ![alt text](/images/posts/nssctf-pwn-wp/going-run-image-6.png)
+
 执行
+
 ![alt text](/images/posts/nssctf-pwn-wp/going-run-image-7.png)
+
 没反应，失败，查找原因，重新理解一下这个题目
+
 请教一下Claude
+
 这并不是一个简单的普通的线性溢出，在简单的ret2win题目上有了一点小改变
-关键在于对read(0, &s[i++], 8)的理解
+
+关键在于对`read(0, &s[i++], 8)`的理解
+
 每次读取8字节，但i每轮只增加1
 
+```text
+第0轮 i=0:  刷  0 1 2 3 4 5 6 7
+第1轮 i=1:  刷    1 2 3 4 5 6 7 8     ← 和上一笔重叠7格
+第2轮 i=2:  刷      2 3 4 5 6 7 8 9
+```
 
+就像是一把 8 格宽的刷子，每次只走 1 步，所以每一笔都在反复涂刚才涂过的地方
 
+所以我前面放在队尾的gitf地址根本到不了第40 格
 
+那会想：我为什么不多来几个A啊？
 
+这就涉及到变量在栈中的地址，我们放入的A覆盖了变量的值，导致了循环的破坏
 
+其实，在之前的笔记中我已经探讨过栈的一些结构，但这一次，我们需要在反汇编中重新理解它
 
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-8.png)
 
+把旧 rbp 压栈，开辟 0x20=32 字节局部空间（第一次知道有这么一个说法：由于 x86-64 的栈向低地址增长，rsp 减少 32，意味着为局部数据预留了 32 字节空间，有点细节）
 
+所以已知的：返回地址在 rbp+8，旧 rbp 在 rbp+0，有一个32字节的空间
 
+接下来是第一次学习到的，
 
+```text
+401276: mov  DWORD PTR [rbp-0x4],0  ; 有个4字节变量在 rbp-0x4, 初值0
+40128c: mov  DWORD PTR [rbp-0x8],0  ; 又有个4字节变量在 rbp-0x8, 初值0
+```
 
+DWORD（Double Word）在 x86 体系中代表 32 位（4 字节）
 
+我一开始十分疑惑，欸，怎么从这么多汇编指令中找到这个，判断这两行描述的就是变量啊，
 
+其实单从前面的赋值语句是看不出来的，要通过多个特征判断（要快速分辨的话确实需要经验），基于这道题目特征是：初始化为 0，反复读取，每次增加 1，与 40 比较。
 
+我在学习的时候进入了一个小误会：就是栈是向低地址增长的，i的值是一直在发生变化的，我以为变量的地址也会跟着变，其实不是的，变量的地址基于当前栈帧的 rbp 固定，也就是说当我们看到一个地址被反复调用并不断地发生变化的时候，就可以怀疑，这个地址存的是不是一个变量了------这波也可能是我蠢了
 
+我说实话，我这个汇编指令读得真有一点吃力，该去pwn.college进修一下了
 
+```text
+小tips：rbp-0x4：计算一个内存地址   [rbp-0x4]：读取这个地址中存储的值。
+        cdqe：将 eax 中的 32 位有符号整数扩展成 64 位，结果存入 rax
+        lea：计算一个内存地址，把计算结果放进寄存器，但不读取该地址中的数据
+        在 Linux x86-64 的函数调用约定中，rdi  → 第1个参数，rsi  → 第2个参数， rdx  → 第3个参数
+        jmp ：无条件跳转
+        jle：Jump if Less or Equal，有符号比较中小于或等于时跳转
+```
 
+根据前面的推理，我们知道两个存储变量的地址，在IDA的分析中，我们知道了确实有两个变量，怎么对应上呢？我们继续分析，
 
+```text
+401295: lea rdx,[rbp-0x20]
+401299: mov eax,DWORD PTR [rbp-0x4]
+40129c: cdqe
+40129e: add rax,rdx
+4012a1: mov edx,0x8
+4012a6: mov rsi,rax
+4012a9: mov edi,0x0
+4012ae: mov eax,0x0
+4012b3: call read@plt    // read（edi ，rsi，edx）     read（文件描述符 ，存放数据的地址，最多读取多少字节）0指的是标准输入
+4012b8: add DWORD PTR [rbp-0x4],1
+```
 
+rbp-0x20这个地址对应的变量用于计算数组元素的地址，并被传给了 read，然后再加一，干的是i的活
 
+同理
 
+```text
+401293: jmp 4012e4 <main+0x84>
 
+4012e4: cmp DWORD PTR [rbp-0x8],0x20
+4012e8: jle 401295 <main+0x35>
+```
 
+so，rbp-0x8地址的变量控制循环次数
 
+来自Claude的小提醒：IDA 给你标的 char s[16] 那个 16 是它瞎猜的，别信。真正可靠的锚点是 lea rdx,[rbp-0x20] 这句——缓冲区从 rbp-0x20 开始。
 
+分析完这些局部变量，我们要步入正轨，去算离 buf 多少格
 
+目前的栈情况如下
 
+```text
+                   高地址
+                     ↑
+              +------------------+
+rbp+0x08      | 返回地址 (8字节)  |
+              +------------------+
+rbp           | 旧 rbp (8字节)   |
+              +------------------+
+rbp-0x04      | i (4字节)        |
+              +------------------+
+rbp-0x08      | j (4字节)        |
+              +------------------+
+              |                  |
+              | 其他空间 (8字节) |
+              |                  |
+rbp-0x10      +------------------+
+              |                  |
+              | buf (16字节)     |
+              |                  |
+rbp-0x20      +------------------+
+                     ↓
+                   低地址
+```
 
+注意已知：全程唯一能往内存写东西的就是 read，从第 i 格开始，往后写 8 格，每转一圈：i 加 1；如果 i>40 就 exit；然后 j 加 1；只要 j≤32 就再转一圈。
 
+注意目的：让程序 ret 的时候跳到 gitf。ret 会跳到返回地址里存的值，而返回地址在第 40 格
 
+面对的问题：需要让read一次写第 i 到 i+7 格，要让这 8 格盖住第 40 格，i 必须落在 33 到 40 之间，如何让某一笔的 i 落在 33~40？
 
+一开始我失败过一次，i 自然根本走不到 33~40，它从 0 开始，每圈 +1。循环靠 j≤32 控制，j 也从 0 开始每圈 +1。所以转到停，i 最多也就到 32 左右
+
+思考：既然i最多到32格，那么这32格都有啥呢，有i的地址！i在第28格！
+
+我们可不可以覆盖第 28 格，把 i 这个数字本身修改了
+
+等i自然爬到一个合适的位置，用一笔 read 把 i 这个数字改大，逼它下一笔直接跳到第 40 格去写地址
+
+这个合适的位置是哪呢？
+
+j 占24~27，i 占28~31。i = 24，这一笔写第 24~31 格，不多不少，j 和 i 全盖住
+
+然后下一步就思考i要调到哪里啊？40！就在返回地址那！
+
+错！
+
+注意：每笔刷完会 i++，而且 i++ 后如果 >40 就 exit
+
+这个时候，i选择39
+
+前面为什么要把j考虑进去？因为j<=32循环是要继续的，i跳到39后，循环要立马停止，也就是说我们改完的j值要满足加1小于等于32，加2大于32，所以j=31
+
+于是有了如下结论：
+
+| 在哪动手 | i 设成 | j 设成 |
+| --- | --- | --- |
+| i 爬到 24 那笔 | 38 | 31 |
+
+结合gitf 的地址：`0x40121d`
+
+写exploit：
+
+![alt text](/images/posts/nssctf-pwn-wp/going-run-image-9.png)
+
+- 反思0：第四题有点小超标，这种构造题需要更高的熟练度，只能说继续成长吧
+- 反思1：这个汇编指令老是忘啊，准备整理一期常用的放出来，真的坑！我是真的菜！
+  这跟我准备盖大厦了，结果水泥没了有何区别！！！
+- 反思2：先 push rbp;mov rbp,rsp 认锚点 → 读 sub rsp 和 [rbp-X] 认局部变量 → 全换算成离 buf 的偏移 → 返回地址固定在 buf+(0x20+8)。
 
 ## IDA知识：
 
