@@ -99,7 +99,8 @@
   body {
     min-height: 100vh;
     overflow-x: hidden;
-    background: var(--void);
+    /* Transparent so the backdrop under the page shows; html keeps the void. */
+    background: transparent;
     color: var(--text);
     font-family: var(--f-body);
     font-size: 16px;
@@ -208,6 +209,54 @@
     opacity: .07;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* The backdrop (source/js/signal-backdrop.js): the night city canvas, and
+     the moon under it so the rain falls in front. The reading column in the
+     middle is dimmed so text stays easy to read; phones dim all of it. */
+  .signal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(50% - 520px), rgba(0, 0, 0, .3) calc(50% - 400px), rgba(0, 0, 0, .3) calc(50% + 400px), #000 calc(50% + 520px));
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(50% - 520px), rgba(0, 0, 0, .3) calc(50% - 400px), rgba(0, 0, 0, .3) calc(50% + 400px), #000 calc(50% + 520px));
+  }
+
+  .signal-moon {
+    position: fixed;
+    top: calc(var(--header-h) + var(--header-top) + 4px);
+    right: max(16px, 3vw);
+    z-index: -2;
+    width: 160px;
+    height: auto;
+    opacity: .85;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  @media (max-width: 767px) {
+    .signal-backdrop {
+      -webkit-mask-image: none;
+      mask-image: none;
+      opacity: .55;
+    }
+
+    .signal-moon {
+      top: calc(var(--header-h) + var(--header-top) + 10px);
+      right: 6px;
+      width: 100px;
+      opacity: .5;
+    }
+  }
+
+  @media print {
+    .signal-backdrop,
+    .signal-moon {
+      display: none;
+    }
   }
 
   /* ───── Header: a thin instrument bar ───── */

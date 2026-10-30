@@ -1,0 +1,326 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- A broken crescent: the upper horn has shattered into drifting shards,
+       a patch of the surface shows its wireframe, cracks glow cyan and a
+       slice of it glitches sideways now and then. On the lower horn kneels
+       a girl in prayer, long orange hair in the wind, a ring of light
+       turning behind her head, her book resting beside her. -->
+  <style>
+    .shard { animation: drift 9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+    .shard.b { animation-duration: 12s; animation-delay: -4s; }
+    .shard.c { animation-duration: 7s; animation-delay: -2s; }
+    .shard.d { animation-duration: 14s; animation-delay: -7s; }
+    .glitch { animation: glitch 6.5s steps(1) infinite; }
+    .glitch.b { animation-duration: 9.3s; animation-delay: -3s; }
+    .crack { animation: pulse 4.6s ease-in-out infinite alternate; }
+    .halo { transform-origin: 232px 196px; animation: spin 36s linear infinite; }
+    .halo2 { transform-origin: 232px 196px; animation: spin 52s linear infinite reverse; }
+    .hair { transform-origin: 236px 200px; animation: wind 3.6s ease-in-out infinite alternate; }
+    .hair.b { animation-duration: 4.4s; animation-delay: -1.5s; }
+    .ribbon { transform-origin: 238px 190px; animation: wind 2.8s ease-in-out -0.6s infinite alternate; }
+    .trace { animation: run 7s linear infinite; }
+    @keyframes run { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -704; } }
+    .mote { animation: rise 6s ease-out infinite; opacity: 0; }
+    .mote.b { animation-delay: -2s; }
+    .mote.c { animation-delay: -4s; }
+    @keyframes drift { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(6px, -8px) rotate(14deg); } }
+    @keyframes glitch { 0% { transform: translateX(0); opacity: 0; } 86% { transform: translateX(7px); opacity: 1; } 89% { transform: translateX(-4px); } 92% { transform: translateX(10px); } 95% { opacity: 0; } }
+    @keyframes pulse { from { opacity: .35; } to { opacity: .9; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes wind { from { transform: rotate(-2deg) skewX(-2deg); } to { transform: rotate(2.5deg) skewX(3deg); } }
+    @keyframes rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translateY(-46px); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } 
+      .mote { opacity: 0; } .trace { opacity: 0; } .glitch { opacity: 0; } }
+  </style>
+  <defs>
+    <radialGradient id="lit" cx="34%" cy="58%" r="72%">
+      <stop offset="0" stop-color="#eeece6"/>
+      <stop offset=".6" stop-color="#d3d1cb"/>
+      <stop offset=".92" stop-color="#aeacab"/>
+      <stop offset="1" stop-color="#8f8e95"/>
+    </radialGradient>
+    <radialGradient id="haloG" cx="50%" cy="50%" r="50%">
+      <stop offset=".4" stop-color="#c8beff" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#a88bff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="prayG" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffd2a8" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#ff9a5c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hairG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f08a4b"/>
+      <stop offset=".55" stop-color="#d9622b"/>
+      <stop offset="1" stop-color="#9e3f17"/>
+    </linearGradient>
+    <linearGradient id="hairEnd" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d9622b"/>
+      <stop offset="1" stop-color="#d9622b" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6f1e9"/>
+      <stop offset="1" stop-color="#d9d0c3"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ec7a3c"/>
+      <stop offset="1" stop-color="#c2531f"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6b2f22"/>
+      <stop offset="1" stop-color="#3e1a13"/>
+    </linearGradient>
+    <mask id="crescent">
+      <circle cx="180" cy="205" r="130" fill="#fff"/>
+      <circle cx="245" cy="170" r="116" fill="#000" filter="url(#terminator)"/>
+      <path d="M140 40 L230 40 L226 104 L208 96 L201 112 L188 101 L176 116 L166 102 L150 108 Z" fill="#000"/>
+      <path d="M62 236 L80 222 L97 230 L104 249 L95 268 L76 272 L60 258 Z" fill="#000"/>
+    </mask>
+    <mask id="shine">
+      <circle cx="180" cy="205" r="130" fill="#fff"/>
+      <path d="M140 40 L230 40 L226 104 L208 96 L201 112 L188 101 L176 116 L166 102 L150 108 Z" fill="#000"/>
+      <path d="M226 104 L330 60 L330 40 L230 40 Z" fill="#000"/>
+    </mask>
+    <clipPath id="hole"><path d="M62 236 L80 222 L97 230 L104 249 L95 268 L76 272 L60 258 Z"/></clipPath>
+    <clipPath id="slice1"><rect x="40" y="148" width="160" height="7"/></clipPath>
+    <clipPath id="slice2"><rect x="40" y="292" width="200" height="5"/></clipPath>
+    <filter id="blur3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="terminator" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="4" seed="3"/>
+      <feColorMatrix values="0 0 0 0 .32  0 0 0 0 .31  0 0 0 0 .34  0 0 0 -2.4 1.25"/>
+    </filter>
+    <filter id="fine" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".6" numOctaves="2" seed="9"/>
+      <feColorMatrix values="0 0 0 0 .2  0 0 0 0 .2  0 0 0 0 .22  0 0 0 -1.6 .95"/>
+    </filter>
+    <radialGradient id="limb" cx="50%" cy="50%" r="50%">
+      <stop offset=".82" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1a1a24" stop-opacity=".35"/>
+    </radialGradient>
+    <radialGradient id="crater" cx="58%" cy="58%" r="55%">
+      <stop offset="0" stop-color="#7d7b80" stop-opacity=".55"/>
+      <stop offset=".75" stop-color="#8d8b90" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#8d8b90" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="seas"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+
+  <circle cx="180" cy="205" r="190" fill="url(#haloG)"/>
+
+  <!-- earthshine: the dark part of the disc, barely there -->
+  <circle cx="180" cy="205" r="130" fill="#262a3e" opacity=".22" mask="url(#shine)"/>
+  <g id="moon">
+    <g mask="url(#crescent)">
+      <circle cx="180" cy="205" r="130" fill="url(#lit)"/>
+      <!-- dark plains (maria), blotchy like the real ones -->
+      <g fill="#6e6c78" filter="url(#seas)">
+        <path d="M78 168 C70 150 86 136 100 142 C112 148 116 164 108 178 C100 192 112 202 106 214 C98 226 80 222 74 208 C68 196 84 186 78 168 Z" opacity=".42"/>
+        <path d="M88 236 C80 226 92 214 106 220 C118 226 126 240 120 252 C114 262 98 258 92 250 Z" opacity=".3"/>
+        <path d="M112 280 C104 272 116 260 132 266 C148 272 156 288 146 296 C136 304 120 296 112 280 Z" opacity=".36"/>
+        <path d="M60 128 C58 118 68 112 76 118 C82 124 78 134 70 136 Z" opacity=".3"/>
+      </g>
+      <!-- surface grain -->
+      <rect x="40" y="70" width="230" height="270" filter="url(#grain)" opacity=".55"/>
+      <rect x="40" y="70" width="230" height="270" filter="url(#fine)" opacity=".35"/>
+      <!-- craters: lit on the sunward rim, shadowed on the other -->
+      <g>
+        <circle cx="92" cy="176" r="7" fill="url(#crater)"/>
+        <path d="M85.3 178.1 A7 7 0 0 1 94.1 169.3" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="1.26"/>
+        <path d="M89.9 182.7 A7 7 0 0 0 98.7 173.9" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="1.40"/>
+        <circle cx="118" cy="214" r="4.5" fill="url(#crater)"/>
+        <path d="M113.7 215.3 A4.5 4.5 0 0 1 119.3 209.7" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.81"/>
+        <path d="M116.7 218.3 A4.5 4.5 0 0 0 122.3 212.7" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.90"/>
+        <circle cx="70" cy="214" r="5" fill="url(#crater)"/>
+        <path d="M65.2 215.5 A5 5 0 0 1 71.5 209.2" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.90"/>
+        <path d="M68.5 218.8 A5 5 0 0 0 74.8 212.5" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="1.00"/>
+        <circle cx="104" cy="150" r="3.5" fill="url(#crater)"/>
+        <path d="M100.7 151.1 A3.5 3.5 0 0 1 105.0 146.7" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.63"/>
+        <path d="M103.0 153.3 A3.5 3.5 0 0 0 107.3 148.9" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.70"/>
+        <circle cx="140" cy="262" r="6" fill="url(#crater)"/>
+        <path d="M134.3 263.8 A6 6 0 0 1 141.8 256.3" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="1.08"/>
+        <path d="M138.2 267.7 A6 6 0 0 0 145.7 260.2" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="1.20"/>
+        <circle cx="112" cy="298" r="4" fill="url(#crater)"/>
+        <path d="M108.2 299.2 A4 4 0 0 1 113.2 294.2" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.72"/>
+        <path d="M110.8 301.8 A4 4 0 0 0 115.8 296.8" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.80"/>
+        <circle cx="160" cy="318" r="5.5" fill="url(#crater)"/>
+        <path d="M154.8 319.6 A5.5 5.5 0 0 1 161.7 312.8" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.99"/>
+        <path d="M158.3 323.2 A5.5 5.5 0 0 0 165.2 316.4" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="1.10"/>
+        <circle cx="84" cy="252" r="3" fill="url(#crater)"/>
+        <path d="M81.2 252.9 A3 3 0 0 1 84.9 249.2" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.60"/>
+        <path d="M83.1 254.8 A3 3 0 0 0 86.8 251.1" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.60"/>
+        <circle cx="196" cy="320" r="3.5" fill="url(#crater)"/>
+        <path d="M192.7 321.1 A3.5 3.5 0 0 1 197.1 316.7" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.63"/>
+        <path d="M194.9 323.3 A3.5 3.5 0 0 0 199.3 318.9" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.70"/>
+        <circle cx="128" cy="128" r="3" fill="url(#crater)"/>
+        <path d="M125.2 128.9 A3 3 0 0 1 128.9 125.2" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.60"/>
+        <path d="M127.1 130.8 A3 3 0 0 0 130.8 127.1" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.60"/>
+        <circle cx="150" cy="296" r="2.5" fill="url(#crater)"/>
+        <path d="M147.6 296.8 A2.5 2.5 0 0 1 150.8 293.6" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.60"/>
+        <path d="M149.2 298.4 A2.5 2.5 0 0 0 152.4 295.2" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.60"/>
+        <circle cx="60" cy="180" r="3" fill="url(#crater)"/>
+        <path d="M57.1 180.9 A3 3 0 0 1 60.9 177.2" fill="none" stroke="#3e3d45" stroke-opacity=".35" stroke-width="0.60"/>
+        <path d="M59.1 182.8 A3 3 0 0 0 62.9 179.1" fill="none" stroke="#fbfaf6" stroke-opacity=".55" stroke-width="0.60"/>
+      </g>
+      <!-- a young bright crater with rays -->
+      <g transform="translate(132 316)" stroke="#f6f4ee" stroke-linecap="round" fill="none" opacity=".5">
+        <path d="M0 0 L-26 -14 M0 0 L-30 4 M0 0 L-18 22 M0 0 L8 -26 M0 0 L22 -14 M0 0 L-6 -30" stroke-width=".8"/>
+      </g>
+      <circle cx="132" cy="316" r="2.6" fill="#fdfcf8" opacity=".8"/>
+      <!-- limb darkening -->
+      <circle cx="180" cy="205" r="130" fill="url(#limb)"/>
+      <!-- etched lines: rim dial, arcs that follow the curve, board traces, a sun motif -->
+      <g fill="none" stroke="#5d5a86" stroke-linecap="round" opacity=".38">
+        <circle cx="180" cy="205" r="121" stroke-width=".7" stroke-dasharray="1 5.3"/>
+        <circle cx="180" cy="205" r="112" stroke-width=".6" stroke-dasharray="40 6 4 6"/>
+        <circle cx="180" cy="205" r="96" stroke-width=".5" stroke-dasharray="70 10 2 10"/>
+        <path d="M68 205 H84 L92 197 H104 M74 172 H90 L98 180 M86 300 L96 290 H112 L118 284 M120 318 V306 L128 298" stroke-width=".7"/>
+        <g fill="#6f6aa6" stroke="none">
+          <circle cx="104" cy="197" r="1.6"/><circle cx="98" cy="180" r="1.6"/><circle cx="118" cy="284" r="1.6"/><circle cx="128" cy="298" r="1.6"/>
+        </g>
+        <g transform="translate(150 316)" stroke-width=".6">
+          <circle r="4"/><circle r="1.6"/>
+          <path d="M0 -9 V-6 M0 6 V9 M-9 0 H-6 M6 0 H9 M-6.4 -6.4 L-4.4 -4.4 M4.4 4.4 L6.4 6.4 M6.4 -6.4 L4.4 -4.4 M-4.4 4.4 L-6.4 6.4"/>
+        </g>
+        <path d="M60 140 q6 -4 12 0 t12 0 M56 268 q6 4 12 0" stroke-width=".5"/>
+      </g>
+      <!-- a pulse running along the inner arc -->
+      <circle class="trace" cx="180" cy="205" r="112" fill="none" stroke="#7cecff" stroke-width="1.1" stroke-dasharray="14 690" stroke-linecap="round" opacity=".8"/>
+      <path d="M150 108 L166 102 L176 116 L188 101 L201 112 L208 96" fill="none" stroke="#7cecff" stroke-width="1.2" opacity=".5"/>
+    </g>
+    <circle cx="245" cy="170" r="118" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="1.5" mask="url(#crescent)"/>
+  </g>
+
+  <!-- wireframe showing through the hole -->
+  <g clip-path="url(#hole)" stroke="#7cecff" stroke-width=".7" fill="none" opacity=".75">
+    <rect x="55" y="215" width="55" height="62" fill="#0b1020" stroke="none"/>
+    <path d="M55 226 H110 M55 234 H110 M55 242 H110 M55 250 H110 M55 258 H110 M55 266 H110"/>
+    <path d="M66 215 Q62 246 66 277 M76 215 Q73 246 76 277 M86 215 Q84 246 86 277 M96 215 Q95 246 96 277"/>
+  </g>
+  <path d="M62 236 L80 222 L97 230 L104 249 L95 268 L76 272 L60 258 Z" fill="none" stroke="#7cecff" stroke-width="1" opacity=".7"/>
+
+  <!-- cracks -->
+  <g class="crack" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#7cecff" stroke-width="3" opacity=".5" filter="url(#blur3)">
+      <path d="M104 249 L118 262 L116 280 L132 298"/>
+      <path d="M150 108 L136 126 L140 142 L126 160"/>
+    </g>
+    <g stroke="#bff6ff" stroke-width="1">
+      <path d="M104 249 L118 262 L116 280 L132 298 M118 262 L130 258"/>
+      <path d="M150 108 L136 126 L140 142 L126 160 M136 126 L124 124"/>
+    </g>
+  </g>
+
+  <!-- glitch slices -->
+  <g class="glitch" clip-path="url(#slice1)"><use href="#moon"/><rect x="40" y="148" width="160" height="1" fill="#7cecff" opacity=".6" mask="url(#crescent)"/></g>
+  <g class="glitch b" clip-path="url(#slice2)"><use href="#moon"/><rect x="40" y="296" width="200" height="1" fill="#ff7e9d" opacity=".6" mask="url(#crescent)"/></g>
+
+  <!-- shards of the upper horn -->
+  <g fill="url(#lit)" stroke="#7cecff" stroke-width=".8" stroke-opacity=".6">
+    <path class="shard" d="M176 78 L190 72 L194 86 L182 90 Z"/>
+    <path class="shard b" d="M198 62 L208 60 L206 72 Z"/>
+    <path class="shard c" d="M158 88 L168 84 L170 96 L160 98 Z"/>
+    <path class="shard d" d="M214 82 L222 80 L220 88 Z"/>
+    <path class="shard b" d="M186 50 L192 48 L193 55 Z"/>
+  </g>
+
+  <!-- ===== the girl ===== -->
+  <g id="girl">
+    <circle cx="214" cy="218" r="30" fill="url(#prayG)"/>
+
+    <g class="halo" fill="none" stroke="#ffb067">
+      <circle cx="232" cy="196" r="21" stroke-width="1.1" stroke-dasharray="10 4 2 4" opacity=".75"/>
+    </g>
+    <g class="halo2" fill="none" stroke="#7cecff">
+      <circle cx="232" cy="196" r="16.5" stroke-width=".6" stroke-dasharray="1.5 3" opacity=".6"/>
+    </g>
+
+    <!-- hair behind her, streaming right -->
+    <g class="hair">
+      <path d="M232 186 C246 182 258 196 262 214 C268 238 282 252 300 262 C314 270 328 270 340 278 C322 282 304 280 290 272 C272 262 258 246 250 228 C246 220 240 214 236 212 Z" fill="url(#hairG)"/>
+      <path d="M300 262 C316 268 332 266 348 272 C334 280 318 279 304 273 Z" fill="url(#hairEnd)" opacity=".8"/>
+    </g>
+    <g class="hair b">
+      <path d="M238 196 C252 206 256 228 270 246 C282 262 300 276 322 288 C304 292 286 286 272 274 C258 260 250 240 244 222 Z" fill="#c4521f"/>
+      <path d="M322 288 C334 294 344 292 356 298 C342 302 330 300 318 294 Z" fill="url(#hairEnd)" opacity=".7"/>
+      <path d="M254 222 C262 244 278 262 300 276" fill="none" stroke="#f6a06a" stroke-width=".8" opacity=".6"/>
+    </g>
+
+    <!-- skirt spread over the moon -->
+    <path d="M222 240 C214 252 204 266 199 284 C206 290 250 292 268 288 C266 270 256 252 244 240 Z" fill="url(#dress)"/>
+    <path d="M244 240 C254 252 264 268 268 288 L258 289 C254 272 248 256 238 244 Z" fill="#1d1a22"/>
+    <path d="M226 244 C220 258 214 272 213 289 L228 290 C228 274 230 258 232 246 Z" fill="url(#panel)"/>
+    <path d="M213 289 L228 290 M226 244 C220 258 214 272 213 289" fill="none" stroke="#e7b46a" stroke-width=".6"/>
+    <path d="M199 284 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 L268 288 L268 290 L199 288 Z" fill="#efe8de"/>
+    <path d="M238 282 q2 -4 4 0 q2 -4 4 0 M248 283 q2 -4 4 0" fill="none" stroke="#e08a52" stroke-width=".6"/>
+    <path d="M266 283 l7 -1 l1 6 l-7 1 z" fill="#d8d3cd"/>
+    <path d="M272 288 l2.5 0 l0 3 l-2.5 0 z" fill="#8a7f78"/>
+
+    <path d="M226 246 L225 262" stroke="#c2531f" stroke-width="1"/>
+    <path d="M222.6 262 L227.4 262 L228.4 270 L221.6 270 Z" fill="#e7a24e"/>
+
+    <path d="M221 234 C228 236.4 239 236.4 246 234 L245 248 C238 250 228 250 221.6 248 Z" fill="#1b1820"/>
+    <path d="M221.2 238 C228 240 239 240 245.6 238" fill="none" stroke="#c9a15a" stroke-width=".5"/>
+    <path d="M230 243 q4 3 8 0" fill="none" stroke="#c9a15a" stroke-width=".5"/>
+
+    <path d="M222 214 C224 210 240 210 244 214 L246 237 L220 237 Z" fill="url(#dress)"/>
+    <path d="M220 213 C224 207 242 207 247 213 L250 228 C242 232 226 231 218 227 Z" fill="#f4efe6"/>
+    <path d="M218 227 C226 231 242 232 250 228" fill="none" stroke="#c5b9a8" stroke-width=".7"/>
+    <g transform="translate(241 221)" stroke="#e08a52" stroke-width=".5" fill="none">
+      <circle r="1.4"/>
+      <path d="M0 -3.4 V-2 M0 2 V3.4 M-3.4 0 H-2 M2 0 H3.4 M-2.4 -2.4 L-1.4 -1.4 M1.4 1.4 L2.4 2.4 M2.4 -2.4 L1.4 -1.4 M-1.4 1.4 L-2.4 2.4"/>
+    </g>
+    <path d="M226 208 q2 3 4 0 q2 3 4 0 q2 3 4 0 L238 212 L226 212 Z" fill="#fbf7f1"/>
+    <path d="M231 211 l-4 6 l3 1 Z M233 211 l3 7 l-3 1 Z" fill="#141217"/>
+    <circle cx="232" cy="211" r="1.6" fill="#e5823f"/>
+
+    <!-- arm raised, hands pressed together in prayer -->
+    <path d="M240 217 C236 222 234 228 231 229 C227 228 224 223 222 219" fill="none" stroke="#e9e1d5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M219.4 219.6 q1.2 -1.8 2.4 0 q1.2 -1.8 2.4 0 q1.2 -1.8 2.4 0" fill="none" stroke="#fffaf3" stroke-width="1.3"/>
+    <!-- neck and bowed head -->
+    <path d="M228 202 L229 210 L234 210 L234 202 Z" fill="#efd5c5"/>
+    <ellipse cx="229" cy="196" rx="8.6" ry="9.6" fill="#f6e3d6"/>
+    <path d="M222.6 196.4 q2 1.6 4 .2" fill="none" stroke="#5a2d1c" stroke-width=".8" stroke-linecap="round"/>
+    <path d="M222.4 196.6 l-1 .9 M224 197.4 l-.5 1.1" stroke="#5a2d1c" stroke-width=".4"/>
+    <path d="M223.6 201.8 q1.2 .5 2.2 0" fill="none" stroke="#c07562" stroke-width=".6" stroke-linecap="round"/>
+    <ellipse cx="225.6" cy="199" rx="2.2" ry="1.4" fill="#ffb7a0" opacity=".35"/>
+
+    <path d="M219.6 194 C218 184 226 177 235 178.4 C243 179.6 246 187 244.6 196 C244 202 245 208 247 214 C242 212 239 206 238.6 199 C236 193 233 188 231 186 C229 190 224 193 219.6 194 Z" fill="url(#hairG)"/>
+    <path d="M221 192 C223 189 226 186 228 182 M229 186 C230 183 232 181 234 180" fill="none" stroke="#f6a06a" stroke-width=".6" opacity=".7"/>
+    <path d="M220.4 192 C217.4 202 217 214 219.4 224 C218.6 214 219.6 203 222.4 195 Z" fill="#d9622b"/>
+
+    <path d="M219.6 218.6 C218.4 213.4 219 208.6 221.4 205.4 C223.8 208.4 224.6 213.4 223.6 218.6 Z" fill="#f6e3d6"/>
+    <path d="M221.5 206.6 L221.7 217.6" stroke="#dcbca9" stroke-width=".45"/>
+    <path d="M220 213 q1.5 .6 3 0" fill="none" stroke="#e7cbb9" stroke-width=".35"/>
+    <g class="ribbon">
+      <path d="M239 188 C246 190 252 196 258 196 C252 199 246 196 240 192 Z" fill="#141217"/>
+      <path d="M239 190 C245 194 249 202 254 204 C248 205 244 200 239 194 Z" fill="#232028"/>
+    </g>
+    <g transform="translate(238 186)">
+      <circle r="4" fill="#e5823f"/>
+      <g fill="#f29a5a">
+        <ellipse rx="1.4" ry="3.4" transform="rotate(0) translate(0 -3)"/>
+        <ellipse rx="1.4" ry="3.4" transform="rotate(45) translate(0 -3)"/>
+        <ellipse rx="1.4" ry="3.4" transform="rotate(90) translate(0 -3)"/>
+        <ellipse rx="1.4" ry="3.4" transform="rotate(135) translate(0 -3)"/>
+        <ellipse rx="1.4" ry="3.4" transform="rotate(180) translate(0 -3)"/>
+        <ellipse rx="1.4" ry="3.4" transform="rotate(225) translate(0 -3)"/>
+        <ellipse rx="1.4" ry="3.4" transform="rotate(270) translate(0 -3)"/>
+        <ellipse rx="1.4" ry="3.4" transform="rotate(315) translate(0 -3)"/>
+      </g>
+      <circle r="1.6" fill="#a8461c"/>
+    </g>
+
+    <g fill="#ffd2a8">
+      <circle class="mote" cx="212" cy="204" r="1"/>
+      <circle class="mote b" cx="216" cy="202" r=".8"/>
+      <circle class="mote c" cx="209" cy="206" r=".7"/>
+    </g>
+
+    <g transform="rotate(-8 186 268)">
+      <rect x="174" y="262" width="22" height="7" rx="1" fill="url(#cover)"/>
+      <rect x="175.5" y="263" width="19" height="2" fill="#efe4d2"/>
+      <g transform="translate(185 266.6)" stroke="#e7a24e" stroke-width=".4" fill="none">
+        <circle r="1.2"/>
+        <path d="M-2.6 0 H-1.6 M1.6 0 H2.6"/>
+      </g>
+    </g>
+  </g>
+</svg>
