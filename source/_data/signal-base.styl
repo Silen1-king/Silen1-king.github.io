@@ -227,12 +227,14 @@
 
   .signal-moon {
     position: fixed;
-    top: calc(var(--header-h) + var(--header-top) + 4px);
-    right: max(16px, 3vw);
+    top: var(--moon-top);
+    right: var(--moon-right);
     z-index: -2;
-    width: 160px;
+    width: var(--moon-w);
     height: auto;
-    opacity: .85;
+    opacity: var(--moon-o);
+    /* Hazed into the night: less colour and contrast, a cyan mist. */
+    filter: saturate(.62) contrast(.82) brightness(.82) drop-shadow(0 0 18px rgba(124, 236, 255, .18));
     pointer-events: none;
     user-select: none;
   }
@@ -243,27 +245,37 @@
       mask-image: none;
       opacity: .55;
     }
-
-    .signal-moon {
-      top: calc(var(--header-h) + var(--header-top) + 10px);
-      right: 6px;
-      width: 100px;
-      opacity: .5;
-    }
   }
 
-  /* The moon comes on last after the home intro. On posts it brightens as
-     the post is read (--read, signal.js); at the end her light falls on
-     the city: a beam under her and a glow round her head. Both sit at the
-     girl's place on the moon, 58% across and 49% down the image. */
+  /* The moon. On the home hero it hangs large and faint above the skyline,
+     its lower edge behind the towers, and rises to a small moon in the
+     corner once the hero has scrolled away (.signal-past-hero, signal.js);
+     every other page has the small one. It comes on last after the home
+     intro. On posts it brightens and clears as the post is read (--read,
+     signal.js); at the end her light falls on the city: a beam under her
+     and a glow round her head. Both follow the moon through these vars,
+     at the girl's place on it, 58% across and 49% down the image. */
   :root {
-    --moon-w: 160px;
-    --moon-top: calc(var(--header-h) + var(--header-top) + 4px);
-    --moon-right: max(16px, 3vw);
+    --moon-w: 120px;
+    --moon-top: calc(var(--header-h) + var(--header-top) + 24px);
+    --moon-right: max(16px, 2vw);
+    --moon-o: .5;
+  }
+
+  :root:has(#signal-hero):not(.signal-past-hero) {
+    --moon-w: 240px;
+    --moon-top: 38vh;
+    --moon-right: 2.5vw;
+    --moon-o: .55;
   }
 
   .signal-moon {
-    transition: opacity 1.6s ease;
+    transition: opacity 1.6s ease, top .9s ease, right .9s ease, width .9s ease;
+  }
+
+  .signal-beam,
+  .signal-halo {
+    transition: opacity 2.4s ease, top .9s ease, right .9s ease;
   }
 
   html.signal-powering .signal-moon {
@@ -271,8 +283,8 @@
   }
 
   html.signal-reading .signal-moon {
-    opacity: calc(.5 + var(--read, 0) * .5);
-    filter: brightness(calc(.62 + var(--read, 0) * .5)) drop-shadow(0 0 calc(var(--read, 0) * 22px) rgba(255, 214, 170, .32));
+    opacity: calc(var(--moon-o) + var(--read, 0) * (1 - var(--moon-o)));
+    filter: saturate(calc(.62 + var(--read, 0) * .38)) contrast(calc(.82 + var(--read, 0) * .18)) brightness(calc(.75 + var(--read, 0) * .4)) drop-shadow(0 0 calc(8px + var(--read, 0) * 16px) rgba(255, 214, 170, calc(var(--read, 0) * .32)));
     transition: none;
   }
 
@@ -282,7 +294,6 @@
     z-index: -1;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 2.4s ease;
   }
 
   .signal-beam {
@@ -323,13 +334,17 @@
 
   @media (max-width: 767px) {
     :root {
-      --moon-w: 100px;
-      --moon-top: calc(var(--header-h) + var(--header-top) + 10px);
-      --moon-right: 6px;
+      --moon-w: 84px;
+      --moon-top: calc(var(--header-h) + var(--header-top) + 6px);
+      --moon-right: 4px;
+      --moon-o: .35;
     }
 
-    html.signal-reading .signal-moon {
-      opacity: calc(.32 + var(--read, 0) * .5);
+    :root:has(#signal-hero):not(.signal-past-hero) {
+      --moon-w: 150px;
+      --moon-top: 57svh;
+      --moon-right: 4vw;
+      --moon-o: .42;
     }
   }
 

@@ -379,6 +379,8 @@
       const rect = hero.getBoundingClientRect();
       const progress = clamp(-rect.top / Math.max(1, rect.height * 0.9));
       scatter = Math.pow(progress, 1.6);
+      // The big moon over the skyline rises to the corner as the hero leaves.
+      document.documentElement.classList.toggle('signal-past-hero', progress > 0.55);
       if (heroCopy) {
         heroCopy.style.opacity = String(1 - clamp(progress * 2.2));
         heroCopy.style.transform = `translateY(${-progress * 80}px)`;
