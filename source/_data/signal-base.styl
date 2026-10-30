@@ -262,10 +262,11 @@
     --moon-o: .5;
   }
 
+  /* Sized to the margin the wordmark leaves, so it never covers the 1. */
   :root:has(#signal-hero):not(.signal-past-hero) {
-    --moon-w: 240px;
+    --moon-w: min(240px, 15vw);
     --moon-top: 38vh;
-    --moon-right: 2.5vw;
+    --moon-right: 2vw;
     --moon-o: .55;
   }
 
