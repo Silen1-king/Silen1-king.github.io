@@ -6,9 +6,10 @@
 // button downloads it once. The choice is remembered in this browser, and
 // the button switches back to the Chinese original.
 //
-// Browsers without the API keep their own page translation; the button
-// then says where to find it. Code, addresses and counters are marked
-// translate="no" here either way.
+// Where the API is missing or can't translate Chinese (Safari, Firefox,
+// most phones, older Chrome), the button opens the page in Google's web
+// translation (translate.goog) instead. Code, addresses and counters are
+// marked translate="no" here either way.
 (function() {
   'use strict';
 
@@ -19,7 +20,8 @@
 
   const button = document.querySelector('[data-signal-translate]');
   const label = document.querySelector('[data-signal-translate-label]');
-  if (!button) return;
+  // Already inside Google's translation proxy: nothing more to do.
+  if (!button || /\.translate\.goog$/.test(window.location.hostname)) return;
 
   const forced = new URLSearchParams(window.location.search).get('translate');
   const languages = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
@@ -96,7 +98,7 @@
       if (!unit.text) continue;
       let output;
       try {
-        output = await translator.translate(unit.text);
+        output = await limit(translator.translate(unit.text), 8000);
       } catch (error) {
         continue;
       }
@@ -127,28 +129,58 @@
     root.classList.toggle('signal-translated', state);
   }
 
+  // Some browsers ship the API but never answer (no model for Chinese, or
+  // the feature switched off), so every call gets a deadline.
+  function limit(promise, ms, onTick) {
+    return new Promise((resolve, reject) => {
+      let timer = setTimeout(() => reject(new Error('timeout')), ms);
+      if (onTick) {
+        onTick(() => {
+          clearTimeout(timer);
+          timer = setTimeout(() => reject(new Error('timeout')), ms);
+        });
+      }
+      promise.then(value => {
+        clearTimeout(timer);
+        resolve(value);
+      }, error => {
+        clearTimeout(timer);
+        reject(error);
+      });
+    });
+  }
+
+  const availability = () => limit(api.availability({ sourceLanguage: 'zh', targetLanguage: target }), 3000);
+
   async function turnOn(fromClick) {
     if (busy) return;
     busy = true;
     try {
       if (!translator) {
+        const state = await availability();
+        if (state === 'unavailable') throw new Error('unavailable');
         label.textContent = '…';
-        translator = await api.create({
+        let tick = null;
+        // A download may take a while, but it has to keep moving.
+        translator = await limit(api.create({
           sourceLanguage: 'zh',
           targetLanguage: target,
           monitor(monitor) {
             monitor.addEventListener('downloadprogress', event => {
               label.textContent = `${Math.round(event.loaded * 100)}%`;
+              if (tick) tick();
             });
           }
-        });
+        }), 15000, reset => (tick = reset));
       }
       show(true);
+      // If even the first sentence doesn't come back, give up on it.
+      await limit(translator.translate('你好'), 8000);
       await translatePage();
       pref('on');
     } catch (error) {
       show(false);
-      if (fromClick) hint();
+      if (fromClick) viaGoogle();
     }
     busy = false;
   }
@@ -159,20 +191,21 @@
     pref('off');
   }
 
-  // No built-in translator here: point to the browser's own page translation.
-  function hint() {
-    const ua = navigator.userAgent;
-    const where = /Firefox\//.test(ua)
-      ? 'Firefox: click the translation icon in the address bar.'
-      : /Safari\//.test(ua) && !/Chrome\//.test(ua)
-        ? 'Safari: tap aA (or the translate icon) in the address bar, then Translate.'
-        : 'Chrome or Edge: right-click the page and choose Translate.';
-    window.alert(`This page is written in Chinese.\n${where}`);
+  // No built-in translator here: open the page through Google's web
+  // translation, which works in any browser.
+  function viaGoogle() {
+    const host = window.location.hostname.replace(/-/g, '--').replace(/\./g, '-');
+    const params = new URLSearchParams(window.location.search);
+    params.delete('translate');
+    params.set('_x_tr_sl', 'zh-CN');
+    params.set('_x_tr_tl', target);
+    params.set('_x_tr_hl', target);
+    window.location.href = `https://${host}.translate.goog${window.location.pathname}?${params}${window.location.hash}`;
   }
 
   button.addEventListener('click', () => {
     if (!api) {
-      hint();
+      viaGoogle();
       return;
     }
     if (translated) turnOff();
@@ -182,9 +215,8 @@
   // Translate straight away when the model is already here and the reader
   // hasn't switched back to Chinese before.
   if (api && pref() !== 'off') {
-    api.availability({ sourceLanguage: 'zh', targetLanguage: target }).then(state => {
+    availability().then(state => {
       if (state === 'available') turnOn(false);
-      else if (state === 'unavailable') button.hidden = true;
     }).catch(() => {});
   }
 })();
