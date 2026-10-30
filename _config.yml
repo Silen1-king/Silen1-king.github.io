@@ -156,3 +156,6 @@ realms:
     epithet: Capture the Flag
     emblem: flag
     description: Cryptography, forensics, web, and the small hours before a deadline.
+  AI:
+    epithet: Artificial Intelligence
+    description: Agents, models, and the tools that do the heavy lifting.

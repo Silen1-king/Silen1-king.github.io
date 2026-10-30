@@ -1,8 +1,9 @@
 ---
 title: how to touch Cc
 date: 2026-10-24
+updated: 2026-10-30 15:15:50
 description: 很多人问我使用 Cc 不怕被封吗，其实很怕，不过目前没事，分享一下使用方法：一份由 codex 生成的 Clash Verge 住宅代理链项目规则，可以直接复制丢给 agent。
-categories: VPN
+categories: AI
 tags:
   - vpn
   - network
