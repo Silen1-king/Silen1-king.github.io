@@ -6,6 +6,7 @@
 //
 //   node tools/og-cards.js            cards for posts that don't have one
 //   node tools/og-cards.js --all      redraw every card
+//   node tools/og-cards.js --site     redraw the site card (images/og-card.png)
 //
 // Needs Playwright with Chromium (not a dependency of the site; the site
 // build only uses the PNGs). The title font is Noto Serif SC: point
@@ -90,8 +91,74 @@ ${skyline(post.path)}<div class="rain"></div><div class="frame"></div>
 </body></html>`;
 }
 
+// The site's own card, for the home page and every page without a post card:
+// SILEN1 in dots over the signal line, as on the home page.
+function siteCard() {
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face { font-family: "Big Shoulders Display"; src: url("${asset('fonts/big-shoulders-display.woff2')}") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Cormorant Garamond"; font-style: italic; src: url("${asset('fonts/cormorant-garamond-italic.woff2')}") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; src: url("${asset('fonts/jetbrains-mono.woff2')}") format("woff2"); }
+* { margin: 0; }
+html, body { width: 1200px; height: 630px; overflow: hidden; background: #05060b; }
+.grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(124,236,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(124,236,255,.035) 1px, transparent 1px); background-size: 40px 40px; }
+.glow { position: absolute; inset: 0; background: radial-gradient(520px 300px at 50% 40%, rgba(124,236,255,.06), transparent 70%); }
+.frame { position: absolute; inset: 28px; border: 1px solid rgba(124,236,255,.10); }
+canvas { position: absolute; inset: 0; }
+.poem { position: absolute; top: 412px; width: 100%; text-align: center; font: italic 60px "Cormorant Garamond", serif; color: #e8ecf6; }
+.poem span { background: linear-gradient(90deg, #7cecff, #b096ff); -webkit-background-clip: text; color: transparent; }
+.url { position: absolute; top: 512px; width: 100%; text-align: center; font: 18px "JetBrains Mono", monospace; letter-spacing: .12em; color: #6f86a0; }
+</style></head><body>
+<div class="grid"></div><div class="glow"></div><div class="frame"></div>
+<canvas width="1200" height="630"></canvas>
+<div class="poem">Signal, <span>out of noise.</span></div>
+<div class="url">silen1.com</div>
+<script>
+document.fonts.load('900 200px "Big Shoulders Display"').then(() => {
+  const g = document.querySelector('canvas').getContext('2d');
+  const m = document.createElement('canvas');
+  m.width = 1200; m.height = 630;
+  const mg = m.getContext('2d');
+  mg.font = '900 230px "Big Shoulders Display"';
+  mg.textAlign = 'center'; mg.textBaseline = 'middle';
+  mg.letterSpacing = '24px';
+  mg.fillText('SILEN1', 612, 210);
+  const data = mg.getImageData(0, 0, 1200, 630).data;
+  for (let y = 0; y < 630; y += 7) for (let x = 0; x < 1200; x += 7) {
+    if (data[(y * 1200 + x) * 4 + 3] < 128) continue;
+    const t = (x - 340) / 520;
+    g.fillStyle = 'rgb(' + Math.round(124 + t * 52) + ',' + Math.round(236 - t * 86) + ',255)';
+    g.globalAlpha = .75;
+    g.beginPath(); g.arc(x, y, 1.6, 0, Math.PI * 2); g.fill();
+  }
+  g.globalAlpha = .6;
+  g.strokeStyle = '#7cb8c8'; g.lineWidth = 1.5;
+  g.beginPath();
+  for (let x = 28; x <= 1172; x += 4) {
+    const y = 360 + Math.sin(x / 190) * 5 + Math.sin(x / 61 + 1) * 2;
+    x === 28 ? g.moveTo(x, y) : g.lineTo(x, y);
+  }
+  g.stroke();
+  document.body.dataset.ready = '1';
+});
+</script></body></html>`;
+}
+
 (async () => {
   const all = process.argv.includes('--all');
+  if (process.argv.includes('--site')) {
+    const { chromium } = require('playwright');
+    const browser = await chromium.launch();
+    const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
+    const scratch = path.join(ROOT, 'source', 'images', '.card.html');
+    fs.writeFileSync(scratch, siteCard());
+    await page.goto(pathToFileURL(scratch).href);
+    await page.waitForSelector('body[data-ready]');
+    await page.screenshot({ path: path.join(ROOT, 'source', 'images', 'og-card.png') });
+    fs.rmSync(scratch, { force: true });
+    await browser.close();
+    console.log('source/images/og-card.png');
+    return;
+  }
   const hexo = new Hexo(ROOT, { silent: true });
   await hexo.init();
   await hexo.load();
