@@ -1,8 +1,8 @@
 ---
 title: nssctf比赛的wp（只有pwn，线上赛，有使用AI）
 date: 2026-10-26 01:43:57
-updated: 2026-10-26 23:10:02
-description: NSSCTF 新生赛的 pwn 题 wp：nc 签到题里的格式化字符串漏洞，creeper 题里用 usleep 窗口打出的竞态条件，never_arrive 题里 64 位转 32 位的截断，附几个新学的 IDA 快捷键。
+updated: 2026-10-30 14:59:44
+description: NSSCTF 新生赛的 pwn 题 wp：nc 签到题里的格式化字符串漏洞，creeper 题里用 usleep 窗口打出的竞态条件，never_arrive 题里 64 位转 32 位的截断，going_run 题里每轮只挪一格的 read 改写循环变量、跳到后门函数，附几个新学的 IDA 快捷键。
 categories: CTF
 tags:
   - pwn
