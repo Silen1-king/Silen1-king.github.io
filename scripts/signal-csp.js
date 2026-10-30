@@ -2,7 +2,8 @@
 
 /**
  * Content Security Policy for every page, as a <meta> tag: GitHub Pages
- * cannot send response headers.
+ * cannot send response headers. Left off only inside Google's translation
+ * proxy (see the gate at the end).
  *
  * Scripts may only come from this site and giscus (comments). The few inline
  * scripts (the intro gate in head.njk, the uptime clock in footer.njk) are
@@ -50,7 +51,15 @@ hexo.extend.filter.register('after_render:html', html => {
   }).concat('upgrade-insecure-requests').join('; ');
 
   // As early in <head> as possible: the policy covers only what follows it.
-  const meta = `<meta http-equiv="Content-Security-Policy" content="${policy}">`
+  // Written by a one-line script so it can stay off inside Google's web
+  // translation (<host>.translate.goog, opened by signal-translate.js):
+  // there the page runs on Google's origin and Google adds its own scripts,
+  // which the policy would block, leaving the page untranslated and bare.
+  // Everywhere else the policy is exactly as before.
+  const meta = `<meta http-equiv="Content-Security-Policy" content="${policy}">`;
+  const gate = '<script>if(!/\\.translate\\.goog$/.test(location.hostname))'
+    + `document.write(${JSON.stringify(meta).replace(/</g, '\\u003c')})</script>`
+    + '<noscript>' + meta + '</noscript>'
     + '<meta name="referrer" content="strict-origin-when-cross-origin">';
-  return html.replace(/<head>(\s*<meta charset="[^"]*">)?/i, match => match + meta);
+  return html.replace(/<head>(\s*<meta charset="[^"]*">)?/i, match => match + gate);
 });
