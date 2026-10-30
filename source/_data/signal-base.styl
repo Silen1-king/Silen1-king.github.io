@@ -1267,4 +1267,77 @@
     align-items: center;
     min-height: 24px;
   }
+
+  /* Page to page. The city stays where it is, the moon glides to its
+     place on the next page, the header holds still, and the rest of the
+     page dissolves into the next. A post's title flies from the link that
+     was pressed to the top of the post, and back (signal-transition in
+     head.njk). Only in browsers with cross-document view transitions;
+     elsewhere pages change as before. */
+  @view-transition {
+    navigation: auto;
+  }
+
+  .signal-backdrop {
+    view-transition-name: signal-city;
+  }
+
+  .signal-moon {
+    view-transition-name: signal-moon;
+  }
+
+  header.header {
+    view-transition-name: signal-header;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: .55s;
+    animation-timing-function: cubic-bezier(.2, .7, .2, 1);
+  }
+
+  ::view-transition-old(root) {
+    animation: .28s ease-in both signal-page-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: .42s .12s ease-out both signal-page-in;
+  }
+
+  ::view-transition-new(signal-city),
+  ::view-transition-old(signal-header),
+  ::view-transition-new(signal-header) {
+    animation: none;
+  }
+
+  /* The next page's city may not have drawn its first frame yet; the old
+     one stays underneath until it has. */
+  ::view-transition-old(signal-city) {
+    animation: .55s ease-in both signal-fade-out;
+  }
+
+  ::view-transition-old(signal-header) {
+    display: none;
+  }
+
+  @keyframes signal-fade-out {
+    to { opacity: 0; }
+  }
+
+  ::view-transition-group(signal-post-title) {
+    animation-duration: .6s;
+  }
+
+  @keyframes signal-page-out {
+    to { opacity: 0; transform: translateY(-6px); filter: blur(2px); }
+  }
+
+  @keyframes signal-page-in {
+    from { opacity: 0; transform: translateY(10px); filter: blur(3px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    @view-transition {
+      navigation: none;
+    }
+  }
 }

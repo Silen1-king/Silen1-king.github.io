@@ -146,12 +146,8 @@
   canvas.className = 'signal-backdrop';
   canvas.setAttribute('aria-hidden', 'true');
   const context = canvas.getContext('2d');
-  const moon = new Image();
-  moon.className = 'signal-moon';
-  moon.alt = '';
-  moon.decoding = 'async';
-  moon.src = '/images/backdrop-moon.svg';
-  document.body.prepend(moon, canvas);
+  const moon = document.querySelector('.signal-moon');
+  document.body.prepend(canvas);
 
   // Her light, shown once a post has been read to the end (signal.js).
   const beam = document.createElement('div');

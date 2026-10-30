@@ -24,3 +24,56 @@
   }
 })();
 </script>
+{#- Page transitions (styles in signal-base.styl). The first frame waits
+    for the moon, so it can glide from page to page. A post's title flies
+    between the link that opened it and the post's heading, both ways. -#}
+<link rel="expect" href="#signal-moon" blocking="render">
+<script>
+(function() {
+  var NAME = 'signal-post-title';
+  var isPost = function(url) { return /^\/\d{4}\/\d{2}\/\d{2}\//.test(new URL(url, location.href).pathname); };
+  var same = function(a, b) { return new URL(a, location.href).pathname === new URL(b, location.href).pathname; };
+  var heading = function() { return document.querySelector('.posts-expand .post-title'); };
+  // The title link that leads to url: the one pressed, else the first in a heading.
+  var pressed = null;
+  var linkTo = function(url) {
+    if (pressed && same(pressed.href, url)) return pressed;
+    var links = [].slice.call(document.querySelectorAll('.main a[href]')).filter(function(link) {
+      return same(link.href, url) && !link.closest('.signal-hero-latest') && link.textContent.trim();
+    });
+    return links.filter(function(link) { return link.closest('h1, h2, h3') || link.matches('.signal-seg-link'); })[0] || links[0];
+  };
+  var clear = function() {
+    [].forEach.call(document.querySelectorAll('[style*="view-transition-name"]'), function(element) {
+      element.style.viewTransitionName = '';
+    });
+  };
+  document.addEventListener('click', function(event) {
+    pressed = event.target.closest && event.target.closest('a[href]');
+  }, true);
+  window.addEventListener('pageswap', function(event) {
+    clear();
+    if (!event.viewTransition || !event.activation || !event.activation.entry) return;
+    var to = event.activation.entry.url;
+    if (isPost(to) && !isPost(location.href)) {
+      var link = linkTo(to);
+      if (link) link.style.viewTransitionName = NAME;
+    } else if (!isPost(to) && isPost(location.href) && heading()) {
+      heading().style.viewTransitionName = NAME;
+    }
+  });
+  window.addEventListener('pagereveal', function(event) {
+    clear();
+    pressed = null;
+    if (!event.viewTransition || !window.navigation || !navigation.activation || !navigation.activation.from) return;
+    var from = navigation.activation.from.url;
+    if (isPost(location.href) && !isPost(from) && heading()) {
+      heading().style.viewTransitionName = NAME;
+    } else if (!isPost(location.href) && isPost(from)) {
+      var link = linkTo(from);
+      if (link) link.style.viewTransitionName = NAME;
+    }
+    event.viewTransition.finished.then(clear, clear);
+  });
+})();
+</script>
