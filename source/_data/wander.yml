@@ -1,13 +1,8 @@
-# 漫游：/wander/ 收藏专业以外、凭兴趣逛的网站，按领域分组（scripts/signal-links.js）。
+# 漫游：/wander/ 收藏专业以外、凭兴趣逛的网站，不分组，按这里的顺序列出
+# （scripts/signal-links.js）。
 #
-# - field: 领域中文名（必填）
-#   en: 英文小字（可选，页面上显示为斜体副标题）
-#   sites:
-#     - name: 网站名（必填）
-#       url: https://example.com/（必填）
-#       description: 一句话说明（可选）
-- field: 数据结构
-  en: data structures
-  sites:
-    - name: 数据结构学习笔记
-      url: https://silen1-structure-notes.alertmango13.chatgpt.site/
+# - name: 网站名（必填）
+#   url: https://example.com/（必填）
+#   description: 一句话说明（可选）
+- name: 从零学习《数据结构（c语言版）（第二版）》
+  url: https://silen1-structure-notes.alertmango13.chatgpt.site/

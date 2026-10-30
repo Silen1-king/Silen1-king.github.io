@@ -5,7 +5,7 @@
  *
  *   /friends/ (友链) from source/_data/friends.yml: friends' blogs.
  *   /wander/  (漫游) from source/_data/wander.yml: sites outside my own field,
- *             grouped by field, kept for curiosity.
+ *             kept for curiosity, one standalone link each.
  *
  * /friends/:
  * Each friend is { name, url, description?, avatar? }. Avatars must be files
@@ -100,32 +100,20 @@ ${self.map(([key, value]) => `    <dt>${key}</dt><dd>${escapeHtml(value)}</dd>`)
 </section>`;
 }
 
-function wanderGroups(data) {
-  const groups = Array.isArray(data) ? data : [];
-  return groups.map((group, index) => {
-    const field = String(group && group.field || '').trim();
-    if (!field) throw new Error(`wander.yml 第 ${index + 1} 组需要 field`);
-    const sites = Array.isArray(group.sites) ? group.sites : [];
-    return {
-      field,
-      en: String(group.en || '').trim(),
-      sites: sites.map((entry, i) => site(entry, `wander.yml「${field}」第 ${i + 1} 个网站`))
-    };
-  });
+function wanderSites(data) {
+  const list = Array.isArray(data) ? data : [];
+  return list.map((entry, index) => site(entry, `wander.yml 第 ${index + 1} 个网站`));
 }
 
-function renderWander(groups) {
-  if (!groups.length) return '<p class="friends-empty">还没有收藏。</p>';
-  return groups.map(group => `<section class="wander-group">
-  <h2>${escapeHtml(group.field)}${group.en ? `<small>${escapeHtml(group.en)}</small>` : ''}</h2>
-  <ul class="wander-list">
-${group.sites.map(entry => `    <li><a class="wander-site" href="${escapeHtml(entry.url)}" target="_blank" rel="noopener">
-      <span class="wander-name">${escapeHtml(entry.name)}</span>
-      <span class="wander-host">${escapeHtml(entry.host)}</span>
-      ${entry.description ? `<span class="wander-description">${escapeHtml(entry.description)}</span>` : ''}
-    </a></li>`).join('\n')}
-  </ul>
-</section>`).join('\n');
+function renderWander(sites) {
+  if (!sites.length) return '<p class="friends-empty">还没有收藏。</p>';
+  return `<ul class="wander-list">
+${sites.map(entry => `  <li><a class="wander-site" href="${escapeHtml(entry.url)}" target="_blank" rel="noopener">
+    <span class="wander-name">${escapeHtml(entry.name)}</span>
+    <span class="wander-host">${escapeHtml(entry.host)}</span>
+    ${entry.description ? `<span class="wander-description">${escapeHtml(entry.description)}</span>` : ''}
+  </a></li>`).join('\n')}
+</ul>`;
 }
 
 function page(meta, type, content) {
@@ -150,6 +138,6 @@ hexo.extend.generator.register('friends', function generateFriends(locals) {
 });
 
 hexo.extend.generator.register('wander', function generateWander(locals) {
-  const groups = wanderGroups(locals.data && locals.data.wander);
-  return page(WANDER, 'wander', renderWander(groups));
+  const sites = wanderSites(locals.data && locals.data.wander);
+  return page(WANDER, 'wander', renderWander(sites));
 });

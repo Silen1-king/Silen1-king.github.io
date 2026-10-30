@@ -139,7 +139,7 @@
 
 两个链接页由 `scripts/signal-links.js` 生成，内容只改数据文件：
 
-- 漫游 `/wander/`：`source/_data/wander.yml`，按领域分组（`field` 中文名、`en` 英文小字、`sites` 网站列表）。
+- 漫游 `/wander/`：`source/_data/wander.yml`，不分组，每个网站一条独立链接（`name`、`url`，可选 `description`）。
 - 友链 `/friends/`：`source/_data/friends.yml`，每人 `name`、`url`，可选 `description`、`avatar`。
   头像必须放在站内 `source/images/friends/`（CSP 不加载外站图片），没有头像显示名字首字母。
   友链还没有人时，导航栏里那一行在 `_config.next.yml` 中注释掉，有人后再打开。
