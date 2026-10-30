@@ -166,6 +166,27 @@
   }
   restChrome();
 
+  // The moon brightens as the post is read; at its end she answers with a
+  // beam of light over the city (signal-backdrop.js draws the rain parting).
+  if (isPost) {
+    const root = document.documentElement;
+    root.classList.add('signal-reading');
+    let graced = false;
+    const readProgress = () => {
+      const box = postBody.getBoundingClientRect();
+      const progress = clamp((window.innerHeight - box.top) / Math.max(1, box.height));
+      root.style.setProperty('--read', progress.toFixed(3));
+      if (!graced && window.scrollY > 0 && box.bottom <= window.innerHeight + 24) {
+        graced = true;
+        window.signalGrace = 1;
+        root.classList.add('signal-graced');
+        window.dispatchEvent(new CustomEvent('signal:grace'));
+      }
+    };
+    scrollHandlers.push(readProgress);
+    readProgress();
+  }
+
   // Post headings carry a code-address label, like the prototype reader.
   if (postBody) {
     $$('.post-body > h2').forEach((heading, index) => {
@@ -197,12 +218,13 @@
       offscreen.width = width;
       offscreen.height = height;
       const draw = offscreen.getContext('2d');
-      const fontSize = Math.min(width * 0.27, height * 0.48);
+      // Phones get a larger wordmark, set lower, so it meets the slogan.
+      const fontSize = Math.min(width * (width < 760 ? 0.33 : 0.27), height * 0.48);
       draw.fillStyle = '#fff';
       draw.textAlign = 'center';
       draw.textBaseline = 'middle';
       draw.font = `900 ${fontSize}px "Big Shoulders Display", "Arial Narrow", Impact, sans-serif`;
-      draw.fillText(wordmark, width / 2, width < 760 ? height * 0.36 : height * 0.4);
+      draw.fillText(wordmark, width / 2, height * 0.4);
       const data = draw.getImageData(0, 0, width, height).data;
       const step = Math.max(3, Math.round(fontSize / (width < 760 ? 30 : 52)));
       magnet.reach = clamp(fontSize * 0.26, 70, 130);
@@ -235,14 +257,23 @@
       }
     };
 
-    // Particles fly in from everywhere once the intro opens.
-    const flyIn = () => {
+    // Particles fly in from everywhere, or, right after the intro, rise out
+    // of the line it ended on, which is where the wave sits.
+    const flyIn = fromLine => {
       if (reduceMotion) return;
       particles.forEach(particle => {
-        particle.x = width / 2 + (Math.random() - 0.5) * width * 1.6;
-        particle.y = height / 2 + (Math.random() - 0.5) * height * 1.6;
+        if (fromLine) {
+          particle.x = particle.hx + (Math.random() - 0.5) * width * 0.3;
+          particle.y = waveBase() + (Math.random() - 0.5) * 3;
+          particle.vy = -Math.random() * 4;
+        } else {
+          particle.x = width / 2 + (Math.random() - 0.5) * width * 1.6;
+          particle.y = height / 2 + (Math.random() - 0.5) * height * 1.6;
+        }
       });
     };
+    // Same share of the screen as waveAt() in blog-intro.js.
+    const waveBase = () => height * (width < 760 ? 0.56 : 0.62);
 
     const drawHero = time => {
       mouse.x += (mouse.tx - mouse.x) * 0.04;
@@ -295,7 +326,7 @@
         context.fillRect(p.x, p.y, size + speed * 3, size);
       }
 
-      const base = height * (width < 760 ? 0.54 : 0.62);
+      const base = waveBase();
       const waveX = (mouse.x * 0.5 + 0.5) * width;
       context.beginPath();
       for (let x = 0; x <= width; x += 4) {
@@ -337,10 +368,10 @@
     buildParticles();
     const introPending = document.documentElement.classList.contains('blog-intro-pending');
     const startHero = reduceMotion ? drawStill : whileVisible(hero, drawHero);
-    if (introPending) window.addEventListener('blog-intro:end', flyIn, { once: true });
+    if (introPending) window.addEventListener('blog-intro:end', () => flyIn(true), { once: true });
     (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
       buildParticles();
-      if (!introPending) flyIn();
+      if (!introPending) flyIn(false);
       startHero();
     });
 

@@ -104,6 +104,13 @@
     font-size: 15px;
   }
 
+  /* Titles end lines between words (scripts/signal-typeset.js). */
+  .signal-seg h3,
+  .signal-hero-latest-title {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
   /* ───── Hero ───── */
   /* One screen, never pinned: the wordmark scatters into dust as it scrolls
      away, so the page keeps its own scrolling rhythm. */
@@ -891,48 +898,63 @@
     margin-top: 32px;
   }
 
-  .signal-spectrum-bar {
-    display: flex;
-    height: 44px;
-    margin-top: 14px;
-    border: 1px solid var(--line);
+  /* One row per tag, each measured against all entries: a post carries
+     several tags, so the shares don't add up to a whole. */
+  .signal-spectrum-rows {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 48px;
+    margin-top: 16px;
   }
 
-  .signal-spectrum-bar a {
+  .signal-spectrum-row {
+    display: grid;
+    grid-template-columns: minmax(0, 9em) 1fr 4.5em;
+    align-items: center;
+    min-height: 24px;
+    gap: 14px;
     border: 0;
-    border-right: 1px solid var(--void);
+    color: var(--mute);
+    font: 12px/1.6 var(--f-mono);
+  }
+
+  .signal-spectrum-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .signal-spectrum-track {
+    position: relative;
+    height: 10px;
+    background: rgba(150, 170, 255, .07);
+  }
+
+  .signal-spectrum-track i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--p);
     background: var(--c);
     transition: filter .2s ease;
   }
 
-  .signal-spectrum-bar a:hover {
-    filter: brightness(1.3);
+  .signal-spectrum-value {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
-  .signal-spectrum-keys {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 22px;
-    margin-top: 12px;
-    font: 12px var(--f-mono);
-  }
-
-  .signal-spectrum-keys a {
-    border: 0;
-    color: var(--mute);
-  }
-
-  .signal-spectrum-keys a:hover {
+  .signal-spectrum-row:hover {
     color: var(--fg);
   }
 
-  .signal-spectrum-keys i {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-right: 6px;
-    vertical-align: -1px;
-    background: var(--c);
+  .signal-spectrum-row:hover i {
+    filter: brightness(1.3);
+  }
+
+  @media (max-width: 760px) {
+    .signal-spectrum-rows {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 760px) {
@@ -946,6 +968,64 @@
 
     .signal-register:nth-child(-n+2) {
       border-bottom: 1px solid var(--line);
+    }
+  }
+
+  /* ───── Scroll reveals ─────
+     Tied to scrolling itself (scroll-driven animations), never pinned, and
+     only where the browser supports them; elsewhere everything is simply
+     there. 札记 rows come in like a disassembly listing being printed,
+     left to right; headings rise; tag bars fill. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .signal-seg {
+        animation: signal-print linear both;
+        animation-timeline: view();
+        animation-range: entry 10% entry 90%;
+      }
+
+      .signal-h2,
+      .signal-realm,
+      .signal-register,
+      .signal-spectrum {
+        animation: signal-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 70%;
+      }
+
+      .signal-spectrum-track i {
+        animation: signal-fill linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 40%;
+      }
+
+      @keyframes signal-print {
+        from {
+          opacity: .2;
+          clip-path: inset(-20px 100% -20px -40px);
+        }
+        to {
+          opacity: 1;
+          clip-path: inset(-20px -20px -20px -40px);
+        }
+      }
+
+      @keyframes signal-rise {
+        from {
+          opacity: 0;
+          transform: translateY(36px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @keyframes signal-fill {
+        from {
+          width: 0;
+        }
+      }
     }
   }
 }

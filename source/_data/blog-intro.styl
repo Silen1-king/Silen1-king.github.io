@@ -25,8 +25,9 @@
     display: none;
   }
 
+  /* Closes onto the line the intro ends on (--intro-line, blog-intro.js). */
   .blog-intro.is-leaving {
-    clip-path: inset(50% 0 50% 0);
+    clip-path: inset(var(--intro-line, 50%) 0 calc(100% - var(--intro-line, 50%)) 0);
     pointer-events: none;
   }
 

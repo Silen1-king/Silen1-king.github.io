@@ -17,6 +17,9 @@
     color: var(--fg);
     font: 900 clamp(34px, 5vw, 62px)/1.2 var(--f-cn-display);
     text-wrap: balance;
+    /* Lines end between words: scripts/signal-typeset.js marks them. */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
 
   .posts-expand .post-title-link {
@@ -831,5 +834,20 @@
 
   body.image-zoom-open {
     overflow: hidden;
+  }
+
+  /* Section headings and figures rise into place as they scroll in
+     (scroll-driven, see signal-home.styl). */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .post-body > h2,
+      .post-body > h3,
+      .post-body .image-zoom,
+      .post-body > p > img {
+        animation: signal-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 60%;
+      }
+    }
   }
 }

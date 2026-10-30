@@ -31,7 +31,7 @@ const BASE_ADDRESS = 0x401000;
 const ADDRESS_STRIDE = 0x1A40;
 const ROUTE_MIN = 2;
 const SPECTRUM_MIN = 5;
-const SPECTRUM = ['var(--cyan)', 'var(--violet)', '#5f9dff', 'var(--heat)', 'var(--green)', '#e58bff', '#3a4260'];
+const SPECTRUM = ['var(--cyan)', 'var(--violet)', '#5f9dff', 'var(--heat)', 'var(--green)', '#e58bff', '#8f9bc9'];
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -297,11 +297,14 @@ function renderAlmanac(site, realms, urlFor) {
       </div>
       ${spectrum.length ? `
       <div class="signal-spectrum">
-        <div class="signal-eyebrow">Tag spectrum · entries carrying each tag</div>
-        <div class="signal-spectrum-bar">${spectrum.map((tag, index) =>
-          `<a href="${escapeHtml(urlFor(tag.path))}" style="flex:${tag.count};--c:${SPECTRUM[index]}" title="${escapeHtml(tag.name)} ${tag.count}/${stats.postCount}" aria-label="${escapeHtml(tag.name)}"></a>`).join('')}</div>
-        <div class="signal-spectrum-keys">${spectrum.map((tag, index) =>
-          `<a href="${escapeHtml(urlFor(tag.path))}"><i style="--c:${SPECTRUM[index]}"></i>${escapeHtml(tag.name)} ${Math.round(tag.count / total * 100)}%</a>`).join('')}</div>
+        <div class="signal-eyebrow">Tag spectrum · share of entries carrying each tag</div>
+        <div class="signal-spectrum-rows">${spectrum.map((tag, index) => `
+          <a class="signal-spectrum-row" href="${escapeHtml(urlFor(tag.path))}" style="--c:${SPECTRUM[index]};--p:${(tag.count / total * 100).toFixed(1)}%">
+            <span class="signal-spectrum-name">${escapeHtml(tag.name)}</span>
+            <span class="signal-spectrum-track" aria-hidden="true"><i></i></span>
+            <span class="signal-spectrum-value">${tag.count} / ${stats.postCount}</span>
+          </a>`).join('')}
+        </div>
       </div>` : ''}
     </div>
   </section>`;

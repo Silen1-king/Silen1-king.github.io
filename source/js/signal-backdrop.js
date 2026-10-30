@@ -9,6 +9,14 @@
 // steady windows, the sign) are drawn once into an offscreen canvas. With
 // reduced motion the canvas draws one still frame. On phones there is less
 // rain, fewer cars and no sign, and signal-base.styl dims the whole layer.
+//
+// The story: the rain city is the noise, the girl on the moon is listening
+// for a signal, and every post is a signal decoded. After the home intro the
+// city powers on from the line the intro collapses into: windows light up
+// outward from the middle, then the beacons, the traffic, the sign, and last
+// the moon. On posts signal.js sets window.signalGrace (0 to 1) once the
+// reader reaches the end: a beam of light falls from her onto the city and
+// the rain stops inside it. The Afterlife sign steps aside for the footer.
 (function() {
   'use strict';
 
@@ -39,6 +47,11 @@
     city.width = w;
     city.height = h;
     const g = city.getContext('2d');
+    // Steady windows go on a layer of their own, so they can switch on.
+    const lights = document.createElement('canvas');
+    lights.width = w;
+    lights.height = h;
+    const l = lights.getContext('2d');
     const windows = [];
     const beacons = [];
 
@@ -74,8 +87,8 @@
             if (r() >= layer.windowOdds) continue;
             const color = r() < .55 ? CYAN : (r() < .75 ? VIOLET : ROSE);
             if (r() < .7) {
-              g.fillStyle = rgba(color, .32 * layer.window);
-              g.fillRect(wx, wy, size, 2);
+              l.fillStyle = rgba(color, .32 * layer.window);
+              l.fillRect(wx, wy, size, 2);
             } else {
               windows.push({ x: wx, y: wy, size, color, alpha: layer.window, phase: r() * 6.28, speed: .2 + r() * .8 });
             }
@@ -92,7 +105,7 @@
       }
     });
 
-    return { city, windows, beacons, sign: small ? null : buildSign(g, w, h) };
+    return { city, lights, windows, beacons, sign: small ? null : buildSign(g, w, h) };
   }
 
   // The Afterlife, on a dark corner block of its own, glow drawn once.
@@ -140,9 +153,41 @@
   moon.src = '/images/backdrop-moon.svg';
   document.body.prepend(moon, canvas);
 
+  // Her light, shown once a post has been read to the end (signal.js).
+  const beam = document.createElement('div');
+  beam.className = 'signal-beam';
+  beam.setAttribute('aria-hidden', 'true');
+  const halo = document.createElement('div');
+  halo.className = 'signal-halo';
+  halo.setAttribute('aria-hidden', 'true');
+  canvas.after(beam, halo);
+
+  // Power on after the home intro, or straight away anywhere else.
+  const root = document.documentElement;
+  let power = root.classList.contains('blog-intro-pending') ? 0 : 1;
+  let powerAt = -1;
+  if (!power) {
+    root.classList.add('signal-powering');
+    window.addEventListener('blog-intro:end', () => {
+      powerAt = time;
+      if (reduceMotion) {
+        power = 1;
+        root.classList.remove('signal-powering');
+        still();
+      }
+    }, { once: true });
+  }
+  const POWER_TIME = 2.6;
+  const ease = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+  const footer = document.querySelector('.footer');
+  let signAlpha = 1;
+  let grace = 0;
+
   let width = 0;
   let height = 0;
   let scene = null;
+  let motes = [];
   let raf = 0;
   let last = 0;
   let time = 0;
@@ -159,6 +204,10 @@
     scene.drops = Array.from({ length: Math.round(width * height / 9000 * density) }, () => ({
       x: r() * width * 1.2, y: r() * height, length: 8 + r() * 22, speed: 120 + r() * 220, depth: r(), color: r() < .7 ? CYAN : VIOLET
     }));
+    scene.motes = Array.from({ length: 26 }, () => ({
+      offset: (r() - .5) * 1.6, y: r() * height, speed: 12 + r() * 26, phase: r() * 6.28
+    }));
+    motes = scene.motes;
     scene.cars = Array.from({ length: Math.max(2, Math.round(width / 260 * density)) }, () => ({
       x: r() * width, y: height * (.45 + r() * .3), speed: (r() < .5 ? -1 : 1) * (14 + r() * 30), color: r() < .5 ? ROSE : CYAN
     }));
@@ -166,7 +215,16 @@
 
   function draw(dt) {
     const c = context;
-    const { city, windows, beacons, sign, cars, drops } = scene;
+    const { city, lights, windows, beacons, sign, cars, drops } = scene;
+    if (power < 1 && powerAt >= 0) {
+      power = Math.min(1, (time - powerAt) / POWER_TIME);
+      if (power > .55) root.classList.remove('signal-powering');
+    }
+    // How far from the middle the lights have reached, and how far along
+    // the rest of the city is.
+    const reach = ease(Math.min(1, power / .55)) * (width / 2 + 40);
+    const lit = x => Math.abs(x - width / 2) < reach;
+    const later = Math.max(0, (power - .45) / .55);
     c.clearRect(0, 0, width, height);
     const haze = c.createLinearGradient(0, height * .4, 0, height);
     haze.addColorStop(0, 'rgba(168,139,255,0)');
@@ -174,25 +232,52 @@
     c.fillStyle = haze;
     c.fillRect(0, height * .4, width, height * .6);
     c.drawImage(city, 0, 0);
+    if (reach > 0) {
+      const x0 = Math.max(0, Math.floor(width / 2 - reach));
+      const w0 = Math.min(width, Math.ceil(reach * 2));
+      if (w0 > 0) c.drawImage(lights, x0, 0, w0, height, x0, 0, w0, height);
+    }
+
+    // The front of the power-on: a faint surge running out to both edges.
+    if (power < .6 && reach > 0) {
+      const fade = 1 - power / .6;
+      [width / 2 - reach, width / 2 + reach].forEach(x => {
+        const surge = c.createLinearGradient(x - 60, 0, x + 60, 0);
+        surge.addColorStop(0, rgba(CYAN, 0));
+        surge.addColorStop(.5, rgba(CYAN, .14 * fade));
+        surge.addColorStop(1, rgba(CYAN, 0));
+        c.fillStyle = surge;
+        c.fillRect(x - 60, height * .45, 120, height * .55);
+      });
+    }
 
     windows.forEach(win => {
+      if (!lit(win.x)) return;
       const a = .5 + .5 * Math.sin(time * win.speed + win.phase);
       c.fillStyle = rgba(win.color, .45 * win.alpha * a);
       c.fillRect(win.x, win.y, win.size, 2);
     });
     beacons.forEach(b => {
+      if (!lit(b.x)) return;
       const on = Math.sin(time * 1.6 + b.phase) > .6;
-      c.fillStyle = rgba(ROSE, on ? (b.near ? .8 : .45) : .12);
+      c.fillStyle = rgba(ROSE, (on ? (b.near ? .8 : .45) : .12) * Math.min(1, later * 2));
       c.fillRect(b.x - 1, b.y - 1, 2.5, 2.5);
     });
     if (sign) {
-      // Lit, with a short stutter every nine seconds or so.
+      // Out of the way while the footer passes behind it.
+      const covered = footer && footer.getBoundingClientRect().top < sign.y + 40;
+      signAlpha += ((covered ? 0 : 1) - signAlpha) * Math.min(1, dt * 6);
+      // Lit, with a short stutter every nine seconds or so, and a few
+      // stutters as it first comes on.
       const cycle = (time + 3) % 9;
-      const stutter = cycle > 8.4 && Math.sin(cycle * 60) > 0;
-      c.globalAlpha = stutter ? .2 : .78 + .08 * Math.sin(time * 3);
-      c.drawImage(sign.image, sign.x, sign.y);
+      const starting = power < 1 && later > .4;
+      const stutter = (cycle > 8.4 || starting) && Math.sin(time * 60) > 0;
+      const on = power >= 1 || later > .4;
+      c.globalAlpha = on ? (stutter ? .2 : .78 + .08 * Math.sin(time * 3)) * signAlpha : 0;
+      if (c.globalAlpha > .01) c.drawImage(sign.image, sign.x, sign.y);
       c.globalAlpha = 1;
     }
+    if (later > 0) c.globalAlpha = Math.min(1, later * 1.5);
     cars.forEach(car => {
       car.x += car.speed * dt;
       if (car.x < -40) car.x = width + 40;
@@ -206,6 +291,13 @@
       c.fillStyle = 'rgba(255,255,255,.7)';
       c.fillRect(car.x - 1, car.y - .4, 2, 2);
     });
+    c.globalAlpha = 1;
+
+    // The rain stops where her light falls.
+    grace += ((window.signalGrace || 0) - grace) * Math.min(1, dt * 1.5);
+    if (reduceMotion) grace = window.signalGrace || 0;
+    const beamX = beamCenter();
+    const beamHalf = y => 30 + y / height * 110;
     c.lineCap = 'round';
     drops.forEach(d => {
       d.y += d.speed * (.5 + d.depth) * dt;
@@ -214,13 +306,31 @@
         d.y = -30;
         d.x = Math.random() * width * 1.2;
       }
-      c.strokeStyle = rgba(d.color, .06 + d.depth * .16);
+      const inBeam = grace > .01 && Math.abs(d.x - beamX) < beamHalf(d.y);
+      c.strokeStyle = rgba(d.color, (.06 + d.depth * .16) * (inBeam ? 1 - grace : 1));
       c.lineWidth = d.depth > .8 ? 1.2 : .8;
       c.beginPath();
       c.moveTo(d.x, d.y);
       c.lineTo(d.x + d.length * .18, d.y - d.length);
       c.stroke();
     });
+
+    // Warm motes drifting up through the beam.
+    if (grace > .01) {
+      motes.forEach(m => {
+        m.y -= m.speed * dt;
+        if (m.y < height * .18) m.y = height + Math.random() * 40;
+        const x = beamX + m.offset * beamHalf(m.y) + Math.sin(time * m.speed * .05 + m.phase) * 6;
+        c.fillStyle = `rgba(255,214,160,${grace * .55 * Math.min(1, (m.y - height * .18) / 80)})`;
+        c.fillRect(x, m.y, 1.6, 1.6);
+      });
+    }
+  }
+
+  // Under the girl on the moon, which CSS places at the top right.
+  function beamCenter() {
+    const box = moon.getBoundingClientRect();
+    return box.width ? box.left + box.width * .58 : width - 100;
   }
 
   function frame(now) {
@@ -253,6 +363,8 @@
   build();
   if (reduceMotion) {
     still();
+    // No motion, but the still frame follows her light.
+    window.addEventListener('signal:grace', () => draw(0));
   } else {
     start();
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));

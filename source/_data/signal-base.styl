@@ -252,9 +252,101 @@
     }
   }
 
+  /* The moon comes on last after the home intro. On posts it brightens as
+     the post is read (--read, signal.js); at the end her light falls on
+     the city: a beam under her and a glow round her head. Both sit at the
+     girl's place on the moon, 58% across and 49% down the image. */
+  :root {
+    --moon-w: 160px;
+    --moon-top: calc(var(--header-h) + var(--header-top) + 4px);
+    --moon-right: max(16px, 3vw);
+  }
+
+  .signal-moon {
+    transition: opacity 1.6s ease;
+  }
+
+  html.signal-powering .signal-moon {
+    opacity: 0;
+  }
+
+  html.signal-reading .signal-moon {
+    opacity: calc(.5 + var(--read, 0) * .5);
+    filter: brightness(calc(.62 + var(--read, 0) * .5)) drop-shadow(0 0 calc(var(--read, 0) * 22px) rgba(255, 214, 170, .32));
+    transition: none;
+  }
+
+  .signal-beam,
+  .signal-halo {
+    position: fixed;
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 2.4s ease;
+  }
+
+  .signal-beam {
+    top: calc(var(--moon-top, 64px) + var(--moon-w, 160px) * .56);
+    right: calc(var(--moon-right, 16px) + var(--moon-w, 160px) * .42 - 140px);
+    bottom: 0;
+    width: 280px;
+    background: linear-gradient(to bottom, rgba(255, 222, 176, .3), rgba(255, 200, 150, .08) 55%, rgba(255, 200, 150, 0));
+    clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+    mix-blend-mode: screen;
+  }
+
+  .signal-halo {
+    top: calc(var(--moon-top, 64px) + var(--moon-w, 160px) * .49 - 36px);
+    right: calc(var(--moon-right, 16px) + var(--moon-w, 160px) * .42 - 36px);
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 232, 196, .55), rgba(255, 210, 160, .15) 45%, rgba(255, 210, 160, 0) 70%);
+    mix-blend-mode: screen;
+  }
+
+  html.signal-graced .signal-beam {
+    opacity: 1;
+  }
+
+  html.signal-graced .signal-halo {
+    opacity: 1;
+    animation: signal-halo 5s ease-in-out 2.4s infinite alternate;
+  }
+
+  @keyframes signal-halo {
+    to {
+      transform: scale(1.25);
+      opacity: .7;
+    }
+  }
+
+  @media (max-width: 767px) {
+    :root {
+      --moon-w: 100px;
+      --moon-top: calc(var(--header-h) + var(--header-top) + 10px);
+      --moon-right: 6px;
+    }
+
+    html.signal-reading .signal-moon {
+      opacity: calc(.32 + var(--read, 0) * .5);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .signal-moon,
+    .signal-beam,
+    .signal-halo {
+      transition: none;
+      animation: none !important;
+    }
+  }
+
   @media print {
     .signal-backdrop,
-    .signal-moon {
+    .signal-moon,
+    .signal-beam,
+    .signal-halo {
       display: none;
     }
   }
@@ -377,6 +469,8 @@
   .site-nav-right {
     order: 3;
     display: flex;
+    /* NexT stacks this column on phones; the header keeps it in a row. */
+    flex-direction: row;
     align-items: center;
     gap: 18px;
     margin-left: auto;
@@ -438,6 +532,51 @@
 
   .global-search-trigger > i {
     display: none;
+  }
+
+  /* Small header switches: RAIN (signal-rain.js), and the reader's language
+     (signal-translate.js). Lit while on. */
+  .signal-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 32px;
+    min-height: 32px;
+    justify-content: center;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: none;
+    color: var(--mute);
+    font: 11px var(--f-mono);
+    letter-spacing: .14em;
+    cursor: var(--cursor-pointer, pointer);
+    transition: color .2s ease, border-color .2s ease;
+  }
+
+  .signal-header-btn:hover,
+  .signal-header-btn:focus-visible {
+    border-color: var(--line-2);
+    color: var(--fg);
+  }
+
+  .signal-header-btn[aria-pressed="true"] {
+    color: var(--cyan);
+    text-shadow: 0 0 8px rgba(124, 236, 255, .5);
+  }
+
+  .signal-header-btn[aria-pressed="true"] svg {
+    filter: drop-shadow(0 0 4px rgba(124, 236, 255, .6));
+  }
+
+  @media (max-width: 767px) {
+    .site-nav-right {
+      gap: 6px;
+    }
+
+    .signal-rain-toggle span {
+      display: none;
+    }
   }
 
   .global-search-trigger kbd {
@@ -1105,7 +1244,6 @@
   .signal-seg-tags a,
   .post-meta-tags a,
   .post-tags a,
-  .signal-spectrum-keys a,
   .tag-cloud a,
   .signal-more,
   .footer .powered-by a {

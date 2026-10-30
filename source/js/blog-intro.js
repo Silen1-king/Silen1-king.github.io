@@ -3,6 +3,9 @@
 
   // Graphic intro, no text: a point of light blooms into rotating rose curves
   // and a tick ring, then collapses into a single line like a CRT power-off.
+  // The line then settles where the home hero draws its signal wave, the
+  // curtain closes onto it, and the city powers on from there while the
+  // wordmark gathers out of the line (signal-backdrop.js, signal.js).
   const root = document.documentElement;
   const intro = document.querySelector('[data-blog-intro]');
   if (!intro || !root.classList.contains('blog-intro-pending')) {
@@ -14,7 +17,9 @@
   const canvas = intro.querySelector('[data-intro-canvas]');
   const context = canvas?.getContext('2d');
   const LAYERS = [[3, 1], [5, 2], [7, 3], [4, 3], [2, 5]];
-  const DURATION = 3.1;
+  const DURATION = 3.55;
+  // Where the hero's wave sits, as a share of the screen height (signal.js).
+  const waveAt = () => (window.innerWidth < 760 ? 0.56 : 0.62);
   const startedAt = performance.now();
   let width = 0;
   let height = 0;
@@ -49,6 +54,20 @@
   function drawFrame(now) {
     if (closing || !context) return;
     const t = (now - startedAt) / 1000;
+
+    // After the power-off: the line glides down to the hero's wave.
+    if (t > 2.95) {
+      const lineY = height / 2 + (height * waveAt() - height / 2) * ease(clamp((t - 2.95) / 0.5));
+      context.fillStyle = 'rgba(5, 6, 11, 0.35)';
+      context.fillRect(0, 0, width, height);
+      context.fillStyle = 'rgba(124, 236, 255, 0.9)';
+      context.fillRect(0, lineY - 1, width, 2);
+      intro.style.setProperty('--intro-line', `${lineY}px`);
+      if (t < DURATION) animationFrame = requestAnimationFrame(drawFrame);
+      else finishIntro();
+      return;
+    }
+
     const radius = Math.min(width, height) * 0.36;
     const grow = ease(clamp((t - 0.25) / 1.5));
     const flatten = ease(clamp((t - 2.4) / 0.55));
@@ -126,6 +145,10 @@
     SKIP_EVENTS.forEach(type => window.removeEventListener(type, handleSkip));
     window.removeEventListener('resize', resizeCanvas);
     root.classList.remove('blog-intro-pending');
+    // A skipped intro closes onto the wave too.
+    if (!intro.style.getPropertyValue('--intro-line')) {
+      intro.style.setProperty('--intro-line', `${height * waveAt()}px`);
+    }
     intro.classList.add('is-leaving');
     window.dispatchEvent(new CustomEvent('blog-intro:end'));
 
