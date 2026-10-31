@@ -4,4 +4,6 @@
 # - name: 网站名（必填）
 #   url: https://example.com/（必填）
 #   description: 一句话说明（可选）
-[]
+- name: 沿途 · 摄影手记
+  url: https://along-the-way-photo-journal.jackfanle75.chatgpt.site/
+  description: 一路走过的地方，用照片记下来。
