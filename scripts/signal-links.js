@@ -47,7 +47,8 @@ function site(entry, label) {
   return {
     name,
     url: url.href,
-    host: url.host.replace(/^www\./, ''),
+    // The path too, when the site lives under a folder (silen1.com/gallery).
+    host: url.host.replace(/^www\./, '') + url.pathname.replace(/\/$/, ''),
     description: String(entry.description || '').trim()
   };
 }

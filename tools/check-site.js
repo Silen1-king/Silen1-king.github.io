@@ -20,7 +20,7 @@ function visit(node, callback) {
 // Use an inventory instead of existsSync so Windows also detects casing errors
 // that would break on the Linux deployment host.
 function checkSite({ publicDir, siteUrl, root = '/', posts = [], drafts = [], searchPath = 'search.json',
-  sitemapPaths = ['sitemap.xml'], feedPaths = ['atom.xml'] }) {
+  sitemapPaths = ['sitemap.xml'], feedPaths = ['atom.xml'], otherSites = [] }) {
   const errors = new Set();
   if (!fs.existsSync(publicDir)) return ['生成目录不存在，请先运行 npm run build。'];
   const files = new Set(walk(publicDir).map(file => path.relative(publicDir, file).split(path.sep).join('/')));
@@ -45,6 +45,8 @@ function checkSite({ publicDir, siteUrl, root = '/', posts = [], drafts = [], se
       return null;
     }
     const relative = pathname.slice(prefix.length);
+    // Served on this domain by another GitHub Pages repository, not built here.
+    if (otherSites.some(site => relative.startsWith(site.replace(/^\/+/, '').replace(/\/?$/, '/')))) return null;
     return relative.endsWith('/') || !relative ? `${relative}index.html` : relative;
   }
 
@@ -139,7 +141,8 @@ async function main() {
     publicDir: hexo.public_dir, siteUrl: hexo.config.url, root: hexo.config.root,
     posts: hexo.locals.get('posts').toArray().map(post => post.path), drafts: routes(false),
     searchPath: hexo.config.search.path,
-    sitemapPaths: list(hexo.config.sitemap.path), feedPaths: list(hexo.config.feed.path)
+    sitemapPaths: list(hexo.config.sitemap.path), feedPaths: list(hexo.config.feed.path),
+    otherSites: list(hexo.config.other_sites || [])
   });
   if (errors.length) throw new Error(`产物检查失败（${errors.length} 项）：\n${errors.map(error => `- ${error}`).join('\n')}`);
   console.log(`[OK] 产物页面、资源、搜索、站点地图和订阅链接检查通过；${routes(false).length} 篇草稿未发布。`);

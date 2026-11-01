@@ -159,3 +159,8 @@ realms:
   AI:
     epithet: Artificial Intelligence
     description: Agents, models, and the tools that do the heavy lifting.
+
+# Paths on this domain served by other GitHub Pages repositories (project
+# sites), not built here. tools/check-site.js does not look for them in public/.
+other_sites:
+  - gallery/   # Silen1-king/gallery, 画室

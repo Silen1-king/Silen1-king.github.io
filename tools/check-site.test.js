@@ -65,3 +65,10 @@ test('resolves relative URLs and a configured subdirectory root', t => {
   write('atom.xml', '<feed><link href="/blog/post/"/></feed>');
   assert.deepEqual(check({ root: '/blog/' }), []);
 });
+
+test('skips paths served on the same domain by another repository', t => {
+  const { write, check } = fixture(t);
+  write('wander/index.html', '<a href="https://blog.example/gallery/">Gallery</a>');
+  assert.equal(check().length, 1);
+  assert.deepEqual(check({ otherSites: ['gallery/'] }), []);
+});
