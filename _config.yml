@@ -164,3 +164,4 @@ realms:
 # sites), not built here. tools/check-site.js does not look for them in public/.
 other_sites:
   - gallery/   # Silen1-king/gallery, 画室
+  - afterimage/   # Silen1-king/afterimage, 残影
