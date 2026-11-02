@@ -655,8 +655,23 @@
   }
 
   /* ───── Page shell ───── */
+  /* Sticky footer in CSS. NexT's JS pins a short page's footer to the
+     viewport bottom (.footer-fixed, position: absolute) but only rechecks on
+     scroll/resize, so a page that grows later (an archive month opened, fonts
+     or counters settling) left the footer drawn over the post list. The body
+     column now pushes the footer down instead, and the class does nothing. */
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
   .main {
+    flex: 1 0 auto;
     padding-bottom: 0;
+  }
+
+  .footer.footer-fixed {
+    position: relative;
   }
 
   .main-inner {
