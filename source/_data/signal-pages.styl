@@ -461,29 +461,172 @@
     color: var(--mute);
   }
 
-  /* ───── 404 (source/404.md) ───── */
+  /* ───── 404 (source/404.md): the one page where the signal breaks ─────
+     Red is reserved for this page: a crash, not a hint. */
+  .main-inner.page:has(.not-found-page) .post-header {
+    display: none;
+  }
+
   .not-found-page {
-    max-width: 640px;
-    margin: 20px 0;
+    --nf-red: #ff2b4f;
+    --nf-red-dim: rgba(255, 43, 79, .16);
+    position: relative;
+    max-width: 720px;
+    margin: 0 0 20px;
     text-align: left;
   }
 
-  .not-found-code {
+  /* The city loses its colour: the backdrop and moon turn red. */
+  body:has(.not-found-page) .signal-backdrop {
+    filter: hue-rotate(150deg) saturate(1.6) brightness(.9);
+  }
+
+  body:has(.not-found-page) .signal-moon {
+    filter: sepia(1) hue-rotate(-50deg) saturate(4) brightness(.8) drop-shadow(0 0 24px rgba(255, 43, 79, .45));
+  }
+
+  body:has(.not-found-page)::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 43, 79, .05) 0 1px, transparent 1px 4px),
+      radial-gradient(ellipse at 50% 40%, transparent 45%, rgba(120, 0, 20, .35));
+  }
+
+  /* Caution tape across the full width. */
+  .nf-tape {
+    position: relative;
+    width: var(--nf-w, 100vw);
+    margin: 0 0 34px calc(-1 * var(--nf-x, 0px));
+    overflow: hidden;
+    padding: clamp(18px, 4vw, 40px) 0;
+  }
+
+  .nf-tape-band {
+    width: 112vw;
+    margin-left: -6vw;
+    transform: rotate(-2.2deg);
+    background: var(--nf-red);
+    box-shadow: 0 0 40px rgba(255, 43, 79, .35);
+  }
+
+  .nf-tape-track {
+    display: flex;
+    width: max-content;
+    color: var(--void);
+    font: 800 15px/1 var(--f-mono);
+    letter-spacing: .12em;
+    white-space: nowrap;
+  }
+
+  .nf-tape-track span {
+    padding: 9px 0;
+    background: repeating-linear-gradient(-45deg, transparent 0 18px, rgba(0, 0, 0, .14) 18px 36px);
+  }
+
+  .nf-alert {
+    margin: 0 0 6px !important;
+    color: var(--mute) !important;
+    font: 12px/1.6 var(--f-mono) !important;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .nf-alert b {
+    margin-right: 10px;
+    color: var(--nf-red);
+    font-weight: 700;
+  }
+
+  /* 404, torn: red body, a cyan ghost, and a slice knocked sideways. */
+  .nf-code {
+    position: relative;
+    display: inline-block;
+    color: var(--nf-red);
+    font: 900 clamp(130px, 30vw, 280px)/.82 var(--f-display);
+    letter-spacing: -.01em;
+    text-shadow: 0 0 34px rgba(255, 43, 79, .45);
+    user-select: none;
+  }
+
+  .nf-code span {
     display: block;
+    clip-path: polygon(0 0, 100% 0, 100% 44%, 0 44%, 0 56%, 100% 56%, 100% 100%, 0 100%);
+  }
+
+  .nf-code::before,
+  .nf-code::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* the slice between 44% and 56%, pushed right */
+  .nf-code::before {
+    color: var(--nf-red);
+    clip-path: inset(44% 0 44% 0);
+    transform: translateX(.09em);
+    text-shadow: -3px 0 var(--cyan);
+  }
+
+  .nf-code::after {
     color: transparent;
-    font: 900 clamp(110px, 24vw, 220px)/.85 var(--f-display);
-    -webkit-text-stroke: 1px var(--line-2);
+    -webkit-text-stroke: 1px var(--cyan);
+    transform: translate(-.035em, .02em);
+    opacity: .7;
+    mix-blend-mode: screen;
   }
 
-  .not-found-page h2 {
-    margin: 18px 0 12px;
+  .not-found-page h1 {
+    margin: 26px 0 12px;
     color: var(--fg);
-    font: 900 clamp(30px, 4vw, 44px)/1.25 var(--f-cn-display);
+    font: 900 clamp(40px, 6vw, 68px)/1.15 var(--f-cn-display);
+    letter-spacing: .04em;
+    text-shadow: 2px 0 var(--nf-red), -2px 0 rgba(124, 236, 255, .55);
   }
 
-  .not-found-page p {
+  .not-found-page h1 small {
+    display: block;
+    margin-top: 10px;
+    color: var(--nf-red);
+    font: italic 500 22px var(--f-poem);
+    letter-spacing: 0;
+    text-shadow: none;
+  }
+
+  .not-found-page .nf-lead {
     color: var(--mute);
     line-height: 1.8;
+  }
+
+  .nf-dump {
+    margin: 26px 0 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    border: 1px solid var(--nf-red-dim);
+    border-left: 3px solid var(--nf-red);
+    border-radius: 0;
+    background: rgba(20, 2, 8, .72);
+    color: var(--text);
+    font: 12.5px/1.75 var(--f-mono);
+    white-space: pre;
+  }
+
+  .nf-dump b { color: var(--nf-red); font-weight: 700; }
+  .nf-dump i { color: var(--heat); font-style: normal; }
+  .nf-dump em { color: var(--cyan); font-style: normal; }
+  .nf-dump .nf-dim { color: var(--mute); }
+
+  .nf-caret {
+    display: inline-block;
+    width: .6em;
+    height: 1.1em;
+    vertical-align: -.2em;
+    background: var(--nf-red);
   }
 
   .not-found-actions {
@@ -500,23 +643,79 @@
     box-sizing: border-box;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
+    padding: 10px 18px;
     border: 1px solid var(--line-2) !important;
-    border-radius: 2px;
+    border-radius: 0;
     background: none;
     color: var(--fg) !important;
     font: 13px var(--f-mono);
+    letter-spacing: .06em;
     cursor: var(--cursor-pointer, pointer);
+    transition: transform .12s, box-shadow .12s, border-color .12s;
   }
 
   .not-found-actions button {
-    border-color: var(--fg) !important;
-    background: var(--fg);
+    border-color: var(--nf-red) !important;
+    background: var(--nf-red);
     color: var(--void) !important;
+    font-weight: 700;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   }
 
-  .not-found-actions a:hover {
-    border-color: var(--cyan) !important;
+  .not-found-actions button:hover,
+  .not-found-actions button:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--cyan);
+  }
+
+  .not-found-actions a:hover,
+  .not-found-actions a:focus-visible {
+    border-color: var(--nf-red) !important;
+    color: var(--nf-red) !important;
+  }
+
+  .signal-rip.is-fault,
+  .signal-rip.is-fault b {
+    color: #ff2b4f;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-tape-track { animation: nf-tape 26s linear infinite; }
+    .nf-code::before { animation: nf-slice 3.2s steps(1) infinite; }
+    .nf-code span { animation: nf-jolt 3.2s steps(1) infinite; }
+    .nf-caret { animation: nf-blink 1s steps(1) infinite; }
+    body:has(.not-found-page) .signal-backdrop { animation: nf-flicker 5s steps(1) infinite; }
+  }
+
+  @keyframes nf-tape {
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes nf-slice {
+    0% { clip-path: inset(44% 0 44% 0); transform: translateX(.09em); }
+    70% { clip-path: inset(18% 0 70% 0); transform: translateX(-.06em); }
+    73% { clip-path: inset(62% 0 22% 0); transform: translateX(.14em); }
+    76% { clip-path: inset(44% 0 44% 0); transform: translateX(.09em); }
+    90% { clip-path: inset(80% 0 6% 0); transform: translateX(-.1em); }
+    92% { clip-path: inset(44% 0 44% 0); transform: translateX(.09em); }
+  }
+
+  @keyframes nf-jolt {
+    0%, 71%, 74%, 100% { transform: none; }
+    72% { transform: translate(-4px, 1px) skewX(-6deg); }
+    73% { transform: translate(5px, -1px); }
+  }
+
+  @keyframes nf-blink {
+    50% { opacity: 0; }
+  }
+
+  @keyframes nf-flicker {
+    0%, 100% { opacity: 1; }
+    61% { opacity: .55; }
+    62% { opacity: 1; }
+    64% { opacity: .35; }
+    65% { opacity: 1; }
   }
 
   @media (max-width: 767px) {
@@ -532,6 +731,15 @@
 
     .not-found-actions {
       display: grid;
+    }
+
+    .nf-dump {
+      font-size: 11px;
+    }
+
+    .nf-alert {
+      letter-spacing: .06em;
+      font-size: 11px !important;
     }
   }
 

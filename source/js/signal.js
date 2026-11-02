@@ -136,6 +136,13 @@
   }
 
   if (isPost && ripLabel) ripLabel.textContent = 'OFFSET';
+  // 404: the readout freezes on the faulting address.
+  if (ripValue && ripLabel && $('.not-found-page')) {
+    jumpTarget = '0x00000404';
+    ripLabel.textContent = 'SEGV';
+    ripValue.closest('.signal-rip')?.classList.add('is-fault');
+    rollReadout();
+  }
   scrollHandlers.push(() => {
     header?.classList.toggle('is-scrolled', window.scrollY > 8);
     if (ripValue && !jumpTarget && !rolling) ripValue.textContent = scrollReadout();
