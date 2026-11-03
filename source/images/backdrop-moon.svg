@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
   <!-- A broken crescent: the upper horn has shattered into drifting shards,
        a patch of the surface shows its wireframe, cracks glow cyan and a
-       slice of it glitches sideways now and then. On the lower horn kneels
-       a girl in prayer, long orange hair in the wind, a ring of light
-       turning behind her head, her book resting beside her. -->
+       slice of it glitches sideways now and then. On the lower horn stands
+       a girl in a white and amber gown, long orange hair in the wind, a ring
+       of light turning behind her head, her head bowed in prayer over an open book. -->
   <style>
     .shard { animation: drift 9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
     .shard.b { animation-duration: 12s; animation-delay: -4s; }
@@ -12,11 +12,11 @@
     .glitch { animation: glitch 6.5s steps(1) infinite; }
     .glitch.b { animation-duration: 9.3s; animation-delay: -3s; }
     .crack { animation: pulse 4.6s ease-in-out infinite alternate; }
-    .halo { transform-origin: 232px 196px; animation: spin 36s linear infinite; }
-    .halo2 { transform-origin: 232px 196px; animation: spin 52s linear infinite reverse; }
-    .hair { transform-origin: 236px 200px; animation: wind 3.6s ease-in-out infinite alternate; }
+    .halo { transform-origin: 232px 194px; animation: spin 36s linear infinite; }
+    .halo2 { transform-origin: 232px 194px; animation: spin 52s linear infinite reverse; }
+    .hair { transform-origin: 236px 196px; animation: wind 3.6s ease-in-out infinite alternate; }
     .hair.b { animation-duration: 4.4s; animation-delay: -1.5s; }
-    .ribbon { transform-origin: 238px 190px; animation: wind 2.8s ease-in-out -0.6s infinite alternate; }
+    .ribbon { transform-origin: 240px 187px; animation: wind 2.8s ease-in-out -0.6s infinite alternate; }
     .trace { animation: run 7s linear infinite; }
     @keyframes run { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -704; } }
     .mote { animation: rise 6s ease-out infinite; opacity: 0; }
@@ -63,9 +63,18 @@
       <stop offset="0" stop-color="#ec7a3c"/>
       <stop offset="1" stop-color="#c2531f"/>
     </linearGradient>
-    <linearGradient id="cover" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6b2f22"/>
-      <stop offset="1" stop-color="#3e1a13"/>
+    <linearGradient id="iris" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a120c"/>
+      <stop offset=".5" stop-color="#9c2f1e"/>
+      <stop offset="1" stop-color="#e8763e"/>
+    </linearGradient>
+    <linearGradient id="leatherL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5a2c16"/>
+      <stop offset="1" stop-color="#7a4022"/>
+    </linearGradient>
+    <linearGradient id="leatherR" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8a4c28"/>
+      <stop offset="1" stop-color="#5e2e17"/>
     </linearGradient>
     <mask id="crescent">
       <circle cx="180" cy="205" r="130" fill="#fff"/>
@@ -222,105 +231,167 @@
   </g>
 
   <!-- ===== the girl ===== -->
+  <!-- Long orange hair with a braided crown and a gold flower, off-shoulder
+       white ruffles, a black corset traced in gold, an amber sash pinned with
+       a gold brooch and tassel, a white gown embroidered with gold vines over
+       rust-and-black ruffles, black opera gloves. Head bowed, she prays over
+       an open book whose pages give off the light. -->
   <g id="girl">
-    <circle cx="214" cy="218" r="30" fill="url(#prayG)"/>
+    <circle cx="232.6" cy="214" r="22" fill="url(#prayG)"/>
 
     <g class="halo" fill="none" stroke="#ffb067">
-      <circle cx="232" cy="196" r="21" stroke-width="1.1" stroke-dasharray="10 4 2 4" opacity=".75"/>
+      <circle cx="232" cy="194" r="20" stroke-width="1.1" stroke-dasharray="10 4 2 4" opacity=".75"/>
     </g>
     <g class="halo2" fill="none" stroke="#7cecff">
-      <circle cx="232" cy="196" r="16.5" stroke-width=".6" stroke-dasharray="1.5 3" opacity=".6"/>
+      <circle cx="232" cy="194" r="15.5" stroke-width=".6" stroke-dasharray="1.5 3" opacity=".6"/>
     </g>
 
-    <!-- hair behind her, streaming right -->
+    <!-- hair behind her, very long, streaming right -->
     <g class="hair">
-      <path d="M232 186 C246 182 258 196 262 214 C268 238 282 252 300 262 C314 270 328 270 340 278 C322 282 304 280 290 272 C272 262 258 246 250 228 C246 220 240 214 236 212 Z" fill="url(#hairG)"/>
-      <path d="M300 262 C316 268 332 266 348 272 C334 280 318 279 304 273 Z" fill="url(#hairEnd)" opacity=".8"/>
+      <path d="M230 184 C246 180 256 196 258 216 C262 240 276 256 296 266 C312 274 330 272 344 282 C324 286 304 282 288 274 C268 264 254 246 248 226 C244 214 240 208 236 206 Z" fill="url(#hairG)"/>
+      <path d="M296 266 C314 274 334 270 352 280 C336 288 316 284 300 277 Z" fill="url(#hairEnd)" opacity=".8"/>
+      <path d="M250 214 C254 236 266 254 288 266" fill="none" stroke="#f6a06a" stroke-width=".7" opacity=".55"/>
     </g>
     <g class="hair b">
-      <path d="M238 196 C252 206 256 228 270 246 C282 262 300 276 322 288 C304 292 286 286 272 274 C258 260 250 240 244 222 Z" fill="#c4521f"/>
-      <path d="M322 288 C334 294 344 292 356 298 C342 302 330 300 318 294 Z" fill="url(#hairEnd)" opacity=".7"/>
-      <path d="M254 222 C262 244 278 262 300 276" fill="none" stroke="#f6a06a" stroke-width=".8" opacity=".6"/>
+      <path d="M240 200 C252 212 254 234 266 252 C278 270 298 284 324 294 C304 298 284 290 270 278 C256 264 250 244 246 226 Z" fill="#c4521f"/>
+      <path d="M324 294 C338 300 348 298 360 304 C346 308 332 304 318 298 Z" fill="url(#hairEnd)" opacity=".7"/>
+      <path d="M224 196 C214 206 212 222 216 238 C212 232 208 220 212 206 Z" fill="#c4521f" opacity=".9"/>
     </g>
 
-    <!-- skirt spread over the moon -->
-    <path d="M222 240 C214 252 204 266 199 284 C206 290 250 292 268 288 C266 270 256 252 244 240 Z" fill="url(#dress)"/>
-    <path d="M244 240 C254 252 264 268 268 288 L258 289 C254 272 248 256 238 244 Z" fill="#1d1a22"/>
-    <path d="M226 244 C220 258 214 272 213 289 L228 290 C228 274 230 258 232 246 Z" fill="url(#panel)"/>
-    <path d="M213 289 L228 290 M226 244 C220 258 214 272 213 289" fill="none" stroke="#e7b46a" stroke-width=".6"/>
-    <path d="M199 284 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 q3 4 6 0 L268 288 L268 290 L199 288 Z" fill="#efe8de"/>
-    <path d="M238 282 q2 -4 4 0 q2 -4 4 0 M248 283 q2 -4 4 0" fill="none" stroke="#e08a52" stroke-width=".6"/>
-    <path d="M266 283 l7 -1 l1 6 l-7 1 z" fill="#d8d3cd"/>
-    <path d="M272 288 l2.5 0 l0 3 l-2.5 0 z" fill="#8a7f78"/>
+    <!-- rust overskirt with a black underlayer, blown out behind her -->
+    <path d="M236 228 C250 236 262 250 276 262 C288 272 298 282 304 291 C292 293 278 289 266 292 L256 291 C252 268 246 248 234 232 Z" fill="#1b1720"/>
+    <path d="M236 228 C250 236 260 248 272 260 C284 270 292 280 296 288 C286 289 274 286 264 289 L256 290 C252 268 246 248 234 232 Z" fill="url(#panel)"/>
+    <path d="M296 288 C286 289 274 286 264 289" fill="none" stroke="#e7b46a" stroke-width=".6"/>
+    <path d="M244 244 C254 256 264 270 272 284 M252 240 C264 252 276 266 286 280" fill="none" stroke="#f29a5a" stroke-width=".6" opacity=".6"/>
+    <path d="M228 230 C220 246 210 264 199 285 C203 289 208 290 212 289 C216 270 222 252 230 236 Z" fill="#1b1720"/>
+    <path d="M228 230 C221 246 212 264 203 284 C206 287 209 288 212 288 C216 270 222 252 230 236 Z" fill="url(#panel)"/>
 
-    <path d="M226 246 L225 262" stroke="#c2531f" stroke-width="1"/>
-    <path d="M222.6 262 L227.4 262 L228.4 270 L221.6 270 Z" fill="#e7a24e"/>
-
-    <path d="M221 234 C228 236.4 239 236.4 246 234 L245 248 C238 250 228 250 221.6 248 Z" fill="#1b1820"/>
-    <path d="M221.2 238 C228 240 239 240 245.6 238" fill="none" stroke="#c9a15a" stroke-width=".5"/>
-    <path d="M230 243 q4 3 8 0" fill="none" stroke="#c9a15a" stroke-width=".5"/>
-
-    <path d="M222 214 C224 210 240 210 244 214 L246 237 L220 237 Z" fill="url(#dress)"/>
-    <path d="M220 213 C224 207 242 207 247 213 L250 228 C242 232 226 231 218 227 Z" fill="#f4efe6"/>
-    <path d="M218 227 C226 231 242 232 250 228" fill="none" stroke="#c5b9a8" stroke-width=".7"/>
-    <g transform="translate(241 221)" stroke="#e08a52" stroke-width=".5" fill="none">
-      <circle r="1.4"/>
-      <path d="M0 -3.4 V-2 M0 2 V3.4 M-3.4 0 H-2 M2 0 H3.4 M-2.4 -2.4 L-1.4 -1.4 M1.4 1.4 L2.4 2.4 M2.4 -2.4 L1.4 -1.4 M-1.4 1.4 L-2.4 2.4"/>
+    <!-- white gown with gold vines -->
+    <path d="M227 228 C222 244 214 264 208 287 C226 291 248 291 262 288 C258 266 248 244 240 228 Z" fill="url(#dress)"/>
+    <path d="M208 287 q3.2 2.6 6.4 0 q3.2 2.6 6.4 0 q3.2 2.6 6.4 0 q3.2 2.6 6.4 0 q3.2 2.6 6.4 0 q3.2 2.6 6.4 0 q3.2 2.6 6.4 0 q3.2 2.6 6.4 0 L262 288 L262 290 L208 289 Z" fill="#efe8de"/>
+    <path d="M208 287.6 C226 291.4 248 291.4 262 288.6" fill="none" stroke="#d4a24c" stroke-width=".5"/>
+    <g fill="none" stroke="#d4a24c" stroke-width=".45" stroke-linecap="round" opacity=".9">
+      <path d="M220 286 C221 276 224 268 229 262 M224 274 q-3 -1 -4 -4 M226 268 q3 -2 3 -5 M222 281 q-3 0 -5 -3"/>
+      <path d="M244 287 C244 276 241 266 236 258 M243 278 q3 -1 4 -4 M240 268 q-3 -2 -3 -5 M244 283 q3 0 5 -2"/>
+      <path d="M233 288 C233 281 232 276 230 272 M232 280 q2 -2 4 -2"/>
     </g>
-    <path d="M226 208 q2 3 4 0 q2 3 4 0 q2 3 4 0 L238 212 L226 212 Z" fill="#fbf7f1"/>
-    <path d="M231 211 l-4 6 l3 1 Z M233 211 l3 7 l-3 1 Z" fill="#141217"/>
-    <circle cx="232" cy="211" r="1.6" fill="#e5823f"/>
+    <g fill="#d9a24f" opacity=".85">
+      <circle cx="229" cy="262" r=".7"/><circle cx="236" cy="258" r=".7"/><circle cx="230" cy="272" r=".6"/>
+    </g>
 
-    <!-- arm raised, hands pressed together in prayer -->
-    <path d="M240 217 C236 222 234 228 231 229 C227 228 224 223 222 219" fill="none" stroke="#e9e1d5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M219.4 219.6 q1.2 -1.8 2.4 0 q1.2 -1.8 2.4 0 q1.2 -1.8 2.4 0" fill="none" stroke="#fffaf3" stroke-width="1.3"/>
-    <!-- neck and bowed head -->
-    <path d="M228 202 L229 210 L234 210 L234 202 Z" fill="#efd5c5"/>
-    <ellipse cx="229" cy="196" rx="8.6" ry="9.6" fill="#f6e3d6"/>
-    <path d="M222.6 196.4 q2 1.6 4 .2" fill="none" stroke="#5a2d1c" stroke-width=".8" stroke-linecap="round"/>
-    <path d="M222.4 196.6 l-1 .9 M224 197.4 l-.5 1.1" stroke="#5a2d1c" stroke-width=".4"/>
-    <path d="M223.6 201.8 q1.2 .5 2.2 0" fill="none" stroke="#c07562" stroke-width=".6" stroke-linecap="round"/>
-    <ellipse cx="225.6" cy="199" rx="2.2" ry="1.4" fill="#ffb7a0" opacity=".35"/>
+    <!-- amber sash: a band at the waist and a long fall over the gown -->
+    <path d="M238 229 C244 238 250 252 252 266 C253 274 250 282 247 288 C244 280 245 270 243 260 C241 250 236 240 233 232 Z" fill="#c8612a"/>
+    <path d="M243 240 C247 250 249 262 248 276" fill="none" stroke="#f0a466" stroke-width=".6" opacity=".7"/>
+    <path d="M225.6 225 C230 227.2 236 227.2 240.6 225 L241 231.4 C236 233.4 230 233.4 225.2 231.4 Z" fill="#d9732b"/>
+    <path d="M225.4 228.4 C230 230.4 236 230.4 240.8 228.4" fill="none" stroke="#f3b070" stroke-width=".5"/>
 
-    <path d="M219.6 194 C218 184 226 177 235 178.4 C243 179.6 246 187 244.6 196 C244 202 245 208 247 214 C242 212 239 206 238.6 199 C236 193 233 188 231 186 C229 190 224 193 219.6 194 Z" fill="url(#hairG)"/>
-    <path d="M221 192 C223 189 226 186 228 182 M229 186 C230 183 232 181 234 180" fill="none" stroke="#f6a06a" stroke-width=".6" opacity=".7"/>
-    <path d="M220.4 192 C217.4 202 217 214 219.4 224 C218.6 214 219.6 203 222.4 195 Z" fill="#d9622b"/>
+    <!-- black corset traced in gold -->
+    <path d="M224.4 211.4 C228 214 237 214 241 211.4 L239.8 226.6 C235 228.2 230 228.2 226 226.6 Z" fill="#17141b"/>
+    <g fill="none" stroke="#c9a15a" stroke-width=".4" opacity=".9">
+      <path d="M228.6 213.6 C229 218 229 222 229.4 227.4 M232.6 214 V228 M236.6 213.6 C236.2 218 236.2 222 235.8 227.4"/>
+    </g>
 
-    <path d="M219.6 218.6 C218.4 213.4 219 208.6 221.4 205.4 C223.8 208.4 224.6 213.4 223.6 218.6 Z" fill="#f6e3d6"/>
-    <path d="M221.5 206.6 L221.7 217.6" stroke="#dcbca9" stroke-width=".45"/>
-    <path d="M220 213 q1.5 .6 3 0" fill="none" stroke="#e7cbb9" stroke-width=".35"/>
+    <!-- bare shoulders and neck -->
+    <path d="M229.4 199 L229.6 204 C226 205 221 206.4 219 209 L246 209 C244 206.4 239.4 205 235.8 204 L235.6 199 Z" fill="#f3dccd"/>
+    <!-- necklace with an amber drop -->
+    <path d="M229.4 203.4 C230.6 206.4 234.6 206.4 235.8 203.4" fill="none" stroke="#e1b453" stroke-width=".45"/>
+    <ellipse cx="232.6" cy="207" rx=".9" ry="1.3" fill="#e8892e" stroke="#f3c56a" stroke-width=".3"/>
+
+    <!-- off-shoulder ruffles -->
+    <path d="M217.6 209.4 C219.6 204.6 226 206.6 232.6 208.6 C239 206.6 245.6 204.6 247.6 209.4 C248.6 213.4 245.6 216 242.6 214 C238 212 227 212 222.6 214 C219.6 216 216.6 213.6 217.6 209.4 Z" fill="#f4efe6"/>
+    <path d="M219 211.6 q1.6 1.4 3.2 0 q1.6 1.4 3.2 0 M240 211.4 q1.6 1.4 3.2 0 q1.6 1.4 3.2 0 M226 209.8 C230 210.8 235 210.8 239 209.8" fill="none" stroke="#c5b9a8" stroke-width=".5"/>
+
+    <!-- arms bent, gloved hands holding an open book before her -->
+    <path d="M219.8 212.6 C218.8 215.6 218.4 218.4 218.8 220.6" fill="none" stroke="#f3dccd" stroke-width="3.3" stroke-linecap="round"/>
+    <path d="M218.8 219.8 C219.4 223.2 222.6 224.6 226.4 224.4" fill="none" stroke="#141217" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M217.2 219.4 L220.4 219.6" stroke="#e1b453" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="M245.6 212.4 C246.6 215.4 247 218.2 246.6 220.6" fill="none" stroke="#f3dccd" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M246.6 219.8 C246 223.2 242.8 224.6 239 224.4" fill="none" stroke="#141217" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M245 219.6 L248.2 219.4" stroke="#e1b453" stroke-width="1.1" stroke-linecap="round"/>
+    <!-- the book, open toward her: we see its brown leather covers, the spine
+         nearest us, a gold cross on the front cover and the page edges on top
+         lit by the light she reads in -->
+    <g transform="translate(0 -1.4)">
+    <path d="M224.2 217.6 C227 217 230.4 217.4 232.6 218.6 C234.8 217.4 238.2 217 241 217.6 L240.6 219 C238.2 218.6 235 218.8 232.6 220 C230.2 218.8 227 218.6 224.6 219 Z" fill="#fbf1de"/>
+    <path d="M224.6 219 C227 218.6 230.2 218.8 232.6 220 L232.6 228.4 C230.2 227.4 227.2 227 225.2 227.2 Z" fill="url(#leatherL)" stroke="#d9a24f" stroke-width=".35" stroke-linejoin="round"/>
+    <path d="M240.6 219 C238.2 218.6 235 218.8 232.6 220 L232.6 228.4 C235 227.4 238 227 240 227.2 Z" fill="url(#leatherR)" stroke="#d9a24f" stroke-width=".35" stroke-linejoin="round"/>
+    <path d="M232.6 219.8 V228.6" stroke="#2a120b" stroke-width=".9" stroke-linecap="round"/>
+    <path d="M232.6 220.6 V227.8" stroke="#d9a24f" stroke-width=".25" stroke-dasharray=".8 .7"/>
+    <g fill="#e9b558" stroke="#7a4a1a" stroke-width=".15">
+      <path d="M236.1 220 h1 v1.8 h1.7 v1 h-1.7 v3.5 h-1 v-3.5 h-1.7 v-1 h1.7 Z"/>
+    </g>
+    <path d="M225.8 220.1 l1.4 -.3 M239.4 219.8 l-1.4 -.3 M225.9 226.3 l1.3 .1 M239.3 226.3 l-1.3 .1" stroke="#d9a24f" stroke-width=".55" stroke-linecap="round"/>
+    <path d="M232.6 228.4 l.1 2.4 l.4 -2.2" fill="#b8402a"/>
+    </g>
+    <!-- gloved fingers over the outer edges of the covers -->
+    <path d="M223.8 224.6 C224.4 222.4 226 221.6 227.6 222.2 C227.6 223.8 226.6 225.4 225 226.2 Z" fill="#141217"/>
+    <path d="M241.4 224.6 C240.8 222.4 239.2 221.6 237.6 222.2 C237.6 223.8 238.6 225.4 240.2 226.2 Z" fill="#141217"/>
+
+    <g transform="rotate(-9 232.6 204) translate(-.4 1.2)">
+    <!-- face: bowed over the book, calm, eyes lowered under long bangs -->
+    <path d="M223.8 188 C223.6 193.8 224.8 197.6 227.2 200 C228.6 201.4 229.8 202.4 230.9 202.5 C232 202.4 234.2 201 236.4 198.8 C238.6 196.6 239.4 193 239.2 188 Z" fill="#f7e6da"/>
+    <path d="M227.6 200.4 C229 201.7 230 202.3 230.9 202.3 C232 202.2 233.6 201.2 235 199.9 C233.4 200.9 232 201.5 230.9 201.5 C229.8 201.5 228.8 201.1 227.6 200.4 Z" fill="#e8c8b6"/>
+    <ellipse cx="226.6" cy="198.6" rx="1.2" ry=".55" fill="#ff9f86" opacity=".18"/>
+    <ellipse cx="235.4" cy="198.6" rx="1.2" ry=".55" fill="#ff9f86" opacity=".18"/>
+    <!-- eyes lowered to the page -->
+    <g fill="none" stroke="#2a110c" stroke-linecap="round">
+      <path d="M225.6 195.6 C226.4 196.9 228.4 197 229.4 195.8" stroke-width=".7"/>
+      <path d="M225.8 195.9 l-.6 .5 M226.6 196.6 l-.3 .7 M227.6 196.9 l-.05 .7" stroke-width=".3"/>
+      <path d="M232.4 195.8 C233.4 197 235.4 196.9 236.2 195.6" stroke-width=".7"/>
+      <path d="M236 195.9 l.6 .5 M235.2 196.6 l.3 .7 M234.2 196.9 l.05 .7" stroke-width=".3"/>
+    </g>
+    <path d="M231 198.9 l.3 .35" stroke="#d9a894" stroke-width=".35" stroke-linecap="round"/>
+    <path d="M230.3 200.5 C230.7 200.65 231.3 200.65 231.7 200.5" fill="none" stroke="#b86e5e" stroke-width=".35" stroke-linecap="round"/>
+
+    <!-- front hair: long bangs falling over the eyes, braided crown, side locks -->
+    <path d="M223 196 C221.4 185 227.4 178.4 233.6 178.8 C239.8 179.2 242.6 185 240.8 192.4 C240.2 198 240.6 204 242.6 210.4 C239.6 208.6 238.2 203.4 238.4 197.6 Q238 193.6 237.2 191.6 Q237.4 194.4 236.6 196.6 Q236.4 192.8 235 190.4 Q235 193.2 233.8 195 Q233.8 192 232.6 189.8 Q232.2 194 230.8 197.6 Q231 193 230.2 190.4 Q229.4 193 228 194.6 Q228.6 192.2 228 190.6 Q226.8 193.6 225.4 195.6 Q225.6 193.4 225.4 191.8 Q224.4 194 223 196 Z" fill="url(#hairG)"/>
+    <path d="M224 190.4 C221.8 197 221 205 222.6 214 C223.2 207 224.2 200.6 225.6 196 C225.2 194.2 224.8 192.2 224 190.4 Z" fill="#d9622b"/>
+    <path d="M238.6 191.6 C239.4 196 239.4 200.4 238.8 204 C238.2 200.6 237.8 196.4 238 192.4 Z" fill="#c4521f"/>
+    <path d="M225 183.4 C228 180.6 233 180 238 182" fill="none" stroke="#b9471a" stroke-width="1.6" stroke-dasharray="1.4 .9"/>
+    <path d="M226 186.6 C227.6 184.4 230 183 232 182.6 M233.4 186 C235 184 236.6 183.4 238.4 183.6 M231.6 190.6 C231.6 192.6 231.2 194.6 230.8 196.4 M235.6 191 C235.8 192.6 235.6 194.4 235.2 195.4 M228.4 191.4 C228.2 192.6 227.6 193.6 227 194.4" fill="none" stroke="#f6a06a" stroke-width=".4" opacity=".7"/>
+    <path d="M232.6 189.8 Q232.2 194 230.8 197.6 M235 190.4 Q235 193.2 233.8 195" fill="none" stroke="#a8401a" stroke-width=".3" opacity=".6"/>
+    <!-- earring -->
+    <path d="M239.2 197.4 V200.6" stroke="#e1b453" stroke-width=".4"/>
+    <ellipse cx="239.2" cy="201.6" rx=".7" ry="1.1" fill="#e8892e"/>
+
+    <!-- gold flower with a black ribbon -->
     <g class="ribbon">
-      <path d="M239 188 C246 190 252 196 258 196 C252 199 246 196 240 192 Z" fill="#141217"/>
-      <path d="M239 190 C245 194 249 202 254 204 C248 205 244 200 239 194 Z" fill="#232028"/>
+      <path d="M240 186 C247 188 253 194 259 194 C253 197 247 194 241 190 Z" fill="#141217"/>
+      <path d="M240 188 C246 192 250 200 255 202 C249 203 245 198 240 192 Z" fill="#232028"/>
+      <path d="M241 190 L242 200" stroke="#e1b453" stroke-width=".35"/>
+      <circle cx="242" cy="200.8" r=".7" fill="#e8892e"/>
     </g>
-    <g transform="translate(238 186)">
-      <circle r="4" fill="#e5823f"/>
-      <g fill="#f29a5a">
-        <ellipse rx="1.4" ry="3.4" transform="rotate(0) translate(0 -3)"/>
-        <ellipse rx="1.4" ry="3.4" transform="rotate(45) translate(0 -3)"/>
-        <ellipse rx="1.4" ry="3.4" transform="rotate(90) translate(0 -3)"/>
-        <ellipse rx="1.4" ry="3.4" transform="rotate(135) translate(0 -3)"/>
-        <ellipse rx="1.4" ry="3.4" transform="rotate(180) translate(0 -3)"/>
-        <ellipse rx="1.4" ry="3.4" transform="rotate(225) translate(0 -3)"/>
-        <ellipse rx="1.4" ry="3.4" transform="rotate(270) translate(0 -3)"/>
-        <ellipse rx="1.4" ry="3.4" transform="rotate(315) translate(0 -3)"/>
+    <g transform="translate(239 184.4)">
+      <g fill="#e9b558">
+        <ellipse rx="1.2" ry="3" transform="rotate(0) translate(0 -2.6)"/>
+        <ellipse rx="1.2" ry="3" transform="rotate(45) translate(0 -2.6)"/>
+        <ellipse rx="1.2" ry="3" transform="rotate(90) translate(0 -2.6)"/>
+        <ellipse rx="1.2" ry="3" transform="rotate(135) translate(0 -2.6)"/>
+        <ellipse rx="1.2" ry="3" transform="rotate(180) translate(0 -2.6)"/>
+        <ellipse rx="1.2" ry="3" transform="rotate(225) translate(0 -2.6)"/>
+        <ellipse rx="1.2" ry="3" transform="rotate(270) translate(0 -2.6)"/>
+        <ellipse rx="1.2" ry="3" transform="rotate(315) translate(0 -2.6)"/>
       </g>
-      <circle r="1.6" fill="#a8461c"/>
+      <circle r="1.8" fill="#d9732b"/>
+      <circle r=".7" fill="#ffd28a"/>
+    </g>
     </g>
 
+    <!-- gold brooch and tassel at the waist -->
+    <path d="M238.4 230.6 C238.6 236 239.4 240 239.6 244" fill="none" stroke="#e1b453" stroke-width=".45"/>
+    <path d="M239.6 244 l-1 1.2 l1 3.6 l1 -3.6 Z" fill="#e8892e"/>
+    <g transform="translate(238.4 229)">
+      <circle r="2.6" fill="#e1b453"/>
+      <path d="M0 -4 V-2.6 M0 2.6 V4 M-4 0 H-2.6 M2.6 0 H4 M-2.8 -2.8 L-1.9 -1.9 M1.9 1.9 L2.8 2.8 M2.8 -2.8 L1.9 -1.9 M-1.9 1.9 L-2.8 2.8" stroke="#e1b453" stroke-width=".5"/>
+      <circle r="1.4" fill="#d9732b"/>
+      <circle cx="-.4" cy="-.4" r=".45" fill="#ffd28a"/>
+    </g>
+
+    <!-- light rising from the pages -->
     <g fill="#ffd2a8">
-      <circle class="mote" cx="212" cy="204" r="1"/>
-      <circle class="mote b" cx="216" cy="202" r=".8"/>
-      <circle class="mote c" cx="209" cy="206" r=".7"/>
-    </g>
-
-    <g transform="rotate(-8 186 268)">
-      <rect x="174" y="262" width="22" height="7" rx="1" fill="url(#cover)"/>
-      <rect x="175.5" y="263" width="19" height="2" fill="#efe4d2"/>
-      <g transform="translate(185 266.6)" stroke="#e7a24e" stroke-width=".4" fill="none">
-        <circle r="1.2"/>
-        <path d="M-2.6 0 H-1.6 M1.6 0 H2.6"/>
-      </g>
+      <circle class="mote" cx="221" cy="219" r="1"/>
+      <circle class="mote b" cx="244.6" cy="218" r=".8"/>
+      <circle class="mote c" cx="218" cy="221" r=".7"/>
     </g>
   </g>
 </svg>
