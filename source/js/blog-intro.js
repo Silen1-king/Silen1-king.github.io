@@ -3,8 +3,9 @@
 
   // Graphic intro, no text: a point of light blooms into rotating rose curves
   // and a tick ring, then collapses into a single line like a CRT power-off.
-  // The line then settles where the home hero draws its signal wave, the
-  // curtain closes onto it, and the city powers on from there while the
+  // The line then settles where the home hero draws its signal wave, a pulse
+  // runs out from its centre and turns it into that wave, the curtain closes
+  // onto it, and the city powers on from there while the
   // wordmark gathers out of the line (signal-backdrop.js, signal.js).
   const root = document.documentElement;
   const intro = document.querySelector('[data-blog-intro]');
@@ -17,7 +18,8 @@
   const canvas = intro.querySelector('[data-intro-canvas]');
   const context = canvas?.getContext('2d');
   const LAYERS = [[3, 1], [5, 2], [7, 3], [4, 3], [2, 5]];
-  const DURATION = 3.55;
+  const DURATION = 4.05;
+  const LAND = 3.45;
   // Where the hero's wave sits, as a share of the screen height (signal.js).
   const waveAt = () => (window.innerWidth < 760 ? 0.56 : 0.62);
   const startedAt = performance.now();
@@ -25,6 +27,7 @@
   let height = 0;
   let animationFrame = 0;
   let closing = false;
+  let wavePhase = false;
   let failsafeTimer = 0;
 
   try {
@@ -51,18 +54,83 @@
     context.fillRect(0, 0, width, height);
   }
 
+  // The hero's wave in signal.js (drawHero), at rAF time `now`, with the
+  // mouse still centred. Keep the two in step.
+  const heroWave = (x, now, base) => {
+    const T = now * 0.001;
+    const near = Math.exp(-Math.pow((x - width / 2) / 260, 2));
+    return base + Math.sin(x * 0.03 + T * 2.4) * (3 + near * 5) + Math.sin(x * 0.011 - T * 1.2) * 3;
+  };
+
+  // Strokes a line y(x). `look` 0 is the intro's flat bright line, 1 is the
+  // hero's thin wave that fades out at both ends (cyan to violet).
+  function strokeLine(y, look) {
+    const gradient = context.createLinearGradient(0, 0, width, 0);
+    const edge = 0.9 * (1 - look);
+    gradient.addColorStop(0, `rgba(124, 236, 255, ${edge})`);
+    gradient.addColorStop(0.5, `rgba(124, 236, 255, ${0.9 - 0.2 * look})`);
+    gradient.addColorStop(1, `rgba(${124 + 44 * look | 0}, ${236 - 97 * look | 0}, 255, ${edge})`);
+    context.beginPath();
+    for (let x = 0; x <= width; x += 3) {
+      if (x) context.lineTo(x, y(x));
+      else context.moveTo(x, y(x));
+    }
+    context.strokeStyle = gradient;
+    context.lineWidth = 2 - 0.9 * look;
+    context.stroke();
+  }
+
+  function drawWave(t, now) {
+    const target = height * waveAt();
+    const fall = ease(clamp((t - 2.95) / (LAND - 2.95)));
+    const lineY = height / 2 + (target - height / 2) * fall;
+    context.fillStyle = 'rgba(5, 6, 11, 0.42)';
+    context.fillRect(0, 0, width, height);
+
+    // On landing a pulse runs out from the centre to both ends;
+    // behind it the line already carries the wave, ahead it is still flat.
+    const since = Math.max(0, t - LAND);
+    const reach = t < LAND ? 0 : ease(clamp(since / 0.55)) * (width / 2 + 120);
+    const soft = 90;
+    const behind = x => clamp((reach - Math.abs(x - width / 2)) / soft + 0.5);
+    const look = ease(clamp(since / 0.6));
+    strokeLine(x => {
+      const d = Math.abs(x - width / 2) - reach;
+      const kick = Math.exp(-d * d / 700) * Math.sin(d * 0.12) * 10 * (1 - look * 0.6);
+      return lineY + (heroWave(x, now, target) - target) * behind(x) + (reach ? kick : 0);
+    }, look);
+    if (reach && reach < width / 2 + 60) {
+      const glint = 1 - look;
+      [-1, 1].forEach(side => {
+        const x = width / 2 + side * reach;
+        const g = context.createRadialGradient(x, lineY, 0, x, lineY, 26);
+        g.addColorStop(0, `rgba(231, 234, 244, ${0.95 * glint})`);
+        g.addColorStop(0.3, `rgba(124, 236, 255, ${0.45 * glint})`);
+        g.addColorStop(1, 'rgba(124, 236, 255, 0)');
+        context.fillStyle = g;
+        context.fillRect(x - 26, lineY - 26, 52, 52);
+      });
+    }
+    intro.style.setProperty('--intro-line', `${lineY}px`);
+  }
+
   function drawFrame(now) {
-    if (closing || !context) return;
+    if (closing) {
+      // Keep the wave moving while the curtain closes onto it, so the
+      // hand-off to the hero's wave underneath has no seam.
+      if (wavePhase && context && intro.isConnected) {
+        drawWave(Math.max(DURATION, (now - startedAt) / 1000), now);
+        animationFrame = requestAnimationFrame(drawFrame);
+      }
+      return;
+    }
+    if (!context) return;
     const t = (now - startedAt) / 1000;
 
-    // After the power-off: the line glides down to the hero's wave.
+    // After the power-off: the line glides down and turns into the hero's wave.
     if (t > 2.95) {
-      const lineY = height / 2 + (height * waveAt() - height / 2) * ease(clamp((t - 2.95) / 0.5));
-      context.fillStyle = 'rgba(5, 6, 11, 0.35)';
-      context.fillRect(0, 0, width, height);
-      context.fillStyle = 'rgba(124, 236, 255, 0.9)';
-      context.fillRect(0, lineY - 1, width, 2);
-      intro.style.setProperty('--intro-line', `${lineY}px`);
+      wavePhase = true;
+      drawWave(t, now);
       if (t < DURATION) animationFrame = requestAnimationFrame(drawFrame);
       else finishIntro();
       return;
@@ -142,6 +210,7 @@
     closing = true;
     window.clearTimeout(failsafeTimer);
     window.cancelAnimationFrame(animationFrame);
+    if (wavePhase) animationFrame = requestAnimationFrame(drawFrame);
     SKIP_EVENTS.forEach(type => window.removeEventListener(type, handleSkip));
     window.removeEventListener('resize', resizeCanvas);
     root.classList.remove('blog-intro-pending');

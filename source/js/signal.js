@@ -333,6 +333,7 @@
         context.fillRect(p.x, p.y, size + speed * 3, size);
       }
 
+      // blog-intro.js heroWave() draws this same wave; keep the two in step.
       const base = waveBase();
       const waveX = (mouse.x * 0.5 + 0.5) * width;
       context.beginPath();
