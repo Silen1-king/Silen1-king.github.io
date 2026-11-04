@@ -456,6 +456,31 @@
     line-height: 1.7;
   }
 
+  /* A long route shows its first steps until it is unfolded. */
+  .learning-path-card.is-folded:not(.is-unfolded) .learning-path-step.is-beyond-fold {
+    display: none;
+  }
+
+  .learning-path-toggle {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    background: transparent;
+    color: var(--cyan);
+    font: 12px var(--f-mono);
+    letter-spacing: .08em;
+    text-align: left;
+    cursor: pointer;
+    transition: background .2s ease;
+  }
+
+  .learning-path-toggle:hover,
+  .learning-path-toggle:focus-visible {
+    background: var(--ink-2);
+  }
+
   .learning-paths-empty {
     padding: 28px 0;
     color: var(--mute);

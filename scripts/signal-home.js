@@ -248,7 +248,7 @@ function renderRoutes(routes, urlFor) {
         ${tabs}
       </div>
       ${!routes.length ? '<p class="signal-empty">路线正在铺设中。</p>' : drawn ? `
-      <div class="route-graph route-graph-home" data-routes="${escapeHtml(JSON.stringify(routes))}"></div>
+      <div class="route-graph route-graph-home" data-routes="${escapeHtml(JSON.stringify(routes))}" data-fold="${escapeHtml(String((hexo.config.learning_paths && hexo.config.learning_paths.fold_after) ?? 6))}" data-fold-link></div>
       <div class="signal-legend">
         <span><i class="is-published"></i>Published</span>
         ${hasPlanned ? '<span><i class="is-planned"></i>Planned</span>' : ''}

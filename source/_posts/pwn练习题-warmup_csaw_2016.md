@@ -10,6 +10,8 @@ tags:
   - ret2text
   - stack-alignment
   - pwntools
+series: PWN · 栈溢出
+order: 3
 ---
 
 ## 拿到题目

@@ -687,6 +687,21 @@
     font-size: 14px;
   }
 
+  .route-node.is-more rect {
+    fill: transparent;
+    stroke: var(--cyan);
+    stroke-dasharray: 4 4;
+  }
+
+  .route-node.is-more:hover rect,
+  .route-node.is-more:focus rect {
+    fill: #151b2e;
+  }
+
+  .route-node.is-more text.route-title {
+    fill: var(--cyan);
+  }
+
   .route-node.is-planned text {
     fill: var(--mute);
   }

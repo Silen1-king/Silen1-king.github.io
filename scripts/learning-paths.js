@@ -22,6 +22,7 @@ const DEFAULTS = {
   subtitle: '',
   description: '按专栏整理的系列教程，循序渐进地开始学习。',
   category_fallback: true,
+  fold_after: 6,
   planned: {}
 };
 
@@ -173,14 +174,15 @@ function groupPosts(postsInput, options) {
         return String(a.title || '').localeCompare(String(b.title || ''), 'zh-CN');
       })
     }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+    // Longest route first; ties by name.
+    .sort((a, b) => b.posts.length - a.posts.length || a.name.localeCompare(b.name, 'zh-CN'));
 }
 
 function learningOptions() {
   return Object.assign({}, DEFAULTS, hexo.config.learning_paths || {});
 }
 
-function renderPost(post, index, root) {
+function renderPost(post, index, root, folded) {
   const date = dateInfo(post.date);
   const order = numericOrder(post.order);
   const description = excerptFor(post);
@@ -189,7 +191,7 @@ function renderPost(post, index, root) {
   const url = joinRoot(root, post.path);
 
   return `
-    <li class="learning-path-step">
+    <li class="learning-path-step${folded ? ' is-beyond-fold' : ''}">
       <span class="learning-path-step-number" aria-hidden="true">${escapeHtml(stepLabel)}</span>
       <div class="learning-path-step-content">
         <a class="learning-path-step-title" href="${escapeHtml(url)}">${escapeHtml(title)}</a>
@@ -204,13 +206,30 @@ function renderPost(post, index, root) {
 function graphFor(group, options, root) {
   const rows = routeRows(group, options, root);
   if (rows.reduce((sum, row) => sum + row.length, 0) < 2) return '';
-  return `<div class="route-graph" data-route="${escapeHtml(JSON.stringify({ name: group.name, rows }))}" aria-hidden="true"></div>`;
+  return `<div class="route-graph" data-route="${escapeHtml(JSON.stringify({ name: group.name, rows }))}" data-fold="${foldAfter(options)}" aria-hidden="true"></div>`;
+}
+
+// Rows (graph) and steps (list) shown before a long route is folded.
+function foldAfter(options) {
+  const value = Number(options.fold_after);
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+}
+
+function routeId(index) {
+  return `route-${String(index + 1).padStart(2, '0')}`;
 }
 
 function renderPage(groups, options, root) {
   const totalPosts = new Set(groups.flatMap(group => group.posts.map(post => post._id || post.path))).size;
-  const cards = groups.map((group, index) => `
-    <section class="learning-path-card">
+  const fold = foldAfter(options);
+  const cards = groups.map((group, index) => {
+    const rowCount = routeRows(group, options, root).length;
+    const folds = fold > 0 && (group.posts.length > fold || rowCount > fold);
+    const toggle = folds
+      ? `<button class="learning-path-toggle" type="button" aria-expanded="false" data-fold-toggle>展开全部 ${group.posts.length} 篇</button>`
+      : '';
+    return `
+    <section class="learning-path-card${folds ? ' is-folded' : ''}" id="${routeId(index)}">
       <header class="learning-path-card-header">
         <span class="learning-path-card-index">${String(index + 1).padStart(2, '0')}</span>
         <div>
@@ -220,9 +239,11 @@ function renderPage(groups, options, root) {
       </header>
       ${graphFor(group, options, root)}
       <ol class="learning-path-steps">
-        ${group.posts.map((post, postIndex) => renderPost(post, postIndex, root)).join('')}
+        ${group.posts.map((post, postIndex) => renderPost(post, postIndex, root, folds && postIndex >= fold)).join('')}
       </ol>
-    </section>`).join('');
+      ${toggle}
+    </section>`;
+  }).join('');
 
   return `
     <div class="learning-paths-intro">
@@ -241,9 +262,11 @@ function renderPage(groups, options, root) {
 hexo.extend.helper.register('learning_path_routes', function learningPathRoutes(posts) {
   const options = learningOptions();
   if (!options.enable) return [];
-  return groupPosts(posts, options).map(group => ({
+  const page = String(options.path || DEFAULTS.path).replace(/^\/+/, '').replace(/\/?$/, '/');
+  return groupPosts(posts, options).map((group, index) => ({
     name: group.name,
-    rows: routeRows(group, options, hexo.config.root)
+    rows: routeRows(group, options, hexo.config.root),
+    more: joinRoot(hexo.config.root, `${page}#${routeId(index)}`)
   }));
 });
 

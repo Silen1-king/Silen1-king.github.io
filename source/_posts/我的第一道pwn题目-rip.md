@@ -9,8 +9,8 @@ tags:
   - stack-overflow
 categories:
   - CTF
-series: ""
-order:
+series: PWN · 栈溢出
+order: 1
 ---
 
 第一次写 writeup。

@@ -8,6 +8,8 @@ tags:
   - pwn
   - format-string
   - pwntools
+series: PWN · 格式化字符串
+order: 1
 ---
 
 第一次正式遇到格式化字符串的题目，这个内容相比ret2win属于是进阶一点内容

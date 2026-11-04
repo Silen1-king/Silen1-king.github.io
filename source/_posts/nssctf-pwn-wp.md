@@ -10,6 +10,7 @@ tags:
   - race-condition
   - ida
   - integer-truncation
+series: 比赛 WP
 ---
 
 看到这个什么新生赛过来参加一下，用用最新的方法论，找找感觉

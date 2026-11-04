@@ -683,10 +683,26 @@
     return pairs;
   }
 
-  function renderRoute(container, route, animate) {
+  function renderRoute(container, route, animate, expanded) {
     if (!route || !route.rows || !route.rows.length) {
       container.innerHTML = '';
       return;
+    }
+    // A long route is folded after `data-fold` rows; the rest is one
+    // "+N STEPS" node (home: a link to the route on 远征, 远征: unfolds it).
+    const fold = Number(container.dataset.fold) || 0;
+    let routeRows = route.rows;
+    let more = null;
+    if (fold > 0 && !expanded && routeRows.length > fold) {
+      const hidden = routeRows.slice(fold).reduce((sum, row) => sum + row.length, 0);
+      const toPage = container.hasAttribute('data-fold-link');
+      more = {
+        title: toPage ? '全部路线 →' : '展开全部 ↓',
+        label: `+${hidden} ${hidden === 1 ? 'STEP' : 'STEPS'}`,
+        url: toPage ? (route.more || '') : '#',
+        more: true
+      };
+      routeRows = [...routeRows.slice(0, fold), [more]];
     }
     const narrow = container.clientWidth < 700;
     const NODE_H = 58;
@@ -694,10 +710,10 @@
     const VIEW_W = narrow ? 380 : 960;
     const GAP = narrow ? 14 : 40;
     const fontSize = narrow ? 14 : 16;
-    const VIEW_H = route.rows.length * ROW_H + 10;
+    const VIEW_H = routeRows.length * ROW_H + 10;
     let address = 0;
 
-    const rows = route.rows.map((row, rowIndex) => {
+    const rows = routeRows.map((row, rowIndex) => {
       const nodeW = Math.min(narrow && row.length > 1 ? 172 : 300, (VIEW_W - 24 - (row.length - 1) * GAP) / row.length);
       const total = row.length * nodeW + (row.length - 1) * GAP;
       const maxChars = Math.max(4, Math.floor((nodeW - 28) / fontSize));
@@ -727,6 +743,13 @@
       }
     }
     rows.flat().forEach(node => {
+      if (node.more) {
+        const body = `<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${NODE_H}"/>`
+          + `<text class="route-addr" x="${node.x + 14}" y="${node.y + 20}">${escapeHtml(node.label)}</text>`
+          + `<text class="route-title" x="${node.x + 14}" y="${node.y + 44}">${escapeHtml(node.title)}</text>`;
+        markup += `<a class="route-node is-more" href="${escapeHtml(node.url)}"${decorative ? ' tabindex="-1"' : ''} data-route-more>${body}</a>`;
+        return;
+      }
       const published = Boolean(node.url);
       const title = node.title.length > node.maxChars ? node.title.slice(0, node.maxChars - 1) + '…' : node.title;
       const body = `<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${NODE_H}"/>`
@@ -763,7 +786,30 @@
     const tabs = container.closest('section')?.querySelector('[data-route-tabs]');
     let current = 0;
     let seen = false;
-    const draw = animate => renderRoute(container, routes[current], animate);
+    const card = container.closest('.learning-path-card');
+    const toggle = card?.querySelector('[data-fold-toggle]');
+    const expanded = () => Boolean(card?.classList.contains('is-unfolded'));
+    const draw = animate => renderRoute(container, routes[current], animate, expanded());
+
+    // 远征: one button unfolds both the graph and the list under it.
+    const setFold = open => {
+      if (!card || !toggle) return;
+      card.classList.toggle('is-unfolded', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.textContent = open ? '收起' : toggle.dataset.label;
+      draw(false);
+      if (!open) card.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+    };
+    if (toggle) {
+      toggle.dataset.label = toggle.textContent;
+      toggle.addEventListener('click', () => setFold(!expanded()));
+      if (location.hash === '#' + card.id) setFold(true);
+    }
+    container.addEventListener('click', event => {
+      if (!card || !event.target.closest('[data-route-more]')) return;
+      event.preventDefault();
+      setFold(true);
+    });
 
     draw(false);
     new IntersectionObserver((entries, observer) => {
