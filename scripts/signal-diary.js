@@ -19,6 +19,12 @@
  * the dim "EOF · 0x7f" line at the end of every post
  * (source/_data/post-body-end.njk).
  *
+ * The page is a darkroom (暗室 in the photographic sense): an amber
+ * safelight instead of the site's cyan, the feed drawn as a strip of film
+ * with a frame number on every entry (oldest is 01A), and entries that
+ * develop from a blur as they come into view (source/js/signal.js). Styles
+ * live under "暗室" in source/_data/signal-pages.styl.
+ *
  * Do not list /0x7f/ in robots.txt: that file is public and would point
  * straight at it. The page carries <meta name="robots" content="noindex">.
  */
@@ -68,7 +74,8 @@ hexo.extend.generator.register('signal-diary', async () => {
     const address = (BASE_ADDRESS + (entries.length - 1 - index) * 0x40).toString(16).toUpperCase();
     const body = await hexo.render.render({ text: entry.body, engine: 'markdown' });
     const iso = entry.date.replace(/\./g, '-') + (entry.time ? `T${entry.time}` : '');
-    return `<article class="diary-entry">
+    const frame = `${pad(entries.length - index)}A`;
+    return `<article class="diary-entry" data-frame="${frame}">
       <header class="diary-row">
         <span class="diary-addr" aria-hidden="true">0x${address}</span>
         <time datetime="${iso}">${entry.date}${entry.time ? ` ${entry.time}` : ''}</time>
@@ -77,8 +84,14 @@ hexo.extend.generator.register('signal-diary', async () => {
     </article>`;
   }));
 
-  const content = `<p class="diary-intro">你读到了 EOF 之后。这里是一些不进目录的随手记。</p>
-    ${rows.length ? `<div class="diary-feed">${rows.join('')}</div>` : '<p class="diary-empty">0x7f · 还是空的。</p>'}`;
+  const content = `<div class="diary-room">
+    <p class="diary-intro">你读到了 EOF 之后。这里是一些不进目录的随手记。</p>
+    <p class="diary-safelight"><i aria-hidden="true"></i>SAFELIGHT ON · 冲洗中，请勿开灯</p>
+    ${rows.length
+    ? `<div class="diary-feed">${rows.join('')}</div>
+    <p class="diary-roll-end">— END OF ROLL · ${rows.length} ${rows.length === 1 ? 'FRAME' : 'FRAMES'} —</p>`
+    : '<p class="diary-empty">0x7f · 还是空的。</p>'}
+  </div>`;
 
   return {
     path: `${DIR}index.html`,

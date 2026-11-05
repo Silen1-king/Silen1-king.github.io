@@ -768,18 +768,114 @@
     }
   }
 
-  /* ───── 暗室 ───── */
-  .diary-intro {
-    color: var(--mute);
+  /* ───── 暗室 (scripts/signal-diary.js): a darkroom ─────
+     Amber safelight instead of the site's cyan, the feed on a strip of film,
+     entries that develop as they come into view (source/js/signal.js). */
+  body:has(.diary-room) .signal-backdrop,
+  body:has(.diary-room) .signal-moon,
+  body:has(.diary-room) .signal-beam,
+  body:has(.diary-room) .signal-halo {
+    opacity: .18 !important;
+    filter: sepia(1) hue-rotate(-12deg) saturate(1.6);
   }
 
+  body:has(.diary-room)::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 45% at 50% -8%, rgba(255, 150, 70, .16), transparent 70%),
+      radial-gradient(ellipse 50% 60% at 50% 110%, rgba(255, 120, 50, .06), transparent 70%);
+  }
+
+  body:has(.diary-room) .signal-grain {
+    opacity: .16;
+  }
+
+  body:has(.diary-room) .post-title {
+    color: #f3dcc2;
+    text-shadow: 0 0 22px rgba(255, 160, 80, .35), 0 0 2px rgba(255, 190, 130, .6);
+  }
+
+  body:has(.diary-room) .post-title-sub {
+    color: rgba(255, 176, 103, .7);
+  }
+
+  .diary-intro {
+    color: #a8957f;
+  }
+
+  .diary-safelight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 0;
+    color: rgba(255, 176, 103, .75);
+    font: 11px var(--f-mono);
+    letter-spacing: .22em;
+
+    i {
+      flex: none;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--heat);
+      box-shadow: 0 0 10px 2px rgba(255, 160, 80, .7);
+      animation: diary-safelight 3.2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes diary-safelight {
+    50% { opacity: .45; }
+  }
+
+  /* The film: sprocket holes down a dark amber base. */
   .diary-feed {
-    margin-top: 32px;
+    position: relative;
+    margin-top: 40px;
+    padding-left: 58px;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 30px;
+      border-radius: 3px;
+      background:
+        repeating-linear-gradient(to bottom, transparent 0 7px, var(--void) 7px 15px, transparent 15px 22px) 5px 0 / 8px 100% no-repeat,
+        repeating-linear-gradient(to bottom, transparent 0 7px, var(--void) 7px 15px, transparent 15px 22px) 17px 0 / 8px 100% no-repeat,
+        linear-gradient(#24170d, #1a1109);
+      box-shadow: inset 0 0 0 1px rgba(255, 176, 103, .18);
+    }
   }
 
   .diary-entry {
+    position: relative;
     padding: 24px 0 28px;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid rgba(255, 176, 103, .14);
+    transition: filter 1.8s ease, opacity 1.8s ease;
+
+    /* Frame number on the film edge, as printed on a negative. */
+    &::before {
+      content: attr(data-frame);
+      position: absolute;
+      top: 24px;
+      left: -26px;
+      color: rgba(255, 176, 103, .85);
+      font: 10px var(--f-mono);
+      letter-spacing: .18em;
+      writing-mode: vertical-rl;
+    }
+
+    /* Undeveloped, until it comes into view. */
+    &.is-latent {
+      filter: blur(5px) sepia(1);
+      opacity: .25;
+    }
   }
 
   .diary-row {
@@ -789,24 +885,60 @@
     margin-bottom: 12px;
   }
 
+  .diary-body {
+    color: #e9dccd;
+  }
+
   .diary-body > :last-child {
     margin-bottom: 0;
   }
 
   .diary-addr,
   .diary-row time {
-    color: var(--mute);
+    color: #9c8a76;
     font: 12px var(--f-mono);
   }
 
   .diary-addr {
-    color: var(--violet);
+    color: var(--heat);
+  }
+
+  .diary-room p.diary-roll-end {
+    margin: 36px 0 0 58px;
+    color: rgba(255, 176, 103, .55);
+    font: 11px var(--f-mono);
+    letter-spacing: .2em;
   }
 
   .diary-empty {
     margin-top: 48px;
     color: var(--mute);
     font: 12px var(--f-mono);
+  }
+
+  @media (max-width: 767px) {
+    .diary-feed {
+      padding-left: 48px;
+    }
+
+    .diary-entry::before {
+      left: -22px;
+    }
+
+    .diary-row {
+      gap: 14px;
+    }
+
+    .diary-room p.diary-roll-end {
+      margin-left: 48px;
+      letter-spacing: .14em;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .diary-safelight i {
+      animation: none;
+    }
   }
 
   /* ───── Friends (scripts/signal-friends.js) ───── */

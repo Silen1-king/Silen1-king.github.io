@@ -135,6 +135,20 @@
     }, 28);
   }
 
+  // 暗室: each entry develops like a print in the tray as it comes into view.
+  // Without JS or with reduced motion, every entry is simply there.
+  const diaryEntries = $$('.diary-room .diary-entry');
+  if (diaryEntries.length && !reduceMotion && 'IntersectionObserver' in window) {
+    diaryEntries.forEach(entry => entry.classList.add('is-latent'));
+    const develop = new IntersectionObserver((seen, observer) => {
+      seen.filter(item => item.isIntersecting).forEach((item, order) => {
+        setTimeout(() => item.target.classList.remove('is-latent'), 120 + order * 220);
+        observer.unobserve(item.target);
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: .2 });
+    diaryEntries.forEach(entry => develop.observe(entry));
+  }
+
   if (isPost && ripLabel) ripLabel.textContent = 'OFFSET';
   // 404: the readout freezes on the faulting address.
   if (ripValue && ripLabel && $('.not-found-page')) {
