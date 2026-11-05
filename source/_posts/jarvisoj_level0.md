@@ -1,12 +1,14 @@
 ---
 title: pwn练习题-jarvisoj_level0
 date: 2026-11-02 16:39:50
+updated: 2026-11-06 01:56:11
 description: jarvisoj_level0 的 pwn 解题记录：128 字节的栈空间读入最多 512 字节，没有 canary，溢出覆盖返回地址，直接跳到程序里现成的 callsystem 函数拿到 shell。
 categories: CTF
 tags:
   - pwn
   - stack-overflow
   - ret2text
+  - ret2win
   - pwntools
 series: PWN · 栈溢出
 order: 3

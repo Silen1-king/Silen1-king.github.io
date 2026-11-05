@@ -1,13 +1,14 @@
 ---
 title: pwn练习题-warmup_csaw_2016
 date: 2026-10-21
-updated: 2026-10-22
+updated: 2026-11-06 01:56:11
 description: 从一道 DASCTF 的 pwn 入门赛题出发，演示在 stripped 的 64 位程序里如何用 ret2text 跳到后门函数，并通过补一个 ret 解决栈对齐问题。
 categories: CTF
 tags:
   - pwn
   - stack-overflow
   - ret2text
+  - ret2win
   - stack-alignment
   - pwntools
 series: PWN · 栈溢出

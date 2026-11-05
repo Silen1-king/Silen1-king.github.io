@@ -1,11 +1,12 @@
 ---
 title: 我的第一道pwn题目 rip
 date: 2026-10-20 18:18:50
-updated: 2026-10-20 18:18:50
+updated: 2026-11-06 01:56:11
 description: "第一次写 writeup。从 DASCTF 的一道 pwn 入门题入手，一步步走完 file、checksec、nm、strings、objdump 的信息收集，确认 gets 栈溢出漏洞，构造 payload 跳到 system(\"/bin/sh\") 拿到 shell。"
 tags:
   - pwn
   - ret2text
+  - ret2win
   - stack-overflow
 categories:
   - CTF
