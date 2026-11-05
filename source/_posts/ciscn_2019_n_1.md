@@ -1,11 +1,13 @@
 ---
 title: pwn解题-ciscn_2019_n_1
 date: 2026-11-02 13:23:09
+updated: 2026-11-06 00:50:17
 description: ciscn_2019_n_1 的 pwn 解题记录：用栈溢出覆盖局部 float 变量 v2，让它等于 11.28125 绕过检查拿到 shell，并手算 11.28125 到 IEEE-754 单精度 0x41348000 的编码过程。
 categories: CTF
 tags:
   - pwn
   - stack-overflow
+  - variable-overwrite
   - pwntools
   - float
   - ieee-754

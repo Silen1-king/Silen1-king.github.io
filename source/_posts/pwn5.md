@@ -1,12 +1,13 @@
 ---
 title: pwn解题-[第五空间2019 决赛]PWN5
 date: 2026-11-04 16:05:07
-updated: 2026-11-05 01:14:56
+updated: 2026-11-06 00:50:17
 description: "[第五空间2019 决赛]PWN5 的 pwn 解题记录：32 位 No-PIE 程序把用户输入的 name 直接当作 printf 的格式串，造成格式化字符串漏洞；用 %N$s 任意地址读泄露写在固定地址 0x804C044 的 /dev/urandom 随机值，处理有符号补码后用正确的 passwd 通过 atoi 比较拿到 shell。"
 categories: CTF
 tags:
   - pwn
   - format-string
+  - arbitrary-read
   - pwntools
 series: PWN · 格式化字符串
 order: 1
