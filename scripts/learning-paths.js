@@ -219,6 +219,31 @@ function routeId(index) {
   return `route-${String(index + 1).padStart(2, '0')}`;
 }
 
+// The departure board at the top of the page: every route listed on one
+// board, one line each, linking down to its card. The card wears the same
+// line badge.
+function lineNo(index) {
+  return `L${String(index + 1).padStart(2, '0')}`;
+}
+
+function renderBoard(groups) {
+  if (groups.length === 0) return '';
+  const lines = groups.map((group, index) => `
+      <li>
+        <a class="lp-board-line" href="#${routeId(index)}">
+          <span class="lp-board-badge">${lineNo(index)}</span>
+          <span class="lp-board-name">${escapeHtml(group.name)}</span>
+          <span class="lp-board-count">${group.posts.length} 篇</span>
+        </a>
+      </li>`).join('');
+  return `
+    <nav class="lp-board" aria-label="全部路线">
+      <ol class="lp-board-list">${lines}
+      </ol>
+    </nav>
+    <div class="lp-board-divider" aria-hidden="true"><span>▼ 各线详情 · LINE DETAILS</span></div>`;
+}
+
 function renderPage(groups, options, root) {
   const totalPosts = new Set(groups.flatMap(group => group.posts.map(post => post._id || post.path))).size;
   const fold = foldAfter(options);
@@ -231,7 +256,7 @@ function renderPage(groups, options, root) {
     return `
     <section class="learning-path-card${folds ? ' is-folded' : ''}" id="${routeId(index)}">
       <header class="learning-path-card-header">
-        <span class="learning-path-card-index">${String(index + 1).padStart(2, '0')}</span>
+        <span class="learning-path-card-index">${lineNo(index)}</span>
         <div>
           <h2>${escapeHtml(group.name)}</h2>
           <span class="learning-path-card-count">${group.posts.length} 篇教程</span>
@@ -253,6 +278,7 @@ function renderPage(groups, options, root) {
         <span><strong>${totalPosts}</strong> 篇文章</span>
       </div>
     </div>
+    ${renderBoard(groups)}
     <div class="learning-path-grid">
       ${cards || '<p class="learning-paths-empty">暂无可展示的专栏。请在文章 Front-matter 中添加 <code>series</code> 或 <code>categories</code>。</p>'}
     </div>`;

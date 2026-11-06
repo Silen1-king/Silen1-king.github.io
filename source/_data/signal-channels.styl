@@ -236,9 +236,18 @@
     border-left: 2px solid var(--ch);
   }
 
-  body:has(.signal-district[data-ch="route"]) .learning-path-card-index,
   body:has(.signal-district[data-ch="route"]) .learning-paths-stats strong {
     color: var(--ch);
+  }
+
+  /* Each card wears its line badge from the departure board. */
+  body:has(.signal-district[data-ch="route"]) .learning-path-card-index {
+    padding: 3px 7px;
+    border-radius: 3px;
+    background: var(--ch);
+    color: var(--void);
+    font-weight: 700;
+    letter-spacing: .06em;
   }
 
   /* ───── 疆域 MAP: a memory map of the realms ───── */
