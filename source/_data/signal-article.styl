@@ -63,22 +63,6 @@
     border-bottom: 0;
   }
 
-  /* Reading time and tags (source/_data/post-meta.njk). */
-  .post-meta .post-meta-tags {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0 10px;
-  }
-
-  .post-meta .post-meta-tags a {
-    border-bottom: 0;
-    color: var(--violet);
-  }
-
-  .post-meta .post-meta-tags a:hover {
-    color: #fff;
-  }
-
   .posts-expand .post-header .post-description {
     max-width: 60ch;
     font-family: var(--f-body);
@@ -89,6 +73,14 @@
     font-size: 18px;
     line-height: 1.7;
     text-align: left;
+  }
+
+  .posts-expand .post-header::after {
+    content: "";
+    display: block;
+    height: 1px;
+    margin-top: 36px;
+    background: var(--signal-line);
   }
 
   /* ───── Body ───── */
@@ -130,18 +122,6 @@
   .post-body h2 {
     margin: 52px 0 14px;
     font-size: 26px;
-  }
-
-  /* The address is decoration; the empty alt keeps screen readers from
-     reading it out before every heading. */
-  .post-body h2[data-loc]::before {
-    content: attr(data-loc);
-    content: attr(data-loc) / "";
-    display: block;
-    margin-bottom: 4px;
-    color: var(--cyan);
-    font: 11px var(--f-mono);
-    letter-spacing: .1em;
   }
 
   .post-body h3 {
@@ -199,8 +179,18 @@
     background: var(--line);
   }
 
+  /* Screenshots come in every colour; a hairline frame, a soft corner and
+     a touch less light make them sit on the page. Full light when pointed
+     at, and in the zoom view. */
   .post-body img {
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    filter: brightness(.9);
+    transition: filter var(--t-fast) var(--ease);
+  }
+
+  .post-body img:hover {
+    filter: none;
   }
 
   .post-body table {
@@ -257,6 +247,23 @@
     left: 0;
     height: 1px;
     background: var(--line);
+  }
+
+  /* A single line of code needs no title bar and no line number. */
+  .post-body .code-container:not(:has(td.code .line ~ .line)) {
+    padding-top: 0;
+  }
+
+  .post-body .code-container:not(:has(td.code .line ~ .line))::before,
+  .post-body .code-container:not(:has(td.code .line ~ .line)) .code-lang,
+  .post-body .code-container:not(:has(td.code .line ~ .line)) .gutter {
+    display: none;
+  }
+
+  .post-body .code-container:not(:has(td.code .line ~ .line)) .copy-btn {
+    top: 50%;
+    transform: translateY(-50%);
+    background: #080a12 !important;
   }
 
   .post-body figure.highlight .table-container,
@@ -523,6 +530,7 @@
     margin-top: 20px;
   }
 
+  .post-footer > .signal-rest,
   .post-footer > .signal-eof {
     order: 0;
   }
@@ -541,6 +549,93 @@
 
   .post-footer > .post-community {
     order: 4;
+  }
+
+  /* The signal comes to rest (source/_data/post-body-end.njk): a wave that
+     settles into a flat line, and the moon at the end of it. This is the
+     only place the moon shows outside the home page. Where the browser
+     can, the line draws itself and the moon comes out as they scroll into
+     view. */
+  .signal-rest {
+    position: relative;
+    margin: 72px 0 0;
+    padding-right: 112px;
+  }
+
+  .signal-rest svg {
+    display: block;
+    width: 100%;
+    height: 40px;
+    overflow: visible;
+  }
+
+  .signal-rest path {
+    fill: none;
+    stroke: url(#signal-rest-ink);
+    stroke-width: 1.2;
+    stroke-dasharray: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .post-body .signal-rest-moon,
+  .signal-rest-moon {
+    position: absolute;
+    right: 0;
+    bottom: 2px;
+    width: 96px;
+    height: auto;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    filter: drop-shadow(0 0 18px rgba(255, 214, 170, .22));
+    pointer-events: none;
+    user-select: none;
+  }
+
+  @media (max-width: 567px) {
+    .signal-rest {
+      padding-right: 84px;
+    }
+
+    .signal-rest-moon {
+      width: 72px;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .signal-rest path {
+        animation: signal-draw linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 40%;
+      }
+
+      .signal-rest-moon {
+        animation: signal-moonrise linear both;
+        animation-timeline: view();
+        animation-range: cover 30% cover 50%;
+      }
+
+      @keyframes signal-draw {
+        from {
+          stroke-dashoffset: 1;
+        }
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      @keyframes signal-moonrise {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    }
   }
 
   /* Hidden entrance: a hair brighter than the page until pointed at. */
@@ -575,12 +670,13 @@
     padding: 0;
     border: 0;
     background: none;
-    color: var(--violet);
+    color: var(--mute);
     font-size: 12px;
+    transition: color var(--t-fast) var(--ease);
   }
 
   .post-tags a:hover {
-    color: #fff;
+    color: var(--cyan);
   }
 
   .post-nav {
@@ -598,18 +694,18 @@
 
   .post-nav-item a {
     display: block;
-    padding: 14px 16px;
-    border: 1px solid var(--line);
-    background: var(--ink);
-    color: var(--fg);
+    padding: 14px 4px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    background: none;
+    color: var(--text);
     font-size: 14.5px;
     line-height: 1.5;
-    transition: border-color .2s ease;
+    transition: color var(--t-fast) var(--ease);
   }
 
   .post-nav-item a:hover {
-    border-color: var(--cyan);
-    color: #fff;
+    color: var(--cyan);
   }
 
   .post-nav-item:last-child a {
@@ -617,96 +713,64 @@
   }
 
   .post-nav-item i {
-    color: var(--cyan);
+    color: var(--mute);
   }
 
   .related-posts-section,
   .post-community {
-    margin-top: 64px;
-    padding-top: 24px;
-    border-top: 1px solid var(--line);
+    margin-top: 72px;
   }
 
-  .related-posts-heading,
-  .post-community-heading {
-    margin-bottom: 16px;
-  }
-
-  .related-posts-heading h2,
+  .related-posts-section h2,
   .post-community-heading h2 {
-    margin: 4px 0 0;
+    margin: 0 0 18px;
     padding: 0;
     border: 0;
     color: var(--fg);
-    font: 700 22px/1.4 var(--f-cn-display);
+    font: 700 24px/1.4 var(--f-cn-display);
   }
 
-  .related-posts-kicker,
-  .post-community-kicker {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .related-posts-section h2 small,
+  .post-community-heading h2 small {
+    margin-left: 12px;
+    color: var(--mute);
+    font: italic 500 18px var(--f-poem);
+  }
+
+  .related-posts-list {
+    margin: 0;
+    border-top: 1px solid var(--line);
+    padding: 0;
+    list-style: none;
+  }
+
+  .related-posts-list li {
+    margin: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .related-post {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: baseline;
+    padding: 14px 4px;
+    border: 0;
+    color: var(--fg);
+  }
+
+  .related-post-title {
+    transition: color var(--t-fast) var(--ease);
+  }
+
+  .related-post:hover .related-post-title {
+    color: var(--cyan);
+  }
+
+  .related-post time {
     color: var(--mute);
     font: 12px var(--f-mono);
-    letter-spacing: .22em;
-  }
-
-  .related-posts-kicker::before,
-  .post-community-kicker::before {
-    content: "";
-    width: 28px;
-    height: 1px;
-    background: var(--cyan);
-  }
-
-  .related-posts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-  }
-
-  .related-post-card {
-    position: relative;
-    display: flex;
-    min-width: 0;
-    min-height: 130px;
-    flex-direction: column;
-    padding: 16px;
-    border: 1px solid var(--line) !important;
-    background: var(--ink);
-    color: var(--fg) !important;
-    transition: border-color .2s ease;
-  }
-
-  .related-post-card:hover {
-    border-color: var(--cyan) !important;
-  }
-
-  .related-post-card h3 {
-    margin: 8px 0 12px;
-    color: var(--fg);
-    font: 500 15px/1.5 var(--f-body);
-  }
-
-  .related-post-card time {
-    margin-top: auto;
-    color: var(--mute);
-    font: 11px var(--f-mono);
-  }
-
-  .related-post-reason {
-    overflow: hidden;
-    color: var(--cyan);
-    font: 11px var(--f-mono);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .related-post-arrow {
-    position: absolute;
-    right: 14px;
-    bottom: 12px;
-    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
   }
 
   .post-community-heading {
@@ -747,16 +811,6 @@
     width: 100%;
   }
 
-  @media (max-width: 900px) {
-    .related-posts-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .related-post-card {
-      min-height: 110px;
-    }
-  }
-
   @media (max-width: 767px) {
     .post-body {
       font-size: 16px;
@@ -786,7 +840,7 @@
     padding: 24px;
     background: rgba(5, 6, 11, .94);
     opacity: 0;
-    transition: opacity .18s ease;
+    transition: opacity var(--t-fast) var(--ease);
   }
 
   .image-zoom-overlay.is-open {

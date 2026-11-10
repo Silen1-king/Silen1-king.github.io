@@ -56,6 +56,15 @@
     --header-h: 60px;
     --header-top: env(safe-area-inset-top, 0px);
     --post-w: 760px;
+    --page-w: 960px;
+    /* Motion: one curve, two speeds. Hover and focus use --t-fast; things
+       that appear or leave use --t-slow. */
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --t-fast: .2s;
+    --t-slow: .6s;
+    /* The signal line: the hero's wave, the rule under a title, the reading
+       progress and the footer's edge are all this one stroke. */
+    --signal-line: linear-gradient(90deg, rgba(124, 236, 255, 0), var(--cyan) 22%, var(--violet) 78%, rgba(168, 139, 255, 0));
 
     /* NexT's own palette, pointed at the SIGNAL tokens. */
     --body-bg-color: var(--void);
@@ -99,7 +108,7 @@
   body {
     min-height: 100vh;
     overflow-x: hidden;
-    /* Transparent so the backdrop under the page shows; html keeps the void. */
+    /* Transparent so the night under the page shows; html keeps the void. */
     background: transparent;
     color: var(--text);
     font-family: var(--f-body);
@@ -201,28 +210,29 @@
     white-space: nowrap;
   }
 
-  .signal-grain {
+  /* ───── The night, and the moon ─────
+     The page sits on a still night sky: the void, with a faint lift of
+     blue at the top. Nothing in it moves.
+
+     The moon appears twice, and nowhere else. On the home page it hangs
+     beside the wordmark and fades as the hero scrolls away
+     (.signal-past-hero, signal.js); that is this fixed image. At the end
+     of a post it sits where the signal line comes to rest
+     (signal-article.styl). 404 and 暗室 tint it their own colour
+     (signal-pages.styl). */
+  body::before {
+    content: "";
     position: fixed;
     inset: 0;
-    z-index: 55;
+    z-index: -3;
+    background: radial-gradient(120% 70% at 78% -12%, #0e1224 0%, rgba(9, 11, 21, .6) 45%, rgba(5, 6, 11, 0) 75%);
     pointer-events: none;
-    opacity: .07;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* The backdrop (source/js/signal-backdrop.js): the night city canvas, and
-     the moon under it so the rain falls in front. The reading column in the
-     middle is dimmed so text stays easy to read; phones dim all of it. */
-  .signal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(50% - 520px), rgba(0, 0, 0, .3) calc(50% - 400px), rgba(0, 0, 0, .3) calc(50% + 400px), #000 calc(50% + 520px));
-    mask-image: linear-gradient(90deg, #000 0, #000 calc(50% - 520px), rgba(0, 0, 0, .3) calc(50% - 400px), rgba(0, 0, 0, .3) calc(50% + 400px), #000 calc(50% + 520px));
+  :root {
+    --moon-w: 120px;
+    --moon-top: calc(var(--header-h) + var(--header-top) + 24px);
+    --moon-right: max(16px, 2vw);
   }
 
   .signal-moon {
@@ -232,105 +242,22 @@
     z-index: -2;
     width: var(--moon-w);
     height: auto;
-    opacity: var(--moon-o);
-    /* Hazed into the night: less colour and contrast, a cyan mist. */
-    filter: saturate(.62) contrast(.82) brightness(.82) drop-shadow(0 0 18px rgba(124, 236, 255, .18));
+    opacity: 0;
     pointer-events: none;
     user-select: none;
+    transition: opacity var(--t-slow) var(--ease);
   }
 
-  @media (max-width: 767px) {
-    .signal-backdrop {
-      -webkit-mask-image: none;
-      mask-image: none;
-      opacity: .55;
-    }
-  }
-
-  /* The moon. On the home hero it hangs large and faint above the skyline,
-     its lower edge behind the towers, and rises to a small moon in the
-     corner once the hero has scrolled away (.signal-past-hero, signal.js);
-     every other page has the small one. It comes on last after the home
-     intro. On posts it brightens and clears as the post is read (--read,
-     signal.js); at the end her light falls on the city: a beam under her
-     and a glow round her head. Both follow the moon through these vars,
-     at the girl's place on it, 58% across and 49% down the image. */
-  :root {
-    --moon-w: 120px;
-    --moon-top: calc(var(--header-h) + var(--header-top) + 24px);
-    --moon-right: max(16px, 2vw);
-    --moon-o: .5;
-  }
-
-  /* Sized to the margin the wordmark leaves, so it never covers the 1. */
-  :root:has(#signal-hero):not(.signal-past-hero) {
+  /* Home: sized to the margin the wordmark leaves, so it never covers the 1. */
+  :root:has(#signal-hero) {
     --moon-w: min(240px, 15vw);
     --moon-top: 38vh;
     --moon-right: 2vw;
-    --moon-o: .55;
   }
 
-  .signal-moon {
-    transition: opacity 1.6s ease, top .9s ease, right .9s ease, width .9s ease;
-  }
-
-  .signal-beam,
-  .signal-halo {
-    transition: opacity 2.4s ease, top .9s ease, right .9s ease;
-  }
-
-  html.signal-powering .signal-moon {
-    opacity: 0;
-  }
-
-  html.signal-reading .signal-moon {
-    opacity: calc(var(--moon-o) + var(--read, 0) * (1 - var(--moon-o)));
-    filter: saturate(calc(.62 + var(--read, 0) * .38)) contrast(calc(.82 + var(--read, 0) * .18)) brightness(calc(.75 + var(--read, 0) * .4)) drop-shadow(0 0 calc(8px + var(--read, 0) * 16px) rgba(255, 214, 170, calc(var(--read, 0) * .32)));
-    transition: none;
-  }
-
-  .signal-beam,
-  .signal-halo {
-    position: fixed;
-    z-index: -1;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .signal-beam {
-    top: calc(var(--moon-top, 64px) + var(--moon-w, 160px) * .56);
-    right: calc(var(--moon-right, 16px) + var(--moon-w, 160px) * .42 - 140px);
-    bottom: 0;
-    width: 280px;
-    background: linear-gradient(to bottom, rgba(255, 222, 176, .3), rgba(255, 200, 150, .08) 55%, rgba(255, 200, 150, 0));
-    clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
-    mix-blend-mode: screen;
-  }
-
-  .signal-halo {
-    top: calc(var(--moon-top, 64px) + var(--moon-w, 160px) * .49 - 36px);
-    right: calc(var(--moon-right, 16px) + var(--moon-w, 160px) * .42 - 36px);
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 232, 196, .55), rgba(255, 210, 160, .15) 45%, rgba(255, 210, 160, 0) 70%);
-    mix-blend-mode: screen;
-  }
-
-  html.signal-graced .signal-beam {
-    opacity: 1;
-  }
-
-  html.signal-graced .signal-halo {
-    opacity: 1;
-    animation: signal-halo 5s ease-in-out 2.4s infinite alternate;
-  }
-
-  @keyframes signal-halo {
-    to {
-      transform: scale(1.25);
-      opacity: .7;
-    }
+  :root:has(#signal-hero):not(.signal-past-hero):not(.blog-intro-pending) .signal-moon {
+    opacity: .62;
+    filter: saturate(.7) contrast(.86) brightness(.86) drop-shadow(0 0 18px rgba(124, 236, 255, .16));
   }
 
   @media (max-width: 767px) {
@@ -338,31 +265,23 @@
       --moon-w: 84px;
       --moon-top: calc(var(--header-h) + var(--header-top) + 6px);
       --moon-right: 4px;
-      --moon-o: .35;
     }
 
-    :root:has(#signal-hero):not(.signal-past-hero) {
+    :root:has(#signal-hero) {
       --moon-w: 150px;
       --moon-top: 57svh;
       --moon-right: 4vw;
-      --moon-o: .42;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .signal-moon,
-    .signal-beam,
-    .signal-halo {
+    .signal-moon {
       transition: none;
-      animation: none !important;
     }
   }
 
   @media print {
-    .signal-backdrop,
-    .signal-moon,
-    .signal-beam,
-    .signal-halo {
+    .signal-moon {
       display: none;
     }
   }
@@ -395,7 +314,7 @@
     background: linear-gradient(to bottom, rgba(5, 6, 11, .85), rgba(5, 6, 11, 0));
     font: 12px var(--f-mono);
     letter-spacing: .08em;
-    transition: background .3s ease, border-color .3s ease, left .2s ease-out;
+    transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), left var(--t-fast) var(--ease);
   }
 
   header.header.is-scrolled,
@@ -464,7 +383,7 @@
     color: var(--mute);
     font: 13px var(--f-body);
     letter-spacing: .14em;
-    transition: color .2s ease;
+    transition: color var(--t-fast) var(--ease);
   }
 
   .main-menu .menu-item a:hover,
@@ -510,22 +429,6 @@
     background: var(--fg);
   }
 
-  .signal-rip {
-    color: var(--mute);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .signal-rip b {
-    color: var(--cyan);
-    font-weight: 400;
-  }
-
-  /* JMP: a 札记 row is under the mouse and the readout shows its address. */
-  .signal-rip.is-jump [data-signal-rip-label] {
-    color: var(--rose);
-  }
-
   .global-search-trigger {
     display: inline-flex;
     align-items: center;
@@ -538,7 +441,7 @@
     font: 12px var(--f-mono);
     letter-spacing: .08em;
     cursor: var(--cursor-pointer, pointer);
-    transition: border-color .2s ease;
+    transition: border-color var(--t-fast) var(--ease);
   }
 
   .global-search-trigger:hover,
@@ -550,8 +453,7 @@
     display: none;
   }
 
-  /* Small header switches: RAIN (signal-rain.js), and the reader's language
-     (signal-translate.js). Lit while on. */
+  /* The reader's language switch (signal-translate.js). Lit while on. */
   .signal-header-btn {
     display: inline-flex;
     align-items: center;
@@ -567,7 +469,7 @@
     font: 11px var(--f-mono);
     letter-spacing: .14em;
     cursor: var(--cursor-pointer, pointer);
-    transition: color .2s ease, border-color .2s ease;
+    transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
   }
 
   .signal-header-btn:hover,
@@ -590,9 +492,6 @@
       gap: 6px;
     }
 
-    .signal-rain-toggle span {
-      display: none;
-    }
   }
 
   .global-search-trigger kbd {
@@ -603,12 +502,6 @@
     color: var(--mute);
     font: 11px var(--f-mono);
     box-shadow: none;
-  }
-
-  @media (max-width: 980px) {
-    .signal-rip {
-      display: none;
-    }
   }
 
   @media (max-width: 767px) {
@@ -631,7 +524,7 @@
       visibility: hidden;
       border-bottom: 1px solid transparent;
       background: rgba(5, 6, 11, .96);
-      transition: max-height .3s ease, visibility .3s;
+      transition: max-height var(--t-fast) var(--ease), visibility var(--t-fast) var(--ease);
     }
 
     body.site-nav-on .site-nav {
@@ -676,7 +569,7 @@
 
   .main-inner {
     width: auto;
-    max-width: 920px;
+    max-width: var(--page-w);
     box-sizing: border-box;
     margin: 0 auto;
     padding: calc(var(--header-h) + var(--header-top) + 56px) var(--gutr) 80px var(--gut);
@@ -711,27 +604,39 @@
     box-shadow: none;
   }
 
-  /* ───── Footer: Coda ───── */
+  /* ───── Footer: Coda ─────
+     The signal comes to rest: the footer's top edge is the same line as the
+     hero's wave, flat now, bright in the middle and gone at the ends. Under
+     it, one quiet row (source/_data/footer.njk). */
   .footer {
+    position: relative;
     margin-top: 40px;
     padding: 0;
-    border-top: 1px solid var(--line);
     background: none;
     color: var(--mute);
+  }
+
+  .footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: var(--signal-line);
   }
 
   .footer-inner {
     display: flex;
     width: auto;
     flex-direction: row;
-    max-width: 1240px;
+    max-width: var(--page-w);
     box-sizing: border-box;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 6px 16px;
+    gap: 6px 20px;
     margin: 0 auto;
-    padding: 40px var(--gutr) calc(32px + env(safe-area-inset-bottom, 0px)) var(--gut);
-    overflow: hidden;
+    padding: 36px var(--gutr) calc(36px + env(safe-area-inset-bottom, 0px)) var(--gut);
     font: 12px/1.8 var(--f-mono);
     text-align: left;
   }
@@ -745,6 +650,7 @@
   .footer-inner a {
     border-bottom: 1px solid var(--line-2);
     color: var(--mute);
+    transition: color var(--t-fast) var(--ease);
   }
 
   .footer-inner a:hover {
@@ -752,191 +658,38 @@
   }
 
   .signal-coda {
-    order: -2;
-    flex: 0 0 100%;
-    min-width: 0;
+    order: -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 20px;
+    margin-right: auto;
   }
 
   .signal-coda-sign {
-    order: -1;
-    margin-right: auto;
     color: var(--fg);
     font: italic 500 18px var(--f-poem);
   }
 
-  /* The harmonograph rings out at the end of every page (source/js/signal.js). */
-  .signal-coda-stage {
-    position: relative;
-  }
-
-  .signal-coda-trace {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    display: block;
-    width: min(440px, 36vw);
-    height: 100%;
-    pointer-events: none;
-  }
-
-  .signal-coda-readout {
-    position: absolute;
-    top: calc(100% + 26px);
-    right: 0;
-    color: var(--mute);
-    font: 11px/1.8 var(--f-mono);
-    letter-spacing: .1em;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .signal-coda-readout b {
-    color: var(--cyan);
-    font-weight: 400;
-  }
-
-  @media (max-width: 820px) {
-    .signal-coda-stage {
-      padding-top: 150px;
-    }
-
-    .signal-coda-trace {
-      top: 0;
-      right: 50%;
-      bottom: auto;
-      width: min(360px, 100%);
-      height: 230px;
-      transform: translateX(50%);
-    }
-
-    .signal-coda-readout {
-      top: 0;
-      right: 0;
-    }
-  }
-
-  .signal-coda-mark {
-    color: transparent;
-    font: 900 clamp(90px, 26vw, 380px)/.8 var(--f-display);
-    white-space: nowrap;
-    -webkit-text-stroke: 1px var(--line-2);
-    user-select: none;
-  }
-
-  /* Only the home page ends on the full Coda. Elsewhere the outlined SILEN1
-     would repeat the hero and outweigh short pages, so the footer keeps the
-     harmonograph beside the uptime, then the credits. */
-  body:not(:has(.signal-index)) :is(.signal-coda-mark, .signal-coda-readout) {
-    display: none;
-  }
-
-  body:not(:has(.signal-index)) .signal-coda-stage {
-    height: 120px;
-    padding-top: 0;
-  }
-
-  body:not(:has(.signal-index)) .signal-coda-trace {
-    right: auto;
-    left: 0;
-    width: min(260px, 70vw);
-    height: 120px;
-    transform: none;
-  }
-
-  @media (min-width: 821px) {
-    body:not(:has(.signal-index)) .signal-coda {
-      position: relative;
-    }
-
-    body:not(:has(.signal-index)) .signal-coda-stage {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: min(260px, 30vw);
-    }
-
-    body:not(:has(.signal-index)) .blog-runtime {
-      min-height: 120px;
-      max-width: calc(100% - min(260px, 30vw) - 40px);
-      box-sizing: border-box;
-      align-content: center;
-      margin: 0 0 8px;
-      padding: 0;
-      border: 0;
-    }
-  }
-
-  .footer .with-love {
-    color: var(--violet);
-    animation: none;
-  }
-
-  .footer .copyright,
-  .footer .busuanzi-count,
-  .footer .powered-by {
-    margin: 0;
-  }
-
-  .footer .busuanzi-count .post-meta-item {
-    margin-right: 10px;
-  }
-
-  .blog-runtime {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 6px 18px;
-    margin: 24px 0 14px;
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .blog-runtime-label {
-    color: var(--mute);
-    font: 500 13px var(--f-body);
-    letter-spacing: .2em;
-  }
-
-  .blog-runtime time {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-  }
-
-  .blog-runtime-value {
-    min-width: 1.1em;
-    color: var(--fg);
-    font: 900 clamp(22px, 2.4vw, 30px)/1 var(--f-display);
-    text-align: right;
-  }
-
-  .blog-runtime-value[data-runtime-seconds] {
-    color: var(--cyan);
-  }
-
-  .blog-runtime-unit {
-    margin: 0 12px 0 4px;
-    color: var(--mute);
-    font: 500 12px var(--f-body);
-  }
-
+  .blog-runtime,
   .blog-visitors {
-    color: var(--mute);
-    font: 12px var(--f-mono);
-    letter-spacing: .08em;
+    font-family: var(--f-body);
+    font-variant-numeric: tabular-nums;
   }
 
+  .blog-runtime b,
   .blog-visitors b {
-    color: var(--fg);
+    color: var(--text);
     font-weight: 500;
   }
 
-  .blog-runtime-since {
-    color: var(--mute);
-    font: italic 500 16px var(--f-poem);
-    letter-spacing: 0;
+  .footer .with-love {
+    display: none;
+  }
+
+  .footer .copyright,
+  .footer .powered-by {
+    margin: 0;
   }
 
   /* ───── NexT widgets ───── */
@@ -1084,7 +837,7 @@
     color: var(--mute);
     font-size: 13px;
     text-align: left;
-    transition: color .2s ease, border-color .2s ease;
+    transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
   }
 
   .post-toc .nav-item a:hover,
@@ -1107,7 +860,7 @@
      (signal.js sets .signal-chrome-hidden). */
   .back-to-top,
   .sidebar-toggle {
-    transition: bottom .25s ease, transform .25s ease, opacity .25s ease;
+    transition: bottom var(--t-fast) var(--ease), transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
   }
 
   @media (max-width: 1199px) {
@@ -1283,22 +1036,12 @@
     min-height: 24px;
   }
 
-  /* Page to page. The city stays where it is, the moon glides to its
-     place on the next page, the header holds still, and the rest of the
-     page dissolves into the next. A post's title flies from the link that
-     was pressed to the top of the post, and back (signal-transition in
-     head.njk). Only in browsers with cross-document view transitions;
-     elsewhere pages change as before. */
+  /* Page to page: the header holds still and the rest of the page
+     dissolves into the next. A post's title flies from the link that was
+     pressed to the top of the post, and back (head.njk). Only in browsers
+     with cross-document view transitions; elsewhere pages change as before. */
   @view-transition {
     navigation: auto;
-  }
-
-  .signal-backdrop {
-    view-transition-name: signal-city;
-  }
-
-  .signal-moon {
-    view-transition-name: signal-moon;
   }
 
   header.header {
@@ -1307,7 +1050,7 @@
 
   ::view-transition-group(*) {
     animation-duration: .55s;
-    animation-timing-function: cubic-bezier(.2, .7, .2, 1);
+    animation-timing-function: var(--ease);
   }
 
   ::view-transition-old(root) {
@@ -1318,24 +1061,13 @@
     animation: .42s .12s ease-out both signal-page-in;
   }
 
-  ::view-transition-new(signal-city),
   ::view-transition-old(signal-header),
   ::view-transition-new(signal-header) {
     animation: none;
   }
 
-  /* The next page's city may not have drawn its first frame yet; the old
-     one stays underneath until it has. */
-  ::view-transition-old(signal-city) {
-    animation: .55s ease-in both signal-fade-out;
-  }
-
   ::view-transition-old(signal-header) {
     display: none;
-  }
-
-  @keyframes signal-fade-out {
-    to { opacity: 0; }
   }
 
   ::view-transition-group(signal-post-title) {

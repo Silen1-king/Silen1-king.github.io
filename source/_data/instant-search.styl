@@ -10,7 +10,7 @@
     justify-content: center;
     padding: 14vh var(--gutr) 24px var(--gut);
     opacity: 0;
-    transition: opacity .18s ease;
+    transition: opacity var(--t-fast) var(--ease);
   }
 
   .global-search-modal.is-open {
@@ -34,7 +34,7 @@
     background: var(--ink);
     box-shadow: 0 30px 120px rgba(0, 0, 0, .6);
     transform: translateY(-10px) scale(.98);
-    transition: transform .25s cubic-bezier(.2, .8, .2, 1);
+    transition: transform var(--t-fast) var(--ease);
   }
 
   .global-search-modal.is-open .global-search-panel {

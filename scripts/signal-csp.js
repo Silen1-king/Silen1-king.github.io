@@ -6,7 +6,7 @@
  * proxy (see the gate at the end).
  *
  * Scripts may only come from this site and giscus (comments). The few inline
- * scripts (the intro gate in head.njk, the uptime clock in footer.njk) are
+ * scripts (the intro gate in head.njk, the day count in footer.njk) are
  * allowed by their SHA-256, computed here from the final HTML, so editing one
  * needs nothing else. JSON blocks (NexT's config) are data, never run, and
  * need no hash. Inline styles stay allowed: the design uses style="--c:…".

@@ -5,8 +5,7 @@
   // and a tick ring, then collapses into a single line like a CRT power-off.
   // The line then settles where the home hero draws its signal wave, a pulse
   // runs out from its centre and turns it into that wave, the curtain closes
-  // onto it, and the city powers on from there while the
-  // wordmark gathers out of the line (signal-backdrop.js, signal.js).
+  // onto it, and the wordmark gathers out of the line (signal.js).
   const root = document.documentElement;
   const intro = document.querySelector('[data-blog-intro]');
   if (!intro || !root.classList.contains('blog-intro-pending')) {

@@ -15,7 +15,7 @@
 
   // Code, addresses and live numbers stay as they are under any
   // translator, the browser's own one included.
-  document.querySelectorAll('pre, code, kbd, .highlight, .signal-rip, .signal-seg-addr, [data-count-to], [id^="vercount_value_"], .footer-uptime')
+  document.querySelectorAll('pre, code, kbd, .highlight, [id^="vercount_value_"], .footer-uptime')
     .forEach(element => element.setAttribute('translate', 'no'));
 
   const button = document.querySelector('[data-signal-translate]');

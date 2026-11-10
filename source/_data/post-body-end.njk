@@ -1,33 +1,42 @@
+{#- The post ends where the signal comes to rest: the wave settles into a
+    flat line, and the moon sits at the end of it (signal-article.styl). -#}
+<div class="signal-rest" aria-hidden="true">
+  <svg viewBox="0 0 760 40" preserveAspectRatio="none" focusable="false">
+    <defs>
+      <linearGradient id="signal-rest-ink" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#7cecff" stop-opacity="0"/>
+        <stop offset=".12" stop-color="#7cecff"/>
+        <stop offset=".7" stop-color="#a88bff"/>
+        <stop offset="1" stop-color="#a88bff" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="M0,20.0 L5,26.4 L10,31.0 L15,33.2 L20,32.6 L25,29.6 L30,24.9 L35,19.5 L40,14.6 L45,11.2 L50,9.7 L55,10.3 L60,12.8 L65,16.6 L70,20.7 L75,24.5 L80,27.1 L85,28.1 L90,27.5 L95,25.4 L100,22.4 L105,19.1 L110,16.3 L115,14.3 L120,13.7 L125,14.3 L130,16.0 L135,18.3 L140,20.9 L145,23.1 L150,24.5 L155,25.0 L160,24.4 L165,23.0 L170,21.1 L175,19.1 L180,17.5 L185,16.4 L190,16.1 L195,16.6 L200,17.8 L205,19.3 L210,20.8 L215,22.1 L220,22.8 L225,23.0 L230,22.6 L235,21.6 L240,20.5 L245,19.3 L250,18.3 L255,17.7 L260,17.7 L265,18.0 L270,18.8 L275,19.7 L280,20.6 L285,21.4 L290,21.8 L295,21.8 L300,21.5 L305,20.9 L310,20.2 L315,19.4 L320,18.9 L325,18.6 L330,18.6 L335,18.9 L340,19.4 L345,19.9 L350,20.5 L355,20.9 L360,21.1 L365,21.1 L370,20.8 L375,20.5 L380,20.0 L385,19.6 L390,19.3 L395,19.1 L400,19.2 L405,19.4 L410,19.7 L415,20.0 L420,20.3 L760,20" pathLength="1"/>
+  </svg>
+  <img class="signal-rest-moon" src="{{ config.root }}images/backdrop-moon.svg" alt="" width="96" height="96" loading="lazy" decoding="async">
+</div>
+
 {#- The way into 暗室 (scripts/signal-diary.js): a near-invisible line right
     where the post ends, lit only when pointed at. -#}
 <p class="signal-eof"><a href="{{ config.root }}0x7f/" rel="nofollow">EOF · 0x7f</a></p>
 
 {% if page.related_posts_by_metadata and page.related_posts_by_metadata.length %}
   <section class="related-posts-section" aria-labelledby="related-posts-title">
-    <div class="related-posts-heading">
-      <span class="related-posts-kicker">RELATED POSTS</span>
-      <h2 id="related-posts-title">继续阅读</h2>
-    </div>
-    <div class="related-posts-grid">
+    <h2 id="related-posts-title">继续阅读<small>read next</small></h2>
+    <ul class="related-posts-list">
       {% for related in page.related_posts_by_metadata %}
-        <a class="related-post-card" href="{{ url_for(related.path) }}" rel="bookmark">
-          <span class="related-post-reason">{{ related.reason }}</span>
-          <h3>{{ related.title }}</h3>
+        <li><a class="related-post" href="{{ url_for(related.path) }}" rel="bookmark">
+          <span class="related-post-title">{{ related.title }}</span>
           {% if related.dateLabel %}<time>{{ related.dateLabel }}</time>{% endif %}
-          <span class="related-post-arrow" aria-hidden="true">→</span>
-        </a>
+        </a></li>
       {% endfor %}
-    </div>
+    </ul>
   </section>
 {% endif %}
 
 {% if page.comments %}
   <section class="post-community" aria-labelledby="post-community-title">
     <div class="post-community-heading">
-      <div>
-        <span class="post-community-kicker">DISCUSSION</span>
-        <h2 id="post-community-title">评论与勘误</h2>
-      </div>
+      <h2 id="post-community-title">评论与勘误<small>discussion</small></h2>
       <a class="post-error-report" href="https://github.com/Silen1-king/Silen1-king.github.io/issues/new?title={{ ('文章勘误：' + page.title) | urlencode }}&body={{ ('文章地址：' + page.permalink + '\n\n问题描述：\n') | urlencode }}" target="_blank" rel="noopener">
         <i class="fa fa-bug" aria-hidden="true"></i> 报告错误
       </a>

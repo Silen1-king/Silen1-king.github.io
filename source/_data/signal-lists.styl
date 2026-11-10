@@ -1,0 +1,68 @@
+// 疆域 (/categories/): one quiet row per category
+// (scripts/signal-channels.js). 漫游 and 友链 are in signal-pages.styl.
+@css {
+  .realm-map-list {
+    margin: 8px 0 0;
+    border-top: 1px solid var(--line);
+    padding: 0;
+    list-style: none;
+  }
+
+  .realm-map-list li {
+    margin: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .post-body .realm-map-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: baseline;
+    padding: 26px 4px;
+    border: 0;
+    color: var(--text);
+  }
+
+  .realm-map-body {
+    display: grid;
+    gap: 4px;
+  }
+
+  .realm-map-name {
+    color: var(--fg);
+    font: 700 28px/1.2 var(--f-cn-display);
+    transition: color var(--t-fast) var(--ease);
+  }
+
+  .realm-map-row:hover .realm-map-name {
+    color: var(--cyan);
+  }
+
+  .realm-map-epithet {
+    color: var(--mute);
+    font: italic 400 19px/1.3 var(--f-poem);
+  }
+
+  .realm-map-desc {
+    margin-top: 4px;
+    color: var(--mute);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .realm-map-count {
+    color: var(--fg);
+    font: 400 15px var(--f-mono);
+    white-space: nowrap;
+  }
+
+  .realm-map-count small {
+    margin-left: 6px;
+    color: var(--mute);
+    font-size: 12px;
+  }
+
+  .realm-map-empty {
+    color: var(--mute);
+  }
+}

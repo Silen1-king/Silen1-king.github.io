@@ -109,7 +109,7 @@ function wanderSites(data) {
 function renderWander(sites) {
   if (!sites.length) return '<p class="friends-empty">还没有收藏。</p>';
   return `<ul class="wander-list">
-${sites.map((entry, index) => `  <li><a class="wander-site" href="${escapeHtml(entry.url)}" target="_blank" rel="noopener" data-loc="EXIT ${(index + 1).toString(16).toUpperCase().padStart(2, '0')}">
+${sites.map((entry, index) => `  <li><a class="wander-site" href="${escapeHtml(entry.url)}" target="_blank" rel="noopener">
     <span class="wander-name">${escapeHtml(entry.name)}</span>
     <span class="wander-host">${escapeHtml(entry.host)}</span>
     ${entry.description ? `<span class="wander-description">${escapeHtml(entry.description)}</span>` : ''}

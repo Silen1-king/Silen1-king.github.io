@@ -10,9 +10,10 @@
  * When `series` is absent, category names are used if
  * `learning_paths.category_fallback` is enabled (the default).
  *
- * Posts that share the same `order` inside a series are drawn side by side
- * as a branch of the route. Optional planned steps can be listed under
- * `learning_paths.planned` (series name -> titles or { title, order }).
+ * Each series is an ordered list of its posts. Posts that share the same
+ * `order` carry the same number: read either one. Steps not written yet can
+ * be listed under `learning_paths.planned` (series name -> titles or
+ * { title, order }); they are shown without a link.
  */
 
 const DEFAULTS = {
@@ -111,41 +112,6 @@ function plannedSteps(options, seriesName) {
     .filter(item => item.title);
 }
 
-// Rows of the route graph: a row with more than one step is a branch.
-function routeRows(group, options, root) {
-  const published = group.posts.map(post => ({
-    title: post.title || '未命名文章',
-    url: joinRoot(root, post.path),
-    date: dateInfo(post.date).iso.slice(0, 10),
-    order: numericOrder(post.order)
-  }));
-  const publishedTitles = new Set(published.map(step => step.title));
-  const planned = plannedSteps(options, group.name)
-    .filter(step => !publishedTitles.has(step.title))
-    .map(step => ({ title: step.title, url: '', date: '', order: step.order }));
-
-  const steps = [...published, ...planned]
-    .map((step, index) => ({ step, index }))
-    .sort((a, b) => {
-      const aOrder = a.step.order;
-      const bOrder = b.step.order;
-      if (aOrder !== null && bOrder !== null && aOrder !== bOrder) return aOrder - bOrder;
-      if (aOrder !== null && bOrder === null) return -1;
-      if (aOrder === null && bOrder !== null) return 1;
-      return a.index - b.index;
-    })
-    .map(item => item.step);
-
-  const rows = [];
-  for (const step of steps) {
-    const lastRow = rows[rows.length - 1];
-    if (lastRow && step.order !== null && lastRow[0].order === step.order) lastRow.push(step);
-    else rows.push([step]);
-  }
-
-  return rows.map(row => row.map(({ title, url, date }) => ({ title, url, date })));
-}
-
 function groupPosts(postsInput, options) {
   const groupedPosts = new Map();
   const posts = postsInput && typeof postsInput.toArray === 'function'
@@ -182,6 +148,8 @@ function learningOptions() {
   return Object.assign({}, DEFAULTS, hexo.config.learning_paths || {});
 }
 
+// One step of a series. Posts that share an `order` are alternatives: read
+// either one, so they carry the same number.
 function renderPost(post, index, root, folded) {
   const date = dateInfo(post.date);
   const order = numericOrder(post.order);
@@ -201,15 +169,20 @@ function renderPost(post, index, root, folded) {
     </li>`;
 }
 
-// A route is drawn once it has two steps; a single node on a grid says nothing
-// the step list below it does not.
-function graphFor(group, options, root) {
-  const rows = routeRows(group, options, root);
-  if (rows.reduce((sum, row) => sum + row.length, 0) < 2) return '';
-  return `<div class="route-graph" data-route="${escapeHtml(JSON.stringify({ name: group.name, rows }))}" data-fold="${foldAfter(options)}" aria-hidden="true"></div>`;
+// A step that is planned but not written yet: listed after the published
+// ones, without a link.
+function renderPlanned(step, index) {
+  return `
+    <li class="learning-path-step is-planned">
+      <span class="learning-path-step-number" aria-hidden="true">${escapeHtml(step.order === null ? index + 1 : step.order)}</span>
+      <div class="learning-path-step-content">
+        <span class="learning-path-step-title">${escapeHtml(step.title)}</span>
+        <span class="learning-path-step-date">计划中</span>
+      </div>
+    </li>`;
 }
 
-// Rows (graph) and steps (list) shown before a long route is folded.
+// Steps shown before a long series is folded.
 function foldAfter(options) {
   const value = Number(options.fold_after);
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
@@ -219,82 +192,34 @@ function routeId(index) {
   return `route-${String(index + 1).padStart(2, '0')}`;
 }
 
-// The departure board at the top of the page: every route listed on one
-// board, one line each, linking down to its card. The card wears the same
-// line badge.
-function lineNo(index) {
-  return `L${String(index + 1).padStart(2, '0')}`;
-}
-
-function renderBoard(groups) {
-  if (groups.length === 0) return '';
-  const lines = groups.map((group, index) => `
-      <li>
-        <a class="lp-board-line" href="#${routeId(index)}">
-          <span class="lp-board-badge">${lineNo(index)}</span>
-          <span class="lp-board-name">${escapeHtml(group.name)}</span>
-          <span class="lp-board-count">${group.posts.length} 篇</span>
-        </a>
-      </li>`).join('');
-  return `
-    <nav class="lp-board" aria-label="全部路线">
-      <ol class="lp-board-list">${lines}
-      </ol>
-    </nav>
-    <div class="lp-board-divider" aria-hidden="true"><span>▼ 各线详情 · LINE DETAILS</span></div>`;
-}
-
 function renderPage(groups, options, root) {
-  const totalPosts = new Set(groups.flatMap(group => group.posts.map(post => post._id || post.path))).size;
   const fold = foldAfter(options);
   const cards = groups.map((group, index) => {
-    const rowCount = routeRows(group, options, root).length;
-    const folds = fold > 0 && (group.posts.length > fold || rowCount > fold);
+    const titles = new Set(group.posts.map(post => post.title));
+    const planned = plannedSteps(options, group.name).filter(step => !titles.has(step.title));
+    const folds = fold > 0 && group.posts.length > fold;
     const toggle = folds
       ? `<button class="learning-path-toggle" type="button" aria-expanded="false" data-fold-toggle>展开全部 ${group.posts.length} 篇</button>`
       : '';
     return `
     <section class="learning-path-card${folds ? ' is-folded' : ''}" id="${routeId(index)}">
       <header class="learning-path-card-header">
-        <span class="learning-path-card-index">${lineNo(index)}</span>
-        <div>
-          <h2>${escapeHtml(group.name)}</h2>
-          <span class="learning-path-card-count">${group.posts.length} 篇教程</span>
-        </div>
+        <h2>${escapeHtml(group.name)}</h2>
+        <span class="learning-path-card-count">${group.posts.length} 篇</span>
       </header>
-      ${graphFor(group, options, root)}
       <ol class="learning-path-steps">
         ${group.posts.map((post, postIndex) => renderPost(post, postIndex, root, folds && postIndex >= fold)).join('')}
+        ${planned.map((step, stepIndex) => renderPlanned(step, group.posts.length + stepIndex)).join('')}
       </ol>
       ${toggle}
     </section>`;
   }).join('');
 
   return `
-    <div class="learning-paths-intro">
-      <p>${escapeHtml(options.description)}</p>
-      <div class="learning-paths-stats" aria-label="路线统计">
-        <span><strong>${groups.length}</strong> 条路线</span>
-        <span><strong>${totalPosts}</strong> 篇文章</span>
-      </div>
-    </div>
-    ${renderBoard(groups)}
     <div class="learning-path-grid">
       ${cards || '<p class="learning-paths-empty">暂无可展示的专栏。请在文章 Front-matter 中添加 <code>series</code> 或 <code>categories</code>。</p>'}
     </div>`;
 }
-
-// Route data for the home page 远征 section, one entry per series.
-hexo.extend.helper.register('learning_path_routes', function learningPathRoutes(posts) {
-  const options = learningOptions();
-  if (!options.enable) return [];
-  const page = String(options.path || DEFAULTS.path).replace(/^\/+/, '').replace(/\/?$/, '/');
-  return groupPosts(posts, options).map((group, index) => ({
-    name: group.name,
-    rows: routeRows(group, options, hexo.config.root),
-    more: joinRoot(hexo.config.root, `${page}#${routeId(index)}`)
-  }));
-});
 
 hexo.extend.generator.register('learning-paths', function generateLearningPaths(locals) {
   const options = learningOptions();

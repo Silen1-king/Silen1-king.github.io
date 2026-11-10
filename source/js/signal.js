@@ -1,13 +1,10 @@
 /* global CONFIG */
 
-// SIGNAL interface: header address readout, home page canvases (hero
-// particles, realm emblems), the series route graph, counters, the hex
-// reading offset on posts, and the harmonograph that closes every page.
-// The mouse only nudges things that are already there: a slight parallax and
-// a magnet on the hero, a breakpoint on 札记 rows, a tuning knob on the
-// harmonograph. The cursor itself is drawn by signal-cursor.js; nothing else
-// follows the pointer. None of it runs for touch, and the parts that move
-// (parallax, magnet, tuning) stay still with reduced motion.
+// SIGNAL interface: the hero's particle wordmark and wave, the moon at the
+// end of a post, 札记 filters, 远征 folds, and small header behaviour.
+// The mouse only nudges what is already there: a slight parallax and a
+// magnet on the hero. The cursor itself is drawn by signal-cursor.js. None
+// of it runs for touch, and what moves stays still with reduced motion.
 (function() {
   'use strict';
 
@@ -16,9 +13,6 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-  const hex = (value, width = 8) => '0x' + Math.max(0, Math.round(value)).toString(16).toUpperCase().padStart(width, '0');
-  const pad2 = value => String(value).padStart(2, '0');
-  const BASE_ADDRESS = 0x401000;
 
   // NexT calls window.anime() for back-to-top and TOC jumps, but only ships
   // anime.js when motion is on. Stand in with native scrolling, keeping
@@ -91,49 +85,10 @@
     }, 150);
   });
 
-  /* ───── Header: scroll address, or reading offset on posts ───── */
+  /* ───── Header ───── */
   const header = $('.header');
-  const ripLabel = $('[data-signal-rip-label]');
-  const ripValue = $('[data-signal-rip]');
   const postBody = $('.post-body');
   const isPost = Boolean(window.CONFIG && CONFIG.page && CONFIG.page.isPost && postBody);
-  // Set while the readout shows where a 札记 row would jump to (below).
-  let jumpTarget = '';
-  let rolling = 0;
-
-  function scrollReadout() {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = max > 0 ? clamp(window.scrollY / max) : 0;
-    if (isPost) {
-      const total = Math.max(0x400, postBody.textContent.length * 3);
-      return `${hex(progress * total, 4)} / ${hex(total, 4)}`;
-    }
-    // Snapped to 16 bytes, like the 札记 addresses and a function entry.
-    return hex(BASE_ADDRESS + Math.round(progress * 0xFFF) * 0x10);
-  }
-
-  // The readout settles on its new value digit by digit, left to right.
-  function rollReadout() {
-    window.clearInterval(rolling);
-    const target = () => jumpTarget || scrollReadout();
-    if (reduceMotion) {
-      rolling = 0;
-      ripValue.textContent = target();
-      return;
-    }
-    let step = 0;
-    rolling = window.setInterval(() => {
-      step++;
-      const text = target();
-      const settled = 2 + (text.length - 2) * step / 8;
-      ripValue.textContent = [...text].map((char, i) =>
-        i < settled || !/[0-9A-F]/.test(char) ? char : '0123456789ABCDEF'[Math.random() * 16 | 0]).join('');
-      if (step >= 8) {
-        window.clearInterval(rolling);
-        rolling = 0;
-      }
-    }, 28);
-  }
 
   // 暗室: each entry develops like a print in the tray as it comes into view.
   // Without JS or with reduced motion, every entry is simply there.
@@ -149,17 +104,8 @@
     diaryEntries.forEach(entry => develop.observe(entry));
   }
 
-  if (isPost && ripLabel) ripLabel.textContent = 'OFFSET';
-  // 404: the readout freezes on the faulting address.
-  if (ripValue && ripLabel && $('.not-found-page')) {
-    jumpTarget = '0x00000404';
-    ripLabel.textContent = 'SEGV';
-    ripValue.closest('.signal-rip')?.classList.add('is-fault');
-    rollReadout();
-  }
   scrollHandlers.push(() => {
     header?.classList.toggle('is-scrolled', window.scrollY > 8);
-    if (ripValue && !jumpTarget && !rolling) ripValue.textContent = scrollReadout();
   });
 
   // Floating buttons hide while scrolling down and return on the way up or
@@ -186,34 +132,6 @@
     }, 2500);
   }
   restChrome();
-
-  // The moon brightens as the post is read; at its end she answers with a
-  // beam of light over the city (signal-backdrop.js draws the rain parting).
-  if (isPost) {
-    const root = document.documentElement;
-    root.classList.add('signal-reading');
-    let graced = false;
-    const readProgress = () => {
-      const box = postBody.getBoundingClientRect();
-      const progress = clamp((window.innerHeight - box.top) / Math.max(1, box.height));
-      root.style.setProperty('--read', progress.toFixed(3));
-      if (!graced && window.scrollY > 0 && box.bottom <= window.innerHeight + 24) {
-        graced = true;
-        window.signalGrace = 1;
-        root.classList.add('signal-graced');
-        window.dispatchEvent(new CustomEvent('signal:grace'));
-      }
-    };
-    scrollHandlers.push(readProgress);
-    readProgress();
-  }
-
-  // Post headings carry a code-address label, like the prototype reader.
-  if (postBody) {
-    $$('.post-body > h2').forEach((heading, index) => {
-      heading.dataset.loc = 'loc_' + (BASE_ADDRESS + index * 0x40).toString(16);
-    });
-  }
 
   /* ───── Hero: SILEN1 drawn in particles ───── */
   const heroCanvas = $('.signal-hero-canvas');
@@ -411,233 +329,6 @@
     resizeHandlers.push(reduceMotion ? drawStill : buildParticles);
   }
 
-  /* ───── Coda: every page rings out on a harmonograph ───── */
-  // It draws itself once the footer comes into view, so it never holds the
-  // scroll. The home page keeps the 2 : 3 figure; every other page gets its
-  // own ratio and phases from its path, a small signature at the end of it.
-  const codaCanvas = $('[data-coda-trace]');
-  if (codaCanvas) {
-    const timeLabel = $('[data-coda-time]');
-    const RATIOS = [[2, 3], [3, 4], [3, 2], [4, 5], [1, 2], [5, 4], [3, 5], [2, 1]];
-    const TMAX = 140;
-    const DURATION = 4200;
-    const isHome = Boolean($('#signal-hero'));
-    let seed = 0;
-    for (const char of location.pathname.replace(/index\.html$/, '')) seed = (seed * 31 + char.codePointAt(0)) >>> 0;
-    const [a, b] = isHome ? [2, 3] : RATIOS[seed % RATIOS.length];
-    const phases = isHome ? [0.3, 1.2, 0, 0.7] : [0, 1, 2, 3].map(i => (seed >>> (i * 8) & 255) / 255 * Math.PI * 2);
-    const f2Label = $('[data-coda-f2]');
-    $('[data-coda-f1]').textContent = a.toFixed(3);
-    f2Label.textContent = (b + 0.01).toFixed(3);
-
-    let context;
-    let width = 0;
-    let height = 0;
-    let shown = 0;
-    // Set by the mouse over the trace (below); both rest at 0.
-    const tune = { detune: 0, phase: 0, toDetune: 0, toPhase: 0 };
-
-    const point = t => {
-      const amplitude = Math.min(width, height) * 0.34;
-      const f2 = b + tune.detune;
-      const x = amplitude * Math.sin(a * t + phases[0] + tune.phase) * Math.exp(-0.012 * t) + amplitude * 0.45 * Math.sin((f2 + 0.01) * t + phases[1]) * Math.exp(-0.018 * t);
-      const y = amplitude * Math.sin(f2 * t + phases[2]) * Math.exp(-0.014 * t) + amplitude * 0.45 * Math.sin((a + 0.005) * t + phases[3]) * Math.exp(-0.02 * t);
-      return [width / 2 + x, height / 2 + y];
-    };
-    const draw = progress => {
-      shown = progress;
-      if (!width || !height) return;
-      context.clearRect(0, 0, width, height);
-      const tEnd = TMAX * progress;
-      if (timeLabel) timeLabel.textContent = tEnd.toFixed(2);
-      if (tEnd <= 0) return;
-      const steps = Math.max(3, Math.floor(tEnd * 22));
-      let previous = point(0);
-      context.lineWidth = 0.7;
-      // Three segments per stroke; the colour drifts cyan to violet as it decays.
-      for (let i = 1; i <= steps; i += 3) {
-        const mix = i / steps * tEnd / TMAX;
-        context.strokeStyle = `rgba(${124 + 44 * mix | 0}, ${236 - 97 * mix | 0}, 255, ${0.25 + 0.45 * (i / steps)})`;
-        context.beginPath();
-        context.moveTo(previous[0], previous[1]);
-        for (let j = i; j < i + 3 && j <= steps; j++) {
-          previous = point(j / steps * tEnd);
-          context.lineTo(previous[0], previous[1]);
-        }
-        context.stroke();
-      }
-      const pen = context.createRadialGradient(previous[0], previous[1], 0, previous[0], previous[1], 16);
-      pen.addColorStop(0, 'rgba(231, 234, 244, .95)');
-      pen.addColorStop(0.3, 'rgba(124, 236, 255, .4)');
-      pen.addColorStop(1, 'rgba(124, 236, 255, 0)');
-      context.fillStyle = pen;
-      context.beginPath();
-      context.arc(previous[0], previous[1], 16, 0, Math.PI * 2);
-      context.fill();
-    };
-    const size = () => {
-      [context, width, height] = fitCanvas(codaCanvas);
-      draw(shown);
-    };
-    const ringOut = () => {
-      if (reduceMotion) {
-        draw(1);
-        return;
-      }
-      const begin = performance.now();
-      const tick = now => {
-        const k = clamp((now - begin) / DURATION);
-        draw(1 - Math.pow(1 - k, 3));
-        if (k < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    };
-
-    size();
-    resizeHandlers.push(size);
-    new IntersectionObserver((entries, observer) => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      observer.disconnect();
-      ringOut();
-    }, { threshold: 0.3 }).observe(codaCanvas);
-
-    // Over the trace the mouse is a pair of knobs: left to right detunes f₂
-    // by up to ±0.04, top to bottom turns the phase by up to ±π/4. When the
-    // mouse leaves, the figure eases back to this page's own values. The
-    // canvas ignores the pointer, so the stage around it listens.
-    const stage = codaCanvas.closest('.signal-coda-stage');
-    if (stage && finePointer && !reduceMotion) {
-      let easing = 0;
-      const ease = () => {
-        tune.detune += (tune.toDetune - tune.detune) * 0.12;
-        tune.phase += (tune.toPhase - tune.phase) * 0.12;
-        const settled = Math.abs(tune.toDetune - tune.detune) < 1e-4 && Math.abs(tune.toPhase - tune.phase) < 1e-3;
-        if (settled) {
-          tune.detune = tune.toDetune;
-          tune.phase = tune.toPhase;
-        }
-        f2Label.textContent = (b + 0.01 + tune.detune).toFixed(3);
-        draw(shown);
-        easing = settled ? 0 : requestAnimationFrame(ease);
-      };
-      const retune = (detune, phase) => {
-        if (detune === tune.toDetune && phase === tune.toPhase) return;
-        tune.toDetune = detune;
-        tune.toPhase = phase;
-        if (!easing) easing = requestAnimationFrame(ease);
-      };
-      stage.addEventListener('pointermove', event => {
-        if (event.pointerType !== 'mouse') return;
-        const rect = codaCanvas.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width;
-        const y = (event.clientY - rect.top) / rect.height;
-        if (x < 0 || x > 1 || y < 0 || y > 1) retune(0, 0);
-        else retune((x - 0.5) * 0.08, (y - 0.5) * Math.PI / 2);
-      });
-      stage.addEventListener('pointerleave', () => retune(0, 0));
-    }
-  }
-
-  /* ───── 疆域: emblems, and a horizontal track once there are 3+ realms ───── */
-  const realms = $('.signal-realms');
-  if (realms) {
-    const grid = $('.signal-realm-grid', realms);
-    const indexLabel = $('[data-realm-index]', realms);
-    const count = Number(realms.dataset.count) || 0;
-    const emblems = $$('canvas[data-emblem]', realms).map(canvas => ({
-      canvas,
-      type: canvas.dataset.emblem,
-      seed: Number(canvas.dataset.seed) || 7
-    }));
-
-    const drawFlag = (context, width, height, t) => {
-      const cols = 30;
-      const rows = 19;
-      const gap = Math.min(width * 0.62 / cols, height * 0.58 / rows);
-      const x0 = width / 2 - cols * gap / 2 + gap * 0.6;
-      const y0 = height / 2 - rows * gap / 2;
-      context.strokeStyle = 'rgba(150, 170, 255, .4)';
-      context.lineWidth = 1.5;
-      context.beginPath();
-      context.moveTo(x0 - gap, y0 - gap * 1.2);
-      context.lineTo(x0 - gap, Math.min(height - 16, y0 + rows * gap * 1.5));
-      context.stroke();
-      context.fillStyle = 'rgba(231, 234, 244, .8)';
-      context.beginPath();
-      context.arc(x0 - gap, y0 - gap * 1.4, 2.4, 0, Math.PI * 2);
-      context.fill();
-      for (let c = 0; c < cols; c++) {
-        for (let r = 0; r < rows; r++) {
-          const k = c / cols;
-          const phase = c * 0.32 - t * 2.2 + r * 0.05;
-          const dx = -Math.abs(Math.sin(phase)) * gap * 0.3 * k;
-          const dy = Math.sin(phase) * gap * 1.5 * k;
-          const light = 0.5 + 0.5 * Math.cos(phase);
-          const m = r / rows;
-          const s = gap * (0.22 + 0.2 * light);
-          context.fillStyle = `rgba(${124 + 44 * m | 0}, ${236 - 97 * m | 0}, 255, ${0.25 + 0.7 * light})`;
-          context.fillRect(x0 + c * gap + dx - s / 2, y0 + r * gap + dy - s / 2, s, s);
-        }
-      }
-    };
-
-    // Unconfigured realms get a rose curve seeded by their name.
-    const drawRose = (context, width, height, t, seed) => {
-      const n = 2 + seed % 5;
-      const d = 1 + (seed >> 4) % 3;
-      const k = n / d;
-      const radius = Math.min(width, height) * 0.36;
-      for (let layer = 0; layer < 3; layer++) {
-        context.beginPath();
-        for (let i = 0; i <= 600; i++) {
-          const theta = i / 600 * Math.PI * 2 * d;
-          const r = radius * (0.6 + layer * 0.2) * Math.cos(k * theta + t * 0.3 * (layer + 1));
-          const angle = theta + t * 0.12 * (layer % 2 ? 1 : -1);
-          const x = width / 2 + r * Math.cos(angle);
-          const y = height / 2 + r * Math.sin(angle);
-          if (i) context.lineTo(x, y);
-          else context.moveTo(x, y);
-        }
-        context.strokeStyle = `rgba(${124 + 22 * layer}, ${236 - 48 * layer}, 255, .35)`;
-        context.lineWidth = 0.8;
-        context.stroke();
-      }
-    };
-
-    const drawEmblems = time => {
-      const t = reduceMotion ? 1 : time / 1000;
-      emblems.forEach(emblem => {
-        const [context, width, height] = fitCanvas(emblem.canvas);
-        context.clearRect(0, 0, width, height);
-        if (emblem.type === 'flag') drawFlag(context, width, height, t);
-        else drawRose(context, width, height, t, emblem.seed);
-      });
-    };
-    if (reduceMotion) {
-      drawEmblems(1000);
-      resizeHandlers.push(() => drawEmblems(1000));
-    } else if (emblems.length) {
-      whileVisible(realms, drawEmblems);
-    }
-
-    const isTrack = () => realms.dataset.mode === 'track' && window.innerWidth > 820;
-    // Travel until the last card sits as far from the right edge as the first sat from the left.
-    const trackExtra = () => grid.scrollWidth - window.innerWidth + (parseFloat(getComputedStyle(grid).paddingLeft) || 24);
-    const sizeTrack = () => {
-      realms.style.height = isTrack() ? `${window.innerHeight + Math.max(0, trackExtra())}px` : '';
-      if (!isTrack()) grid.style.transform = '';
-    };
-    sizeTrack();
-    resizeHandlers.push(sizeTrack);
-    scrollHandlers.push(() => {
-      if (!isTrack()) return;
-      const rect = realms.getBoundingClientRect();
-      const progress = clamp(-rect.top / Math.max(1, rect.height - window.innerHeight));
-      grid.style.transform = `translateX(${-progress * Math.max(0, trackExtra())}px)`;
-      if (indexLabel) indexLabel.textContent = `${pad2(Math.min(count, 1 + Math.floor(progress * (count - 0.001))))} / ${pad2(count)}`;
-    });
-  }
-
   /* ───── 札记: realm filter chips (only rendered for 2+ realms) ───── */
   const filters = $('[data-realm-filters]');
   if (filters) {
@@ -652,215 +343,19 @@
     });
   }
 
-  /* ───── 札记: a breakpoint on the row under the mouse ───── */
-  // The row's address lights up beside a breakpoint (signal-home.styl), and
-  // the header readout jumps to it, the way a debugger shows where a jump
-  // will land. Keyboard focus does the same.
-  if (ripValue && ripLabel) {
-    const rip = ripValue.closest('.signal-rip');
-    const jump = row => {
-      jumpTarget = $('.signal-seg-addr', row)?.textContent.trim() || '';
-      if (!jumpTarget) return;
-      rip?.classList.add('is-jump');
-      ripLabel.textContent = 'JMP';
-      rollReadout();
-    };
-    const land = () => {
-      if (!jumpTarget) return;
-      jumpTarget = '';
-      rip?.classList.remove('is-jump');
-      ripLabel.textContent = isPost ? 'OFFSET' : 'RIP';
-      rollReadout();
-    };
-    $$('.signal-seg').forEach(row => {
-      row.addEventListener('mouseenter', () => jump(row));
-      row.addEventListener('mouseleave', land);
-      row.addEventListener('focusin', () => jump(row));
-      row.addEventListener('focusout', land);
-    });
-  }
-
-  /* ───── 远征: series route graph ───── */
-  function routeEdges(rowA, rowB) {
-    const pairs = [];
-    const last = list => Math.max(1, list.length - 1);
-    const used = new Set();
-    rowB.forEach((node, j) => {
-      const i = rowA.length === 1 ? 0 : Math.round(j * (rowA.length - 1) / last(rowB));
-      used.add(i);
-      pairs.push([rowA[i], node]);
-    });
-    rowA.forEach((node, i) => {
-      if (used.has(i)) return;
-      pairs.push([node, rowB[rowB.length === 1 ? 0 : Math.round(i * (rowB.length - 1) / last(rowA))]]);
-    });
-    return pairs;
-  }
-
-  function renderRoute(container, route, animate, expanded) {
-    if (!route || !route.rows || !route.rows.length) {
-      container.innerHTML = '';
-      return;
-    }
-    // A long route is folded after `data-fold` rows; the rest is one
-    // "+N STEPS" node (home: a link to the route on 远征, 远征: unfolds it).
-    const fold = Number(container.dataset.fold) || 0;
-    let routeRows = route.rows;
-    let more = null;
-    if (fold > 0 && !expanded && routeRows.length > fold) {
-      const hidden = routeRows.slice(fold).reduce((sum, row) => sum + row.length, 0);
-      const toPage = container.hasAttribute('data-fold-link');
-      more = {
-        title: toPage ? '全部路线 →' : '展开全部 ↓',
-        label: `+${hidden} ${hidden === 1 ? 'STEP' : 'STEPS'}`,
-        url: toPage ? (route.more || '') : '#',
-        more: true
-      };
-      routeRows = [...routeRows.slice(0, fold), [more]];
-    }
-    const narrow = container.clientWidth < 700;
-    const NODE_H = 58;
-    const ROW_H = narrow ? 104 : 116;
-    const VIEW_W = narrow ? 380 : 960;
-    const GAP = narrow ? 14 : 40;
-    const fontSize = narrow ? 14 : 16;
-    const VIEW_H = routeRows.length * ROW_H + 10;
-    let address = 0;
-
-    const rows = routeRows.map((row, rowIndex) => {
-      const nodeW = Math.min(narrow && row.length > 1 ? 172 : 300, (VIEW_W - 24 - (row.length - 1) * GAP) / row.length);
-      const total = row.length * nodeW + (row.length - 1) * GAP;
-      const maxChars = Math.max(4, Math.floor((nodeW - 28) / fontSize));
-      return row.map((step, column) => ({
-        ...step,
-        w: nodeW,
-        maxChars,
-        x: (VIEW_W - total) / 2 + column * (nodeW + GAP),
-        y: 24 + rowIndex * ROW_H
-      }));
-    });
-
-    // On 远征 the graph repeats the list beside it and is hidden from
-    // assistive tech, so its links stay out of the tab order too.
-    const decorative = container.getAttribute('aria-hidden') === 'true';
-    let markup = '<defs><marker id="route-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>';
-    for (let r = 0; r < rows.length - 1; r++) {
-      routeEdges(rows[r], rows[r + 1]).forEach(([a, b]) => {
-        const x1 = a.x + a.w / 2;
-        const y1 = a.y + NODE_H;
-        const x2 = b.x + b.w / 2;
-        const y2 = b.y - 2;
-        markup += `<path class="route-edge" d="M${x1} ${y1} C${x1} ${(y1 + y2) / 2} ${x2} ${(y1 + y2) / 2} ${x2} ${y2}" marker-end="url(#route-arrow)"/>`;
-      });
-      if (rows[r].length === 1 && rows[r + 1].length > 1) {
-        markup += `<text class="route-label" x="${VIEW_W / 2 + 10}" y="${rows[r][0].y + NODE_H + 30}">either</text>`;
-      }
-    }
-    rows.flat().forEach(node => {
-      if (node.more) {
-        const body = `<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${NODE_H}"/>`
-          + `<text class="route-addr" x="${node.x + 14}" y="${node.y + 20}">${escapeHtml(node.label)}</text>`
-          + `<text class="route-title" x="${node.x + 14}" y="${node.y + 44}">${escapeHtml(node.title)}</text>`;
-        markup += `<a class="route-node is-more" href="${escapeHtml(node.url)}"${decorative ? ' tabindex="-1"' : ''} data-route-more>${body}</a>`;
-        return;
-      }
-      const published = Boolean(node.url);
-      const title = node.title.length > node.maxChars ? node.title.slice(0, node.maxChars - 1) + '…' : node.title;
-      const body = `<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${NODE_H}"/>`
-        + `<rect class="route-bar" x="${node.x}" y="${node.y}" width="3" height="${NODE_H}"/>`
-        + `<text class="route-addr" x="${node.x + 14}" y="${node.y + 20}"><tspan aria-hidden="true">loc_${(BASE_ADDRESS + address * 0x40).toString(16)}</tspan>${published ? '' : '  PLANNED'}</text>`
-        + `<text class="route-title" x="${node.x + 14}" y="${node.y + 44}">${escapeHtml(title)}</text>`
-        + `<title>${escapeHtml(node.title)}</title>`;
-      markup += published
-        ? `<a class="route-node is-published" href="${escapeHtml(node.url)}"${decorative ? ' tabindex="-1"' : ''}>${body}</a>`
-        : `<g class="route-node is-planned">${body}</g>`;
-      address++;
-    });
-
-    container.innerHTML = `<svg class="route-svg${narrow ? ' is-narrow' : ''}" viewBox="0 0 ${VIEW_W} ${VIEW_H}" role="group" aria-label="${escapeHtml(route.name)}">${markup}</svg>`;
-    const svg = container.firstElementChild;
-    $$('.route-edge', svg).forEach(path => path.style.setProperty('--len', Math.ceil(path.getTotalLength())));
-    if (animate && !reduceMotion) {
-      svg.classList.add('is-hidden');
-      svg.getBoundingClientRect();
-      requestAnimationFrame(() => requestAnimationFrame(() => svg.classList.remove('is-hidden')));
-    }
-  }
-
-  function parseJson(value, fallback) {
-    try {
-      return JSON.parse(value);
-    } catch (error) {
-      return fallback;
-    }
-  }
-
-  $$('.route-graph').forEach(container => {
-    const routes = container.dataset.routes ? parseJson(container.dataset.routes, []) : [parseJson(container.dataset.route, null)];
-    const tabs = container.closest('section')?.querySelector('[data-route-tabs]');
-    let current = 0;
-    let seen = false;
-    const card = container.closest('.learning-path-card');
-    const toggle = card?.querySelector('[data-fold-toggle]');
-    const expanded = () => Boolean(card?.classList.contains('is-unfolded'));
-    const draw = animate => renderRoute(container, routes[current], animate, expanded());
-
-    // 远征: one button unfolds both the graph and the list under it.
+  /* ───── 远征: a long series unfolds on its button ───── */
+  $$('.learning-path-card [data-fold-toggle]').forEach(toggle => {
+    const card = toggle.closest('.learning-path-card');
+    const label = toggle.textContent;
     const setFold = open => {
-      if (!card || !toggle) return;
       card.classList.toggle('is-unfolded', open);
       toggle.setAttribute('aria-expanded', String(open));
-      toggle.textContent = open ? '收起' : toggle.dataset.label;
-      draw(false);
+      toggle.textContent = open ? '收起' : label;
       if (!open) card.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
     };
-    if (toggle) {
-      toggle.dataset.label = toggle.textContent;
-      toggle.addEventListener('click', () => setFold(!expanded()));
-      if (location.hash === '#' + card.id) setFold(true);
-    }
-    container.addEventListener('click', event => {
-      if (!card || !event.target.closest('[data-route-more]')) return;
-      event.preventDefault();
-      setFold(true);
-    });
-
-    draw(false);
-    new IntersectionObserver((entries, observer) => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      seen = true;
-      draw(true);
-      observer.disconnect();
-    }, { threshold: 0.3 }).observe(container);
-    resizeHandlers.push(() => draw(false));
-
-    tabs?.addEventListener('click', event => {
-      const tab = event.target.closest('[data-route-index]');
-      if (!tab) return;
-      current = Number(tab.dataset.routeIndex) || 0;
-      $$('[data-route-index]', tabs).forEach(button => button.setAttribute('aria-pressed', String(button === tab)));
-      draw(seen);
-    });
+    toggle.addEventListener('click', () => setFold(!card.classList.contains('is-unfolded')));
+    if (location.hash === '#' + card.id) setFold(true);
   });
-
-  /* ───── 年鉴: registers count up when they come into view ───── */
-  const registers = $('.signal-registers');
-  if (registers && !reduceMotion) {
-    new IntersectionObserver((entries, observer) => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      observer.disconnect();
-      $$('[data-count-to]', registers).forEach(element => {
-        const target = Number(element.dataset.countTo) || 0;
-        const startedAt = performance.now();
-        const step = now => {
-          const progress = clamp((now - startedAt) / 1400);
-          element.textContent = Math.round(target * (1 - Math.pow(1 - progress, 3))).toLocaleString('en');
-          if (progress < 1) requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-      });
-    }, { threshold: 0.4 }).observe(registers);
-  }
 
   /* ───── Navigation marks the page you are on ───── */
   // Each menu word opens a page (札记 /archives/, 远征 /learning-paths/,

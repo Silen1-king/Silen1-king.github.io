@@ -142,10 +142,9 @@ learning_paths:
   subtitle: a route through the series
   description: 按专栏整理的系列教程，循序渐进地开始学习。
   category_fallback: true
-  # A route longer than this many rows is folded: the home page shows the
-  # first rows and links here; this page has a button to unfold it.
+  # A series longer than this many posts is folded behind a button.
   fold_after: 6
-  # Optional steps not written yet, shown as PLANNED on the route:
+  # Optional steps not written yet, listed without a link:
   planned:
     PWN · 堆:
       - title: 认识堆（2）tcache poisoning

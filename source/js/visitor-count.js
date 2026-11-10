@@ -5,7 +5,7 @@
   // counter). This is a small client of its public API, so no third-party
   // script runs on the page: one POST per page view, numbers written with
   // textContent into #vercount_value_site_uv / site_pv / page_pv. Local
-  // previews are not counted. If the request fails the "—" stays.
+  // previews are not counted. If the request fails the counts stay hidden.
   const API = 'https://events.vercount.one/api/v2/log';
   const FIELDS = ['site_uv', 'site_pv', 'page_pv'];
 
@@ -36,7 +36,11 @@
       if (!data) return;
       outputs.forEach(([field, element]) => {
         const value = Number(data[field]);
-        if (element && Number.isFinite(value)) element.textContent = value.toLocaleString('en-US');
+        if (!element || !Number.isFinite(value)) return;
+        element.textContent = value.toLocaleString('en-US');
+        // The counts stay out of sight until there is a number to show.
+        const holder = element.closest('[data-blog-visitors]');
+        if (holder) holder.hidden = false;
       });
     })
     .catch(() => {})
