@@ -20,7 +20,8 @@
         </h1>
       </div>
 
-      {{ post_template.render(page.posts) }}
+      {%- set shelf = signal_bookshelf(page.posts) %}
+      {%- if shelf %}{{ shelf }}{% else %}{{ post_template.render(page.posts) }}{% endif %}
     </div>
   </div>
   {##########################}

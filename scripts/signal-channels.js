@@ -8,6 +8,8 @@
  *   signal_realm_map()   the 疆域 body
  */
 
+const { renderTrail } = require('./signal-books');
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -32,6 +34,7 @@ function realmList(site, config) {
       name: category.name,
       path: category.path,
       count: category.length || toArray(category.posts).length,
+      trail: renderTrail(category.posts),
       epithet: options.epithet || '',
       description: options.description || ''
     };
@@ -48,8 +51,9 @@ function renderRealmMap(site, config, urlFor) {
           <span class="realm-map-name">${escapeHtml(realm.name)}</span>
           ${realm.epithet ? `<span class="realm-map-epithet">${escapeHtml(realm.epithet)}</span>` : ''}
           ${realm.description ? `<span class="realm-map-desc">${escapeHtml(realm.description)}</span>` : ''}
+          ${realm.trail}
         </span>
-        <span class="realm-map-count">${realm.count}<small>${realm.count === 1 ? 'entry' : 'entries'}</small></span>
+        <span class="realm-map-count">${realm.count}<small>${realm.trail ? (realm.count === 1 ? 'book' : 'books') : (realm.count === 1 ? 'entry' : 'entries')}</small></span>
       </a>
     </li>`).join('');
 

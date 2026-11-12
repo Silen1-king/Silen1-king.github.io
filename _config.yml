@@ -68,6 +68,7 @@ index_generator:
 # Category & Tag
 default_category: uncategorized
 category_map:
+  读书: reading
 tag_map:
 
 # Metadata elements
@@ -161,6 +162,9 @@ realms:
   AI:
     epithet: Artificial Intelligence
     description: Agents, models, and the tools that do the heavy lifting.
+  读书:
+    epithet: Reading
+    description: Books outside the coursework, and how far I've got.
 
 # Paths on this domain served by other GitHub Pages repositories (project
 # sites), not built here. tools/check-site.js does not look for them in public/.
