@@ -361,6 +361,39 @@
     gap: 64px;
   }
 
+  /* Contents list above the routes: name left, count right, hairlines. */
+  .learning-path-toc {
+    margin: 0 0 64px;
+  }
+
+  .post-body .learning-path-toc ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .post-body .learning-path-toc li {
+    margin: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .post-body .learning-path-toc a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 4px;
+    border: 0;
+    color: var(--text);
+    transition: color var(--t-fast) var(--ease);
+  }
+
+  .post-body .learning-path-toc a:hover,
+  .post-body .learning-path-toc a:focus-visible {
+    color: var(--cyan);
+  }
+
   .learning-path-card {
     scroll-margin-top: calc(var(--header-h) + var(--header-top) + 24px);
   }
@@ -382,7 +415,8 @@
     font: 700 26px/1.3 var(--f-cn-display);
   }
 
-  .learning-path-card-count {
+  .learning-path-card-count,
+  .learning-path-toc-count {
     color: var(--mute);
     font: 12px var(--f-mono);
     white-space: nowrap;

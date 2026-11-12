@@ -192,6 +192,19 @@ function routeId(index) {
   return `route-${String(index + 1).padStart(2, '0')}`;
 }
 
+// A plain contents list at the top: every route, its post count, a link
+// down to its section.
+function renderToc(groups) {
+  if (groups.length < 2) return '';
+  const items = groups.map((group, index) => `
+        <li><a href="#${routeId(index)}"><span>${escapeHtml(group.name)}</span><span class="learning-path-toc-count">${group.posts.length} 篇</span></a></li>`).join('');
+  return `
+    <nav class="learning-path-toc" aria-label="全部路线">
+      <ol>${items}
+      </ol>
+    </nav>`;
+}
+
 function renderPage(groups, options, root) {
   const fold = foldAfter(options);
   const cards = groups.map((group, index) => {
@@ -215,7 +228,7 @@ function renderPage(groups, options, root) {
     </section>`;
   }).join('');
 
-  return `
+  return `${renderToc(groups)}
     <div class="learning-path-grid">
       ${cards || '<p class="learning-paths-empty">暂无可展示的专栏。请在文章 Front-matter 中添加 <code>series</code> 或 <code>categories</code>。</p>'}
     </div>`;
