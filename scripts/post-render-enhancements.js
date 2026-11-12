@@ -13,8 +13,28 @@ const ALERT_TYPES = {
   CAUTION: { title: '谨慎', icon: '🚧' }
 };
 
+// Reading notes (读书) mark whose words a passage is:
+//   > [!摘要]  lines taken from the book
+//   > [!手写]  my own thoughts
+//   > [!小结]  the chapter's summary
+const NOTE_TYPES = { 摘要: 'excerpt', 手写: 'mine', 小结: 'summary' };
+
+function transformReadingNote(blockquote, inner) {
+  const firstParagraph = inner.match(/^\s*<p>\s*\[!(摘要|手写|小结)\]\s*(?:<br\s*\/?>\s*)?([\s\S]*?)<\/p>/);
+  if (!firstParagraph) return null;
+  const label = firstParagraph[1];
+  const firstBody = firstParagraph[2].trim();
+  const remainingBody = inner.slice(firstParagraph[0].length).trim();
+  return `<aside class="book-note book-note-${NOTE_TYPES[label]}">
+      <p class="book-note-label">${label}</p>
+      <div class="book-note-body">${firstBody ? `<p>${firstBody}</p>` : ''}${remainingBody}</div>
+    </aside>`;
+}
+
 function transformAlerts(html) {
   return String(html || '').replace(/<blockquote>([\s\S]*?)<\/blockquote>/gi, (blockquote, inner) => {
+    const note = transformReadingNote(blockquote, inner);
+    if (note) return note;
     const firstParagraph = inner.match(/^\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(?:<br\s*\/?>\s*)?([\s\S]*?)<\/p>/i);
     if (!firstParagraph) return blockquote;
 

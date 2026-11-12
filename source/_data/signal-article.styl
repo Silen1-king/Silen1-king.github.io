@@ -905,3 +905,45 @@
     }
   }
 }
+
+// 读书 notes: whose words a passage is (scripts/post-render-enhancements.js).
+// 摘要 = the book's words, quiet; 小结 = the chapter summary, on --ink;
+// 手写 = my own thoughts, brightest, with a cyan edge.
+@css {
+  .book-note {
+    margin: 28px 0;
+    padding: 2px 0 2px 18px;
+    border-left: 2px solid var(--line-2);
+    color: var(--text);
+  }
+
+  .book-note .book-note-label {
+    margin: 0 0 8px;
+    color: var(--mute);
+    font-size: 13px;
+    letter-spacing: .2em;
+  }
+
+  .book-note-body > :first-child {
+    margin-top: 0;
+  }
+
+  .book-note-body > :last-child {
+    margin-bottom: 0;
+  }
+
+  .book-note-summary {
+    padding: 16px 20px;
+    border: 1px solid var(--line);
+    background: var(--ink);
+  }
+
+  .book-note-mine {
+    border-left-color: var(--cyan);
+    color: var(--fg);
+  }
+
+  .book-note-mine .book-note-label {
+    color: var(--cyan);
+  }
+}
