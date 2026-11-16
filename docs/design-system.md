@@ -204,9 +204,13 @@ book:
   chapter: 1       # 也可以写 pages + read（页），或只写 progress（百分比）
   started: 2026-11-12
   finished:        # 读完的日期
+  cover: /images/books/atomic-habits.jpg   # 可选：封面
 ```
 
 `scripts/signal-books.js` 读它：读书页（`/categories/reading/`）显示成书架，每本书一行，
 书名、作者和状态（在读 / 想读 / 读完）、一条发丝粗的进度线（青色，读完变 `--mute`）、
 进度和起止日期；疆域页「读书」那一行下面显示同样的简版轨迹。书架代替了这一页按年份的
 文章列表，没有新增装饰。
+
+封面（可选）放在 `source/images/books/`，只在书架上显示：行首 64px 的小图，一像素 `--line`
+描边。笔记页和疆域的简版轨迹都不放封面。

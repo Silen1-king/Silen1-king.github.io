@@ -12,6 +12,7 @@ book:
   chapter: 5        # 读到第几章，读完一章改一下这个数字
   started: 2026-11-12
   finished:         # 读完那天写日期，比如 2026-12-20
+  cover: /images/books/atomic-habits.jpg
 ---
 
 **Tips:**

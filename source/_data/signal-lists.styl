@@ -131,6 +131,24 @@
     text-align: right;
     white-space: nowrap;
   }
+
+  /* An optional cover sits left of the row, spanning its lines. */
+  .posts-collapse .post-content .shelf-row.has-cover {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+  }
+
+  .shelf-cover {
+    grid-row: 1 / span 3;
+    align-self: start;
+    width: 64px;
+    height: auto;
+    margin: 0;
+    border: 1px solid var(--line);
+  }
+
+  .has-cover .shelf-when {
+    grid-column: 2 / -1;
+  }
 }
 
 // The same trail, compact, inside the 读书 row on 疆域.

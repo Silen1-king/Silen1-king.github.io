@@ -11,10 +11,12 @@
  *                       # or just `progress: 35` (percent)
  *     started: 2026-11-12
  *     finished:         # date once done; also implied by read >= pages
+ *     cover: /images/books/sophies-world.jpg   # optional cover image
  *
  * A category page whose posts carry `book:` shows them as a shelf (one row
  * per book: title, author, a thin progress line, pages) instead of the
- * year list. Books in progress come first, newest activity first.
+ * year list. Books in progress come first, newest activity first. A
+ * `cover` shows as a small thumbnail at the start of the shelf row.
  *
  *   signal_bookshelf(posts)   '' when no post has a book block
  */
@@ -64,6 +66,7 @@ function bookOf(post) {
     started: dotDate(book.started),
     done: dotDate(book.finished),
     finished,
+    cover: book.cover ? String(book.cover) : '',
     state: finished ? '读完' : percent > 0 ? '在读' : '想读'
   };
 }
@@ -118,6 +121,12 @@ function renderTrail(posts) {
     </span>`).join('')}</span>`;
 }
 
+function coverImg(book, urlFor, className) {
+  if (!book.cover) return '';
+  const src = /^(https?:)?\/\//.test(book.cover) ? book.cover : urlFor(book.cover);
+  return `<img class="${className}" src="${escapeHtml(src)}" alt="《${escapeHtml(book.title)}》封面" loading="lazy" decoding="async">`;
+}
+
 function renderShelf(posts, urlFor) {
   const rows = shelfRows(posts);
   if (!rows.length) return '';
@@ -125,7 +134,8 @@ function renderShelf(posts, urlFor) {
   const items = rows.map(({ post, book }) => {
     const when = span(book);
     return `<li class="shelf-item${book.finished ? ' is-done' : ''}">
-      <a class="shelf-row" href="${escapeHtml(urlFor(post.path))}">
+      <a class="shelf-row${book.cover ? ' has-cover' : ''}" href="${escapeHtml(urlFor(post.path))}">
+        ${coverImg(book, urlFor, 'shelf-cover')}
         <span class="shelf-title">${escapeHtml(book.title)}</span>
         <span class="shelf-meta">${book.author ? `${escapeHtml(book.author)} · ` : ''}${book.state}</span>
         ${bar(book)}
