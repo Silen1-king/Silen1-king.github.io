@@ -840,13 +840,24 @@
     transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
   }
 
-  .post-toc .nav-item a:hover,
-  .post-toc .nav .active > a {
+  .post-toc .nav-item a:hover {
+    color: var(--fg);
+  }
+
+  /* Where you are reading: the chapter (top level) in violet, the section
+     inside it in cyan. A section that holds the current one keeps the cyan
+     edge with plain text, so only one line of the list is cyan. */
+  .post-toc > .nav > .active > a {
+    border-left-color: var(--violet);
+    color: var(--violet);
+  }
+
+  .post-toc .nav-child .active > a {
     border-left-color: var(--cyan);
     color: var(--fg);
   }
 
-  .post-toc .nav .active-current > a {
+  .post-toc .nav-child .active-current > a {
     color: var(--cyan);
   }
 

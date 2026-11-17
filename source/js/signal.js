@@ -368,5 +368,48 @@
     if (inside || postHome) link.setAttribute('aria-current', 'page');
   });
 
+  /* ───── Table of contents follows what you are reading ───── */
+  // NexT marks a heading only once it has passed 10px from the top of the
+  // window, which is behind the fixed header, and a TOC jump stops just
+  // below the header, so it lit the heading before the one you opened.
+  // Here a section is the one whose heading has crossed a reading line a
+  // quarter of the way down the visible text. Before the first heading
+  // nothing is lit; at the bottom of the page the last heading on screen
+  // wins, so short closing sections can still be reached.
+  const tocUtils = window.NexT && NexT.utils;
+  if (tocUtils && $('.post-toc:not(.placeholder-toc) .nav')) {
+    const lightTocItem = tocUtils.activateNavByIndex.bind(tocUtils);
+    tocUtils.activateNavByIndex = index => {
+      if (index >= 0) return lightTocItem(index);
+      $$('.post-toc .nav .active').forEach(item => item.classList.remove('active', 'active-current'));
+    };
+    // A heading clicked in the TOC stays lit after the jump, even when the
+    // next heading sits right under it, until you scroll yourself.
+    let pinned = -1;
+    $$('.post-toc:not(.placeholder-toc) a.nav-link').forEach((link, i) => {
+      link.addEventListener('click', () => { pinned = i; });
+    });
+    ['wheel', 'touchstart', 'keydown'].forEach(type => {
+      window.addEventListener(type, () => { pinned = -1; }, { passive: true });
+    });
+    tocUtils.updateActiveNav = function() {
+      const sections = Array.isArray(this.sections) ? this.sections : [];
+      if (!sections.length) return;
+      if (pinned >= 0) return this.activateNavByIndex(pinned);
+      const headerBottom = Math.max(0, $('.header')?.getBoundingClientRect().bottom || 0);
+      const viewport = window.innerHeight;
+      const line = headerBottom + (viewport - headerBottom) * 0.25;
+      const atBottom = window.scrollY + viewport >= document.documentElement.scrollHeight - 2;
+      let index = -1;
+      sections.forEach((heading, i) => {
+        const top = heading ? heading.getBoundingClientRect().top : Infinity;
+        if (top <= line + 1 || (atBottom && top < viewport)) index = i;
+      });
+      this.activateNavByIndex(index);
+    };
+    window.addEventListener('load', () => tocUtils.updateActiveNav(), { once: true });
+    window.addEventListener('resize', () => tocUtils.updateActiveNav(), { passive: true });
+  }
+
   onScroll();
 })();
