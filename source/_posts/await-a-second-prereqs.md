@@ -1,7 +1,7 @@
 ---
 title: 读《Await() a Second》之前：C++20 协程、x86_64 与 CFI
 date: 2026-11-18 00:30:06
-updated: 2026-11-18 00:30:06
+updated: 2026-11-18 00:46:48
 description: 读论文《Await() a Second》前的预备知识：C++20 协程帧把 resume/destroy 指针放在堆上，x86_64 的 call/ret、栈帧与 GOT/PLT，从 ret2libc、ROP、JOP 到 COOP 的代码复用攻击，以及 CFI 与 Intel CET（IBT、影子栈）为什么拦不住协程劫持。
 tags:
   - c++
@@ -377,7 +377,7 @@ CET（Control-flow Enforcement Technology）是 Intel 把 CFI 思想做进硬件
 - 执行一条间接 call/jmp 时，tracker 切到 WAIT_FOR_ENDBRANCH 状态。
 - 落点处的下一条指令必须是 endbr64，CPU 看见它就把 tracker 切回 IDLE，放行。如果落点不是 endbr64，tracker 还停在等待状态，CPU 立刻触发 #CP（control protection）异常，程序终止。
 
-而直接call的不会受到IBT 的约束
+而直接call的不会受到IBT 约束，地址是写死的，不是利用指针的地址
 
 IBT 的粒度：它只回答"落点是不是某个函数的入口"，不回答"这个入口该不该在这里被调用"。所以 IBT 本质是粗粒度 CFI 的硬件版——挡得住 ROP/JOP（它们的 gadget 落在函数中间，没有 endbr64），挡不住 COOP（vfgadget 入口本来就有 endbr64），也挡不住协程劫持（resume 函数入口本来就有 endbr64）
 
@@ -399,3 +399,13 @@ IBT 不管 ret，因为 ret 的目标不是"跳到某个函数入口"，而是"�
 | --- | --- | --- | --- | --- | --- |
 | 影子栈 | ret | 栈上地址必须和影子栈副本一致 | 拦住 | 不相关 | 不相关（resume 不是靠 ret 回到调用者,是call） |
 | IBT | 间接 call/jmp | 落点必须是 endbr64 | 不相关(gadget本就不走间接跳转) | 放行（落点是合法函数入口） | 放行（resume 函数入口本就有 endbr64） |
+
+**Q1：为什么 IBT 不管 ret，而要单独设计影子栈？**
+
+A1：ret 的目标从来就不是"函数入口"，而是调用者里 call 指令之后的那条指令——那个位置本来就不该有 endbr64（每个 call 之后都要求有，这既不现实也没必要）。所以 IBT 这套"落点必须是 endbr64"的规则对 ret 根本不适用，不是"管不着"，而是"管的对象不一样"。ret返回的要么是正常函数，要么就不是函数，而是gadget2
+
+**Q2：综合本模块：如果你是防御设计者，针对协程劫持，你觉得该往 IBT 加什么规则，或者该往影子栈的思路里加什么类似机制？（没有标准答案，说说直觉）**
+
+A2：协程帧也有标识符，以及在协程挂起的时候也放入一个“影子”的地方，resume的时候对照
+
+-----这个基本就是学术界针对"堆上函数指针被篡改"这一大类问题（不只是协程，还有 C++ 虚函数、各种回调表）提出的防御方向：把影子栈/标签检查的粒度，从"栈上的返回地址"和"虚函数表"，扩展到所有堆上存着的、会被间接调用的函数指针。协程恰恰是一个现有方案没覆盖到的新实例。
