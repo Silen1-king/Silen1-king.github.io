@@ -151,6 +151,10 @@ learning_paths:
     PWN · 堆:
       - title: 认识堆（2）tcache poisoning
         order: 2
+  # Collections rather than sequences: every post is on equal footing,
+  # shown with a dot instead of a step number.
+  unordered:
+    - 其他
 
 # Home page 疆域 cards, one per top-level category.
 # Categories missing here still appear, with an emblem generated from the name.

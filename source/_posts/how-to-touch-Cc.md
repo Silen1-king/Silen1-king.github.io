@@ -11,6 +11,7 @@ tags:
   - clash-verge
   - mihomo
   - dns-leak
+series: 其他
 ---
 
 很多人问我使用Cc不怕被封吗，其实很怕，不过目前没事，分享一下使用方法。有一个codex的管理这个VPN的项目，以下是项目规则，配置的时候可以用另一个agent负责检查和监督

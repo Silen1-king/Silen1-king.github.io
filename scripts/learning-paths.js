@@ -14,6 +14,10 @@
  * `order` carry the same number: read either one. Steps not written yet can
  * be listed under `learning_paths.planned` (series name -> titles or
  * { title, order }); they are shown without a link.
+ *
+ * Routes listed under `learning_paths.unordered` are collections, not
+ * sequences: every post is on equal footing, so steps carry a dot instead of
+ * a number and are listed by date.
  */
 
 const DEFAULTS = {
@@ -24,7 +28,8 @@ const DEFAULTS = {
   description: '按专栏整理的系列教程，循序渐进地开始学习。',
   category_fallback: true,
   fold_after: 6,
-  planned: {}
+  planned: {},
+  unordered: []
 };
 
 function escapeHtml(value) {
@@ -150,11 +155,11 @@ function learningOptions() {
 
 // One step of a series. Posts that share an `order` are alternatives: read
 // either one, so they carry the same number.
-function renderPost(post, index, root, folded) {
+function renderPost(post, index, root, folded, unordered) {
   const date = dateInfo(post.date);
   const order = numericOrder(post.order);
   const description = excerptFor(post);
-  const stepLabel = order === null ? index + 1 : order;
+  const stepLabel = unordered ? '·' : order === null ? index + 1 : order;
   const title = post.title || '未命名文章';
   const url = joinRoot(root, post.path);
 
@@ -210,6 +215,7 @@ function renderPage(groups, options, root) {
   const cards = groups.map((group, index) => {
     const titles = new Set(group.posts.map(post => post.title));
     const planned = plannedSteps(options, group.name).filter(step => !titles.has(step.title));
+    const unordered = toArray(options.unordered).includes(group.name);
     const folds = fold > 0 && group.posts.length > fold;
     const toggle = folds
       ? `<button class="learning-path-toggle" type="button" aria-expanded="false" data-fold-toggle>展开全部 ${group.posts.length} 篇</button>`
@@ -221,7 +227,7 @@ function renderPage(groups, options, root) {
         <span class="learning-path-card-count">${group.posts.length} 篇</span>
       </header>
       <ol class="learning-path-steps">
-        ${group.posts.map((post, postIndex) => renderPost(post, postIndex, root, folds && postIndex >= fold)).join('')}
+        ${group.posts.map((post, postIndex) => renderPost(post, postIndex, root, folds && postIndex >= fold, unordered)).join('')}
         ${planned.map((step, stepIndex) => renderPlanned(step, group.posts.length + stepIndex)).join('')}
       </ol>
       ${toggle}
