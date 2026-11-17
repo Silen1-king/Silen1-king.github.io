@@ -12,11 +12,17 @@
  *     started: 2026-11-12
  *     finished:         # date once done; also implied by read >= pages
  *     cover: /images/books/sophies-world.jpg   # optional cover image
+ *     original: Sofies verden   # optional: original title
+ *     translator: 萧宝森        # optional: this edition's translator,
+ *     publisher: 作家出版社     #   publisher, edition and a short
+ *     edition: 修订版           #   introduction, shown with the cover
+ *     intro: 一句话介绍这本书和这个版本。   #   at the top of the note
  *
  * A category page whose posts carry `book:` shows them as a shelf (one row
  * per book: title, author, a thin progress line, pages) instead of the
  * year list. Books in progress come first, newest activity first. A
- * `cover` shows as a small thumbnail at the start of the shelf row.
+ * `cover` shows as a small thumbnail at the start of the shelf row, and with
+ * the edition details as a small card at the top of the note.
  *
  *   signal_bookshelf(posts)   '' when no post has a book block
  */
@@ -67,6 +73,11 @@ function bookOf(post) {
     done: dotDate(book.finished),
     finished,
     cover: book.cover ? String(book.cover) : '',
+    original: String(book.original || ''),
+    translator: String(book.translator || ''),
+    publisher: String(book.publisher || ''),
+    edition: String(book.edition || ''),
+    intro: String(book.intro || ''),
     state: finished ? '读完' : percent > 0 ? '在读' : '想读'
   };
 }
@@ -127,6 +138,19 @@ function coverImg(book, urlFor, className) {
   return `<img class="${className}" src="${escapeHtml(src)}" alt="《${escapeHtml(book.title)}》封面" loading="lazy" decoding="async">`;
 }
 
+// The card at the top of a note: cover, title, edition, short introduction.
+function renderCard(book, urlFor) {
+  if (!book.cover && !book.intro) return '';
+  const byline = [book.author && `${book.author} 著`, book.translator && `${book.translator} 译`].filter(Boolean).join(' · ');
+  const edition = [book.publisher, book.edition].filter(Boolean).join(' · ');
+  return `<section class="book-card">${coverImg(book, urlFor, 'book-card-cover')}<div class="book-card-text">
+      <p class="book-card-title">${escapeHtml(book.title)}${book.original ? ` <span>${escapeHtml(book.original)}</span>` : ''}</p>
+      ${byline ? `<p class="book-card-meta">${escapeHtml(byline)}</p>` : ''}
+      ${edition ? `<p class="book-card-meta">${escapeHtml(edition)}</p>` : ''}
+      ${book.intro ? `<p class="book-card-intro">${escapeHtml(book.intro)}</p>` : ''}
+    </div></section>`;
+}
+
 function renderShelf(posts, urlFor) {
   const rows = shelfRows(posts);
   if (!rows.length) return '';
@@ -152,6 +176,14 @@ function renderShelf(posts, urlFor) {
 if (typeof hexo !== 'undefined') {
   hexo.extend.helper.register('signal_bookshelf', function signalBookshelf(posts) {
     return renderShelf(posts, path => this.url_for(path));
+  });
+
+  hexo.extend.filter.register('after_post_render', function bookCard(post) {
+    const book = post.layout === 'post' ? bookOf(post) : null;
+    if (!book) return post;
+    const root = String(hexo.config.root || '/').replace(/\/?$/, '/');
+    post.content = renderCard(book, path => root + String(path).replace(/^\//, '')) + post.content;
+    return post;
   });
 }
 

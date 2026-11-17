@@ -205,6 +205,11 @@ book:
   started: 2026-11-12
   finished:        # 读完的日期
   cover: /images/books/atomic-habits.jpg   # 可选：封面
+  original: Atomic Habits      # 以下可选：原名、译者、出版社、版本、简介
+  translator: 迟东晨
+  publisher: 北京联合出版公司
+  edition: 全新修订纪念版
+  intro: 一两句话介绍这本书。
 ```
 
 `scripts/signal-books.js` 读它：读书页（`/categories/reading/`）显示成书架，每本书一行，
@@ -212,5 +217,6 @@ book:
 进度和起止日期；疆域页「读书」那一行下面显示同样的简版轨迹。书架代替了这一页按年份的
 文章列表，没有新增装饰。
 
-封面（可选）放在 `source/images/books/`，只在书架上显示：行首 64px 的小图，一像素 `--line`
-描边。笔记页和疆域的简版轨迹都不放封面。
+封面（可选）放在 `source/images/books/`。书架上是行首 64px 的小图；笔记页开头是一张介绍卡：
+左边 112px 封面（手机 84px），右边书名和原名、作者 · 译者、出版社 · 版本、简介，下面一条
+`--line` 分隔线。封面都是一像素 `--line` 描边。疆域的简版轨迹不放封面。

@@ -906,6 +906,74 @@
   }
 }
 
+// 读书 card (scripts/signal-books.js): the cover and this edition, at the
+// top of a reading note.
+@css {
+  .post-body .book-card {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin: 0 0 36px;
+    padding: 0 0 28px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .post-body .book-card-cover {
+    flex: 0 0 112px;
+    width: 112px;
+    height: auto;
+    margin: 0;
+    border: 1px solid var(--line);
+  }
+
+  .post-body .book-card-text {
+    min-width: 0;
+  }
+
+  .post-body .book-card-text p {
+    margin: 0;
+  }
+
+  .post-body .book-card-title {
+    color: var(--fg);
+    font: 700 22px/1.3 var(--f-cn-display);
+  }
+
+  .post-body .book-card-title span {
+    margin-left: 6px;
+    color: var(--mute);
+    font: italic 17px var(--f-poem);
+  }
+
+  .post-body .book-card-meta {
+    margin-top: 6px;
+    color: var(--mute);
+    font-size: 13px;
+  }
+
+  .post-body .book-card-intro {
+    margin-top: 14px;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 600px) {
+    .post-body .book-card {
+      gap: 16px;
+    }
+
+    .post-body .book-card-cover {
+      flex-basis: 84px;
+      width: 84px;
+    }
+
+    .post-body .book-card-title {
+      font-size: 19px;
+    }
+  }
+}
+
 // 读书 notes: whose words a passage is (scripts/post-render-enhancements.js).
 // 摘要 = the book's words, quiet; 小结 = the chapter summary, on --ink;
 // 亲笔 = my own thoughts, brightest, with a cyan edge.

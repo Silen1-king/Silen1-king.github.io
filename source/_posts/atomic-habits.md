@@ -1,7 +1,7 @@
 ---
 title: 《掌控习惯》读书笔记
 date: 2026-11-13 01:17:27
-updated: 2026-11-17 02:29:14
+updated: 2026-11-17 22:46:37
 description: 《掌控习惯》逐章读书笔记：习惯是自我提高的复利，忘记目标，专注于体系；改变习惯，先想清楚自己想成为谁；习惯循环是提示、渴求、反应、奖励；行为转变始于自觉；用执行意图和习惯叠加培养新习惯。
 tags: [habits]
 categories: [读书]
@@ -13,6 +13,11 @@ book:
   started: 2026-11-12
   finished:         # 读完那天写日期，比如 2026-12-20
   cover: /images/books/atomic-habits.jpg
+  original: Atomic Habits
+  translator: 迟东晨
+  publisher: 北京联合出版公司
+  edition: 全新修订纪念版
+  intro: 讲怎样养成好习惯、戒掉坏习惯。作者把每个习惯拆成提示、渴求、反应、奖励四步，再给出行为转变的四大定律。
 ---
 
 **Tips:**
