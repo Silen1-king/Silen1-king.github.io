@@ -1,7 +1,7 @@
 ---
 title: 读《Await() a Second》之前：C++20 协程、x86_64 与 CFI
 date: 2026-11-18 00:30:06
-updated: 2026-11-18 00:46:48
+updated: 2026-11-18 00:54:08
 description: 读论文《Await() a Second》前的预备知识：C++20 协程帧把 resume/destroy 指针放在堆上，x86_64 的 call/ret、栈帧与 GOT/PLT，从 ret2libc、ROP、JOP 到 COOP 的代码复用攻击，以及 CFI 与 Intel CET（IBT、影子栈）为什么拦不住协程劫持。
 tags:
   - c++
@@ -127,10 +127,11 @@ ret 做一件事：
 
 ```text
 高地址
-  ...                      <- main 的栈帧
-  [返回地址 = 0x1170]       <- call greet 压入的，greet 的 ret 会跳回这里
-  [greet 保存的旧 rbp]      <- greet 里 "push rbp" 压入
-rbp/rsp -> ...             <- greet 的局部变量区
+       ...                      <- main 的栈帧
+       [返回地址 = 0x1170]       <- call greet 压入的，greet 的 ret 会跳回这里
+rbp -> [greet 保存的旧 rbp]      <- greet 里 "push rbp" 压入
+       ...                      <- greet 的局部变量区
+rsp -> ...
 低地址
 ```
 
@@ -158,7 +159,7 @@ GOT（Global Offset Table）：数据段里的一张函数地址表。桩再从 
 
 > 🔑 两个经典攻击面，模块三会用：
 >
-> GOT 覆写：GOT 是可写数据。改掉 puts 的 GOT 槽为 system 的地址，之后程序以为在调 puts("/bin/sh")，实际执行 system("/bin/sh")。
+> GOT 覆写：GOT 是可写数据（没开 Full RELRO 时）。改掉 puts 的 GOT 槽为 system 的地址，之后程序以为在调 puts("/bin/sh")，实际执行 system("/bin/sh")。
 >
 > 泄露 libc 基址：读出某个 GOT 槽里的真实地址，减去已知偏移，就反推出整个 libc 的加载基址——于是 ASLR 被绕过，system、/bin/sh 的地址全有了。这正是 ret2libc 的套路。
 
@@ -328,7 +329,7 @@ CFI（Control-Flow Integrity，控制流完整性）是防御方对前面所有�
 
 #### 1. CFI 想解决的问题
 
-程序运行时会画出一张"控制流图"（CFG，Control-Flow Graph）：哪个函数能调用哪个函数、哪个间接跳转合法地跳到哪些目标，这些在编译期基本是确定的。CFI 的想法是：在每一次间接跳转（间接 call、间接 jmp、ret）发生前，检查这次跳转的目标是不是 CFG 里允许的，不允许就终止程序。
+编译器可以为程序画出一张"控制流图"（CFG，Control-Flow Graph）：哪个函数能调用哪个函数、哪个间接跳转合法地跳到哪些目标，这些在编译期基本是确定的。CFI 的想法是：在每一次间接跳转（间接 call、间接 jmp、ret）发生前，检查这次跳转的目标是不是 CFG 里允许的，不允许就终止程序。
 
 > 在计算机中，一个程序从我们编写源代码，到最终由 CPU 执行，需要经过一系列步骤：
 >
@@ -379,7 +380,7 @@ CET（Control-flow Enforcement Technology）是 Intel 把 CFI 思想做进硬件
 
 而直接call的不会受到IBT 约束，地址是写死的，不是利用指针的地址
 
-IBT 的粒度：它只回答"落点是不是某个函数的入口"，不回答"这个入口该不该在这里被调用"。所以 IBT 本质是粗粒度 CFI 的硬件版——挡得住 ROP/JOP（它们的 gadget 落在函数中间，没有 endbr64），挡不住 COOP（vfgadget 入口本来就有 endbr64），也挡不住协程劫持（resume 函数入口本来就有 endbr64）
+IBT 的粒度：它只回答"落点是不是某个函数的入口"，不回答"这个入口该不该在这里被调用"。所以 IBT 本质是粗粒度 CFI 的硬件版——挡得住 JOP（它的 gadget 落在函数中间，没有 endbr64），ROP 靠 ret 串联，归影子栈管，挡不住 COOP（vfgadget 入口本来就有 endbr64），也挡不住协程劫持（resume 函数入口本来就有 endbr64）
 
 #### 2. 影子栈（Shadow Stack）—— 管 ret 的目标
 
@@ -402,7 +403,7 @@ IBT 不管 ret，因为 ret 的目标不是"跳到某个函数入口"，而是"�
 
 **Q1：为什么 IBT 不管 ret，而要单独设计影子栈？**
 
-A1：ret 的目标从来就不是"函数入口"，而是调用者里 call 指令之后的那条指令——那个位置本来就不该有 endbr64（每个 call 之后都要求有，这既不现实也没必要）。所以 IBT 这套"落点必须是 endbr64"的规则对 ret 根本不适用，不是"管不着"，而是"管的对象不一样"。ret返回的要么是正常函数，要么就不是函数，而是gadget2
+A1：ret 的目标从来就不是"函数入口"，而是调用者里 call 指令之后的那条指令——那个位置本来就不该有 endbr64（每个 call 之后都要求有，这既不现实也没必要）。所以 IBT 这套"落点必须是 endbr64"的规则对 ret 根本不适用，不是"管不着"，而是"管的对象不一样"。ret返回的要么是正常函数，要么就不是函数，而是gadget
 
 **Q2：综合本模块：如果你是防御设计者，针对协程劫持，你觉得该往 IBT 加什么规则，或者该往影子栈的思路里加什么类似机制？（没有标准答案，说说直觉）**
 
