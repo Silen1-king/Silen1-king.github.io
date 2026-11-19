@@ -375,6 +375,14 @@
     margin: 0;
   }
 
+  // Pages of a filtered realm are buttons (signal.js); they look like links.
+  .signal-codex-foot button.page-number,
+  .signal-codex-foot button.prev,
+  .signal-codex-foot button.next {
+    line-height: inherit;
+    cursor: pointer;
+  }
+
   @media (max-width: 860px) {
     .signal-seg {
       grid-template-columns: 1fr auto;

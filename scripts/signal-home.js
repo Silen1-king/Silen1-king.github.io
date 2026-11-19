@@ -6,6 +6,9 @@
  *
  *   signal_home_hero()      hero, with a link to the newest entry
  *   signal_codex(posts)     札记 rows for the current index page
+ *   signal_codex_paged(page)  every 札记 row, those off this index page
+ *                            hidden, so the realm filter can page through
+ *                            the filtered set in the browser (signal.js)
  *   signal_codex_filters()  category filter chips, shown once there are 2+
  *   signal_reading_minutes(post)  reading time, shared with the post header
  */
@@ -154,6 +157,29 @@ hexo.extend.helper.register('signal_codex', function signalCodex(posts) {
   const urlFor = path => this.url_for(path);
   const rows = toArray(posts).map(post => renderCodexRow(post, urlFor));
   return `<div class="signal-seglist">${rows.join('') || '<p class="signal-empty">第一篇札记正在路上。</p>'}</div>`;
+});
+
+// Same order hexo-generator-index pages through: index_generator.order_by,
+// then sticky posts first.
+function indexOrder(site, config) {
+  const indexConfig = config.index_generator || {};
+  if (!site || !site.posts) return [];
+  const posts = site.posts.sort(indexConfig.order_by || '-date').toArray();
+  return posts.sort((a, b) => (b.sticky || 0) - (a.sticky || 0));
+}
+
+hexo.extend.helper.register('signal_codex_paged', function signalCodexPaged(page) {
+  const urlFor = path => this.url_for(path);
+  const indexConfig = this.config.index_generator || {};
+  const perPage = Math.max(0, Number(indexConfig.per_page ?? this.config.per_page) || 0);
+  const current = Math.max(1, Number(page && page.current) || 1);
+  const first = (current - 1) * perPage;
+  const rows = indexOrder(this.site, this.config).map((post, index) => {
+    const row = renderCodexRow(post, urlFor);
+    const offPage = perPage && (index < first || index >= first + perPage);
+    return offPage ? row.replace('<article class="signal-seg"', '<article class="signal-seg" hidden') : row;
+  });
+  return `<div class="signal-seglist" data-codex-list data-per-page="${perPage}" data-current="${current}">${rows.join('') || '<p class="signal-empty">第一篇札记正在路上。</p>'}</div>`;
 });
 
 // hexo-generator-index writes nothing when there are no posts yet, which leaves

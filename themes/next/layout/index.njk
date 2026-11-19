@@ -17,9 +17,11 @@
         <h2 class="signal-h2" id="codex-title">札记<small>entries, newest first</small></h2>
         {{ signal_codex_filters() }}
       </div>
-      {{ signal_codex(page.posts) }}
+      {{ signal_codex_paged(page) }}
       <div class="signal-codex-foot">
-        {%- include '_partials/pagination.njk' -%}
+        <div class="signal-codex-pager" data-codex-pager>
+          {%- include '_partials/pagination.njk' -%}
+        </div>
         {%- if site.posts.length %}
         <a class="signal-more" href="{{ url_for(config.archive_dir + '/') }}">全部归档 →</a>
         {%- endif %}

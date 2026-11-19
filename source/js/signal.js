@@ -330,16 +330,70 @@
   }
 
   /* ───── 札记: realm filter chips (only rendered for 2+ realms) ───── */
+  // Every index page carries all rows, those off its page hidden
+  // (scripts/signal-home.js). All keeps the site's own pages and links; a
+  // realm pages through its own rows here, starting from its first page.
   const filters = $('[data-realm-filters]');
-  if (filters) {
+  const codexList = $('[data-codex-list]');
+  const codexPager = $('[data-codex-pager]');
+  if (filters && codexList && codexPager) {
+    const rows = $$('.signal-seg', codexList);
+    const perPage = Number(codexList.dataset.perPage) || 0;
+    const serverPage = Number(codexList.dataset.current) || 1;
+    const serverPager = codexPager.innerHTML;
+    let realm = '';
+
+    const pageList = (current, total) => {
+      if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+      const pages = [...new Set([1, total, current - 1, current, current + 1])]
+        .filter(n => n >= 1 && n <= total)
+        .sort((a, b) => a - b);
+      return pages.flatMap((n, i) => (i && n - pages[i - 1] > 1 ? ['…', n] : [n]));
+    };
+
+    const pagerHtml = (current, total) => {
+      if (total < 2) return '';
+      const arrow = (page, dir, label) => `<button class="extend ${dir}" type="button" data-codex-page="${page}" title="${label}" aria-label="${label}"><i class="fa fa-angle-${dir === 'prev' ? 'left' : 'right'}"></i></button>`;
+      const numbers = pageList(current, total).map(n => {
+        if (n === '…') return '<span class="space">…</span>';
+        if (n === current) return `<span class="page-number current" aria-current="page">${n}</span>`;
+        return `<button class="page-number" type="button" data-codex-page="${n}">${n}</button>`;
+      }).join('');
+      return `<nav class="pagination" aria-label="${escapeHtml(realm)} 分页">${current > 1 ? arrow(current - 1, 'prev', '上一页') : ''}${numbers}${current < total ? arrow(current + 1, 'next', '下一页') : ''}</nav>`;
+    };
+
+    const show = page => {
+      if (!realm) {
+        rows.forEach((row, i) => {
+          row.hidden = Boolean(perPage) && (i < (serverPage - 1) * perPage || i >= serverPage * perPage);
+        });
+        codexPager.innerHTML = serverPager;
+        return;
+      }
+      const matching = rows.filter(row => row.dataset.realm === realm);
+      const total = perPage ? Math.max(1, Math.ceil(matching.length / perPage)) : 1;
+      const current = Math.min(Math.max(1, page), total);
+      const shown = new Set(perPage ? matching.slice((current - 1) * perPage, current * perPage) : matching);
+      rows.forEach(row => { row.hidden = !shown.has(row); });
+      codexPager.innerHTML = pagerHtml(current, total);
+    };
+
     filters.addEventListener('click', event => {
       const chip = event.target.closest('[data-realm-filter]');
       if (!chip) return;
-      const realm = chip.dataset.realmFilter;
+      realm = chip.dataset.realmFilter;
       $$('[data-realm-filter]', filters).forEach(button => button.setAttribute('aria-pressed', String(button === chip)));
-      $$('.signal-seg').forEach(row => {
-        row.hidden = Boolean(realm) && row.dataset.realm !== realm;
-      });
+      show(1);
+    });
+
+    codexPager.addEventListener('click', event => {
+      const button = event.target.closest('[data-codex-page]');
+      if (!button) return;
+      show(Number(button.dataset.codexPage));
+      const head = $('#codex');
+      if (head && head.getBoundingClientRect().top < 0) {
+        head.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+      }
     });
   }
 
