@@ -1,7 +1,7 @@
 ---
 title: 在Claude的带领下认识堆（1）
 date: 2026-10-29 02:51:31
-updated: 2026-10-29 03:00:52
+updated: 2026-11-20 01:22:48
 description: 从堆和栈的区别讲起，认识 glibc 的 chunk 结构和几种 bin，再用一个小程序配合 pwndbg 亲眼看 malloc/free 时 chunk 和 tcache 链表怎么变，顺带验证 LIFO 和 safe-linking。
 categories: CTF
 tags:
@@ -127,9 +127,7 @@ A、B、C 各占 0x20，头挨着头：0x405000 → 0x405020 → 0x405040，正�
 
 ![alt text](/images/posts/heap-intro-1/image-2.png)
 
-```text
-内存地址     前8字节                后8字节                ASCII  ------这样理解着看
-```
+<div style="position: relative; height: 1.6em; margin: -12px 0 20px; font: min(12.5px, 2.4vw) var(--f-mono); color: var(--mute); white-space: nowrap;"><span style="position: absolute; left: 0;">内存地址</span><span style="position: absolute; left: 16.4%;">前8字节</span><span style="position: absolute; left: 39.3%;">后8字节</span><span style="position: absolute; left: 62.2%;">ASCII  ------这样理解着看</span></div>
 
 在 0x405010、0x405030、0x405050 那几行右边，能看到 AAAAAAAA、BBBBBBBB、CCCCCCCC 的 ASCII。确认一下数据区的位置。
 
