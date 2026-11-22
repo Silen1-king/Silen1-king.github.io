@@ -6,6 +6,7 @@ description: 概率论与数理统计笔记第一部分：加法、减法、条�
 categories: [学校课程]
 tags: [概率论]
 math: true
+published: false
 ---
 
 ## 一、随机事件及其概率
