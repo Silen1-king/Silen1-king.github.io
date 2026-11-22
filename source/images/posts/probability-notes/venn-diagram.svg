@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" width="480" height="270" role="img" aria-label="维恩图：A 与 B 的交集 AB 有斜线阴影">
+  <defs>
+    <pattern id="h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#a88bff" stroke-width="2"/>
+    </pattern>
+    <clipPath id="a"><circle cx="195" cy="140" r="88"/></clipPath>
+  </defs>
+  <rect width="480" height="270" rx="10" fill="#0c0f19"/>
+  <rect x="24" y="24" width="432" height="222" rx="4" fill="none" stroke="#7f88a3" stroke-width="1.5"/>
+  <text x="38" y="52" fill="#7f88a3" font-family="Georgia, 'Times New Roman', serif" font-size="20" font-style="italic">Ω</text>
+  <circle cx="285" cy="140" r="88" fill="url(#h)" clip-path="url(#a)"/>
+  <circle cx="195" cy="140" r="88" fill="none" stroke="#7cecff" stroke-width="2"/>
+  <circle cx="285" cy="140" r="88" fill="none" stroke="#7cecff" stroke-width="2"/>
+  <g fill="#e7eaf4" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="30" text-anchor="middle">
+    <text x="160" y="150">A</text>
+    <text x="320" y="150">B</text>
+  </g>
+  <text x="240" y="40" fill="#a88bff" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="18" text-anchor="middle">AB</text>
+  <line x1="240" y1="46" x2="240" y2="70" stroke="#a88bff" stroke-width="1.2"/>
+</svg>

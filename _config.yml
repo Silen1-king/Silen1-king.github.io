@@ -70,6 +70,7 @@ default_category: uncategorized
 category_map:
   读书: reading
   论文: papers
+  学校课程: courses
 tag_map:
 
 # Metadata elements
@@ -173,6 +174,9 @@ realms:
   论文:
     epithet: Papers
     description: Reading security research slowly, starting with what it assumes you know.
+  学校课程:
+    epithet: Coursework
+    description: Lecture notes from school, worked through page by page.
 
 # Paths on this domain served by other GitHub Pages repositories (project
 # sites), not built here. tools/check-site.js does not look for them in public/.
