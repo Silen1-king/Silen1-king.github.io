@@ -222,6 +222,43 @@
     box-decoration-break: clone;
   }
 
+  /* ───── Math (KaTeX, scripts/signal-math.js) ─────
+     Formulas are set a shade brighter than prose, like the headings, so
+     they read as the thing the paragraph is about. A wide display formula
+     scrolls sideways on its own instead of pushing the page. */
+  .post-body .katex {
+    color: var(--fg);
+    font-size: 1.1em;
+    text-rendering: auto;
+  }
+
+  .post-body .math-block {
+    max-width: 100%;
+    margin: 28px 0;
+    padding: 4px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-2) transparent;
+  }
+
+  .post-body .math-block .katex-display {
+    margin: 0;
+  }
+
+  .post-body .math-block .katex {
+    font-size: 1.2em;
+  }
+
+  .post-body .katex-display > .katex > .katex-html > .tag {
+    color: var(--mute);
+  }
+
+  .post-body .katex-error {
+    border-bottom: 1px dashed currentColor;
+    font: .86em var(--f-mono);
+  }
+
   /* ───── Code blocks ───── */
   .post-body figure.highlight,
   .post-body .post-code-container {
